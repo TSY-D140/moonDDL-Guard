@@ -65,175 +65,204 @@ pub fn review_sql(
     return { source, transaction, delivery, statements, findings, }
   }
   let mut opened_here = false
+  let implicit_batch = delivery == SimpleQuery && parts.length() > 1
+  let lock_budget = new_timeout("lock_timeout", transaction, implicit_batch)
+  let statement_budget = new_timeout(
+    "statement_timeout", transaction, implicit_batch,
+  )
   for part in parts {
     let number = statements.length() + 1
     let mut coverage = Unsupported
     let mut operation = "unassessed"
-    match transaction_step(part.tokens) {
-      Some(Start) => {
-        coverage = Analyzed
-        operation = "begin"
-        if state == Active {
-          finding(
-            findings,
-            part,
-            number,
-            "PG203",
-            Warning,
-            "BEGIN does not create a nested PostgreSQL transaction.",
-            "Confirm ownership of the surrounding transaction; savepoints need an explicitly supported workflow.",
-          )
-        } else {
-          opened_here = state == Autocommit
-        }
-        state = Active
+    lock_budget.before(implicit_batch)
+    statement_budget.before(implicit_batch)
+    if timeout_setting(part.tokens) is Some(setting) {
+      let tracker = if setting.parameter == "lock_timeout" {
+        lock_budget
+      } else {
+        statement_budget
       }
-      Some(Finish(kind, chain)) => {
+      if tracker.assign(
+          setting, state, delivery, implicit_batch, findings, part, number,
+        ) {
         coverage = Analyzed
-        operation = kind
-        if state == Autocommit {
-          finding(
-            findings,
-            part,
-            number,
-            "PG205",
-            Warning,
-            "Transaction end has no known explicit BEGIN.",
-            "Check the runner's initial transaction state and the intended boundaries.",
-          )
-        }
-        state = if chain { Active } else { Autocommit }
-        opened_here = chain
+        operation = (if setting.scoped { "set_local_" } else { "set_" }) +
+          setting.parameter
       }
-      None =>
-        match index_spec(part.tokens) {
-          Some(spec) if part.tokens.length() <= 256 =>
-            try @sqlglot.parse_one(part.sql, read="postgres") catch {
-              _ => {
-                coverage = Invalid
-                finding(
-                  findings,
-                  part,
-                  number,
-                  "PG001",
-                  Error,
-                  "SQL parser rejected this index statement.",
-                  "Correct the SQL before reviewing it again.",
-                )
-              }
-            } noraise {
-              ast =>
-                if index_features(ast) is Some(features) {
-                  coverage = Analyzed
-                  operation = if spec.concurrent {
-                    "create_index_concurrently"
-                  } else {
-                    "create_index"
-                  }
-                  if spec.concurrent {
-                    let implicit_batch = delivery == SimpleQuery &&
-                      parts.length() > 1
-                    if state == Active || implicit_batch {
+    } else {
+      match transaction_step(part.tokens) {
+        Some(Start) => {
+          lock_budget.begin(state, delivery)
+          statement_budget.begin(state, delivery)
+          coverage = Analyzed
+          operation = "begin"
+          if state == Active {
+            finding(
+              findings,
+              part,
+              number,
+              "PG203",
+              Warning,
+              "BEGIN does not create a nested PostgreSQL transaction.",
+              "Confirm ownership of the surrounding transaction; savepoints need an explicitly supported workflow.",
+            )
+          } else {
+            opened_here = state == Autocommit
+          }
+          state = Active
+        }
+        Some(Finish(kind, chain)) => {
+          lock_budget.finish(kind == "rollback", chain, state, delivery)
+          statement_budget.finish(kind == "rollback", chain, state, delivery)
+          coverage = Analyzed
+          operation = kind
+          if state == Autocommit {
+            finding(
+              findings,
+              part,
+              number,
+              "PG205",
+              Warning,
+              "Transaction end has no known explicit BEGIN.",
+              "Check the runner's initial transaction state and the intended boundaries.",
+            )
+          }
+          state = if chain { Active } else { Autocommit }
+          opened_here = chain
+        }
+        None =>
+          match index_spec(part.tokens) {
+            Some(spec) if part.tokens.length() <= 256 =>
+              try @sqlglot.parse_one(part.sql, read="postgres") catch {
+                _ => {
+                  coverage = Invalid
+                  finding(
+                    findings,
+                    part,
+                    number,
+                    "PG001",
+                    Error,
+                    "SQL parser rejected this index statement.",
+                    "Correct the SQL before reviewing it again.",
+                  )
+                }
+              } noraise {
+                ast =>
+                  if index_features(ast) is Some(features) {
+                    coverage = Analyzed
+                    lock_budget.at_index(findings, part, number)
+                    statement_budget.at_index(findings, part, number)
+                    timeout_relationship(
+                      lock_budget, statement_budget, findings, part, number,
+                    )
+                    operation = if spec.concurrent {
+                      "create_index_concurrently"
+                    } else {
+                      "create_index"
+                    }
+                    if spec.concurrent {
+                      if state == Active || implicit_batch {
+                        finding(
+                          findings,
+                          part,
+                          number,
+                          "PG201",
+                          Error,
+                          "CREATE INDEX CONCURRENTLY cannot run in this explicit or multi-statement implicit transaction.",
+                          "Submit this index in its own non-transactional query; changing only the SQL is insufficient.",
+                        )
+                      } else if state == UnknownTransaction ||
+                        delivery == UnknownDelivery {
+                        finding(
+                          findings,
+                          part,
+                          number,
+                          "PG202",
+                          Error,
+                          "Concurrent-index transaction compatibility cannot be established from the supplied context.",
+                          "Supply the actual initial transaction state and query submission mode; unknown is not autocommit.",
+                        )
+                      }
                       finding(
                         findings,
                         part,
                         number,
-                        "PG201",
-                        Error,
-                        "CREATE INDEX CONCURRENTLY cannot run in this explicit or multi-statement implicit transaction.",
-                        "Submit this index in its own non-transactional query; changing only the SQL is insufficient.",
+                        "PG105",
+                        Advisory,
+                        "A failed concurrent build may leave an invalid index; no database state has been inspected.",
+                        "Check pg_index.indisvalid after failure and plan database-specific cleanup/retry before deployment.",
                       )
-                    } else if state == UnknownTransaction ||
-                      delivery == UnknownDelivery {
+                    } else {
                       finding(
                         findings,
                         part,
                         number,
-                        "PG202",
-                        Error,
-                        "Concurrent-index transaction compatibility cannot be established from the supplied context.",
-                        "Supply the actual initial transaction state and query submission mode; unknown is not autocommit.",
+                        "PG101",
+                        Warning,
+                        "Ordinary CREATE INDEX prevents concurrent writes while the index is built.",
+                        "Assess the write window; consider CONCURRENTLY with a compatible runner and appropriate lock timeout.",
                       )
                     }
-                    finding(
-                      findings,
-                      part,
-                      number,
-                      "PG105",
-                      Advisory,
-                      "A failed concurrent build may leave an invalid index; no database state has been inspected.",
-                      "Check pg_index.indisvalid after failure and plan database-specific cleanup/retry before deployment.",
-                    )
-                  } else {
-                    finding(
-                      findings,
-                      part,
-                      number,
-                      "PG101",
-                      Warning,
-                      "Ordinary CREATE INDEX prevents concurrent writes while the index is built.",
-                      "Assess the write window; consider CONCURRENTLY with a compatible runner and appropriate lock timeout.",
-                    )
+                    if features.expression {
+                      finding(
+                        findings,
+                        part,
+                        number,
+                        "PG106",
+                        Advisory,
+                        "Index expressions require immutable functions/operators; their catalog properties were not checked.",
+                        "Verify function resolution, immutability and expression-based duplicate keys in the target database.",
+                      )
+                    }
+                    if features.partial {
+                      finding(
+                        findings,
+                        part,
+                        number,
+                        "PG107",
+                        Advisory,
+                        "This partial index covers only rows satisfying its predicate; uniqueness and query applicability are conditional.",
+                        "Verify predicate immutability and use the same predicate when checking duplicate keys; validate query predicate implication separately.",
+                      )
+                    }
+                    if features.covering {
+                      finding(
+                        findings,
+                        part,
+                        number,
+                        "PG108",
+                        Advisory,
+                        "INCLUDE columns are payload, not uniqueness keys; their values can increase index tuple size.",
+                        "Check payload width and index tuple limits; do not include payload columns in the uniqueness precheck.",
+                      )
+                    }
+                    if spec.unique {
+                      finding(
+                        findings,
+                        part,
+                        number,
+                        "PG103",
+                        Advisory,
+                        "Existing data must satisfy the unique index; this review has not checked the database.",
+                        "Check duplicate keys using the same index semantics before deployment.",
+                      )
+                    }
+                    if spec.exists {
+                      finding(
+                        findings,
+                        part,
+                        number,
+                        "PG104",
+                        Advisory,
+                        "IF NOT EXISTS does not verify the existing index definition or validity.",
+                        "Inspect the existing index definition and pg_index.indisvalid.",
+                      )
+                    }
                   }
-                  if features.expression {
-                    finding(
-                      findings,
-                      part,
-                      number,
-                      "PG106",
-                      Advisory,
-                      "Index expressions require immutable functions/operators; their catalog properties were not checked.",
-                      "Verify function resolution, immutability and expression-based duplicate keys in the target database.",
-                    )
-                  }
-                  if features.partial {
-                    finding(
-                      findings,
-                      part,
-                      number,
-                      "PG107",
-                      Advisory,
-                      "This partial index covers only rows satisfying its predicate; uniqueness and query applicability are conditional.",
-                      "Verify predicate immutability and use the same predicate when checking duplicate keys; validate query predicate implication separately.",
-                    )
-                  }
-                  if features.covering {
-                    finding(
-                      findings,
-                      part,
-                      number,
-                      "PG108",
-                      Advisory,
-                      "INCLUDE columns are payload, not uniqueness keys; their values can increase index tuple size.",
-                      "Check payload width and index tuple limits; do not include payload columns in the uniqueness precheck.",
-                    )
-                  }
-                  if spec.unique {
-                    finding(
-                      findings,
-                      part,
-                      number,
-                      "PG103",
-                      Advisory,
-                      "Existing data must satisfy the unique index; this review has not checked the database.",
-                      "Check duplicate keys using the same index semantics before deployment.",
-                    )
-                  }
-                  if spec.exists {
-                    finding(
-                      findings,
-                      part,
-                      number,
-                      "PG104",
-                      Advisory,
-                      "IF NOT EXISTS does not verify the existing index definition or validity.",
-                      "Inspect the existing index definition and pg_index.indisvalid.",
-                    )
-                  }
-                }
-            }
-          _ => ()
-        }
+              }
+            _ => ()
+          }
+      }
     }
     if coverage == Unsupported {
       finding(
@@ -247,6 +276,8 @@ pub fn review_sql(
       )
     }
     if coverage != Analyzed {
+      lock_budget.invalidate()
+      statement_budget.invalidate()
       state = UnknownTransaction
       opened_here = false
     }

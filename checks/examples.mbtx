@@ -28,5 +28,31 @@ async fn main {
   assert_eq(findings.filter(f => f is { "code": String("PG106"), .. }).length(), 2)
   assert_eq(findings.filter(f => f is { "code": String("PG107"), .. }).length(), 1)
   assert_eq(findings.filter(f => f is { "code": String("PG108"), .. }).length(), 1)
-  println("Umami: 17 index statements assessed; mixed migration incomplete; persisted report replay passed.")
+  let mut portable_report : Json? = None
+  for target in ["wasm", "wasm-gc", "js"] {
+    let bounded = @shell.Cmd("moon", ["run", "--target", target, "engine/cli", "--", "specimens/bounded-lock.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+    assert_eq(bounded.exit_code(), 0)
+    let report = @json.parse(bounded.stdout())
+    guard report is { "complete": True, "findings": Array(findings), .. } else { fail("Expected a complete bounded-lock report") }
+    assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 1000ms for this index."), .. }).length(), 1)
+    assert_eq(findings.filter(f => f is { "code": String("PG307"), "message": String("Effective statement_timeout is 30000ms for this index."), .. }).length(), 1)
+    match portable_report {
+      None => portable_report = Some(report)
+      Some(previous) => assert_eq(report, previous)
+    }
+    @fs.write_string_to_file("_build/timeout-report.json", bounded.stdout())
+    let replay = @shell.Cmd("moon", ["run", "--target", target, "engine/cli", "--", "_build/timeout-report.json", "--replay", "--json"]).output()
+    assert_eq(replay.exit_code(), 0)
+    assert_eq(@json.parse(replay.stdout()), report)
+  }
+  let grouped = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/bounded-lock.sql", "--json", "--transaction=autocommit", "--delivery=simple-query"]).output()
+  assert_eq(grouped.exit_code(), 1)
+  guard @json.parse(grouped.stdout()) is { "findings": Array(findings), .. } else { fail("Expected grouped findings") }
+  assert_eq(findings.filter(f => f is { "code": String("PG201"), .. }).length(), 1)
+  let scoped = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/local-timeout.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+  assert_eq(scoped.exit_code(), 1)
+  guard @json.parse(scoped.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected LOCAL scope findings") }
+  assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 100ms for this index."), .. }).length(), 1)
+  assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 2000ms for this index."), .. }).length(), 1)
+  println("Umami unchanged; advanced indexes assessed; timeout scope and cross-target report replay passed.")
 }

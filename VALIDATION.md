@@ -39,3 +39,16 @@ Current local validation uses the pinned stable compiler/core pair above:
 ## B-tree expression, partial and covering indexes (0.4.0)
 
 The profile adds independent PG106/PG107/PG108 preconditions without changing the public API. Tests cover allowed scalar shapes, rejection of unparenthesized arithmetic/subqueries/unknown functions/options, 32 key-plus-payload boundaries, nesting limits, transaction conflicts, source retention and replay. The CLI acceptance script also checks `specimens/advanced.sql` while retaining both original Umami outcomes. The pinned compiler/core remains `0.10.17+d971670cd`.
+
+Revision `05d4b1eb65b646042a5a4449c2da751652f4a9bf` passed [CI run 40121577845](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/40121577845) on all three operating systems. Its 23 test groups ran on Wasm, Wasm-GC and JavaScript everywhere, with native tests on Linux/macOS.
+
+## Timeout settings and transaction scope (0.5.0)
+
+Local Windows validation on the same pinned compiler/core:
+
+- 33 test groups executed and passed on Wasm, Wasm-GC and JavaScript. They cover exact units, integer bounds, 64-character limits, octal ambiguity, rejected rounding/overflow, SESSION/LOCAL override, rollback snapshots, chained/nested transactions, implicit Simple Query scopes, inherited/unknown settings, recovery and deterministic report replay.
+- The `.mbtx` acceptance runner executes `bounded-lock.sql` and report replay on all three portable CLI targets and requires equal JSON output. It checks PG201 under whole-file delivery, 100ms/2000ms before/after LOCAL rollback, expression-index preconditions and both unchanged Umami results.
+- Formatting and generated-interface consistency are checked; the public interface remains unchanged. Strict all-target compilation passes. Native execution on this Windows host and PostgreSQL server integration remain unverified; Linux/macOS native runtime is checked by CI, not inferred from compilation.
+- The new specimens and tests are project-owned; PostgreSQL references and license links are recorded in SOURCES.md. The profile deliberately rejects values requiring PostgreSQL rounding instead of approximating their effective timeout.
+
+For this capability's remote runtime evidence, use the Actions run attached to its commit. Earlier green runs above apply only to those exact revisions.

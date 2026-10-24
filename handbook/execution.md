@@ -10,6 +10,8 @@ This models the successful execution path. It does not assume SQL after a databa
 
 ## Diagnostics
 
+Explicit lock/statement timeout settings have transaction-dependent lifetimes. See [timeout scope](timeouts.md) for their exact input profile and PG301–PG308 diagnostics.
+
 | Code | Meaning |
 | --- | --- |
 | PG000 | Tokenization failed or input exceeded the review limit |

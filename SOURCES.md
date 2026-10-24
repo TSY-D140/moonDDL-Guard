@@ -14,6 +14,10 @@
 
 The rule implementation and project-owned boundary tests are written for this repository. No Squawk, Strong Migrations or Unison implementation/test source has been copied. These projects informed the demand research, not an originality or performance claim.
 
+## Timeout rule references
+
+Timeout behavior follows PostgreSQL 18 [SET](https://www.postgresql.org/docs/18/sql-set.html), [client defaults](https://www.postgresql.org/docs/18/runtime-config-client.html), [setting parameters](https://www.postgresql.org/docs/18/config-setting.html) and the [GUC conversion source](https://github.com/postgres/postgres/blob/REL_18_STABLE/src/backend/utils/misc/guc.c), checked on 2026-10-25. PostgreSQL source is under the [PostgreSQL License](https://www.postgresql.org/about/licence/); no source or upstream tests are copied. The exact-duration subset deliberately rejects conversions requiring PostgreSQL rounding. `specimens/bounded-lock.sql`, `specimens/local-timeout.sql` and timeout tests are project-owned examples/tests under Apache-2.0, derived from the documented behavior rather than copied fixtures.
+
 ## Ecosystem boundary
 
 https://github.com/kath61105/moon-schema-plan compares schema models and generates SQL; its safety model explicitly does not guarantee lock/performance behavior and its scope excludes SQL parsing. https://github.com/moonbit-community/migrate executes migrations. MoonDDL Guard adds pre-execution review of existing SQL rather than schema diff, SQL rendering, or a migration runner.

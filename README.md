@@ -2,7 +2,7 @@
 
 Static preflight for PostgreSQL index migrations, exposed as a MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it.
 
-The current profile targets PostgreSQL 18 named B-tree `CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]` statements, including a bounded expression/predicate subset and `INCLUDE` columns. It reports write blocking, transaction incompatibility, expression immutability, conditional uniqueness and unchecked database preconditions. Every unsupported statement is retained and prevents a complete verdict.
+The current profile targets PostgreSQL 18 named B-tree `CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]` statements, including a bounded expression/predicate subset and `INCLUDE` columns. It reports write blocking, transaction incompatibility, expression immutability, conditional uniqueness and unchecked database preconditions. Explicit `lock_timeout` / `statement_timeout` settings are tracked through session, transaction-local, commit and rollback scopes. Every unsupported statement is retained and prevents a complete verdict.
 
 ## Run
 
@@ -16,6 +16,8 @@ moon run engine/cli -- specimens/ordinary.sql --json
 moon run engine/cli -- specimens/concurrent.sql --transaction=autocommit --delivery=statements
 moon run engine/cli -- specimens/transaction.sql --transaction=autocommit --delivery=statements
 moon run engine/cli -- specimens/advanced.sql --transaction=autocommit --delivery=statements
+moon run engine/cli -- specimens/bounded-lock.sql --transaction=autocommit --delivery=statements
+moon run engine/cli -- specimens/local-timeout.sql --transaction=autocommit --delivery=statements
 moon run checks/examples.mbtx
 ```
 
@@ -69,6 +71,8 @@ The [Umami specimens](specimens/upstream/README.md) are real, unmodified, commit
 
 Limits: 262144 UTF-16 source code units, 512 executable statements, 256 tokens per assessed index, 32 nested key-expression parentheses, 32 total key/payload columns (standard PostgreSQL build), and 8388608 UTF-16 code units for report decoding. Larger/unsupported input receives an explicit incomplete/error result; SQL is never truncated or rewritten.
 
-Planned: timeout semantics, staged constraint validation, additional PostgreSQL versions and database integration tests. These capabilities are not implemented by version 0.4.0.
+Version 0.5.0 assesses `SET [SESSION|LOCAL] lock_timeout|statement_timeout` with a deliberately bounded exact-duration grammar. It reports ineffective LOCAL settings, disabled/unknown budgets and conflicting lock/statement budgets. Settings apply to subsequent statements on the same session; no inherited default is assumed. Read [timeout scope and runnable examples](handbook/timeouts.md) for supported conversions, limits and diagnostics.
+
+Planned: staged constraint validation, additional PostgreSQL versions and database integration tests. These capabilities are not implemented by version 0.5.0.
 
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).
