@@ -29,5 +29,6 @@ jobs:
       - run: moon run engine/cli -- --help
       - run: moon run --target js engine/cli -- --help
       - run: moon run --target wasm-gc engine/cli -- --help
+      - run: moon run --deny-warn checks/examples.mbtx
       - if: runner.os != 'Windows'
         run: moon test --target native --deny-warn

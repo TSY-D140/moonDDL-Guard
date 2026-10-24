@@ -7,9 +7,15 @@ import {
 }
 
 // Values
+pub fn decode_report(String) -> Review raise ReportError
+
 pub fn review_sql(String, transaction~ : Transaction, delivery~ : Delivery) -> Review
 
 // Errors
+pub(all) suberror ReportError {
+  InvalidReport(String)
+} derive(@debug.Debug)
+pub fn ReportError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) enum Coverage {

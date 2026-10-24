@@ -53,6 +53,17 @@ pub fn review_sql(
     }
   }
   let mut state = transaction
+  if parts.length() > 512 {
+    findings.push({
+      code: "PG000",
+      severity: Error,
+      statement: 0,
+      location: location_at(source, 0, source.length()),
+      message: "SQL exceeds the 512 executable statement review limit.",
+      action: "Split the migration into independently reviewed submissions.",
+    })
+    return { source, transaction, delivery, statements, findings, }
+  }
   let mut opened_here = false
   for part in parts {
     let number = statements.length() + 1
@@ -73,7 +84,7 @@ pub fn review_sql(
             "Confirm ownership of the surrounding transaction; savepoints need an explicitly supported workflow.",
           )
         } else {
-          opened_here = true
+          opened_here = state == Autocommit
         }
         state = Active
       }

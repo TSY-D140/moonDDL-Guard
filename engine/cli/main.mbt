@@ -3,7 +3,7 @@ fn main {
   let args = process_args()
   if args.length() == 2 && args[1] == "--help" {
     println(
-      "Usage: moon run engine/cli -- FILE [--json] [--transaction=autocommit|active|unknown] [--delivery=statements|simple-query|unknown]",
+      "Usage: moon run engine/cli -- FILE [--json] [--replay] [--transaction=autocommit|active|unknown] [--delivery=statements|simple-query|unknown]",
     )
     println(
       "Defaults: unknown transaction and delivery. PostgreSQL 18 rules. Exit 0: no blocking finding; 1: risk; 2: incomplete/input error.",
@@ -17,11 +17,13 @@ fn main {
   }
   let path = args[1]
   let mut json = false
+  let mut replay = false
   let mut transaction = @guard.UnknownTransaction
   let mut delivery = @guard.UnknownDelivery
   for arg in args[2:] {
     match arg {
       "--json" => json = true
+      "--replay" => replay = true
       "--transaction=autocommit" => transaction = @guard.Autocommit
       "--transaction=active" => transaction = @guard.Active
       "--transaction=unknown" => transaction = @guard.UnknownTransaction
@@ -42,7 +44,25 @@ fn main {
     }
   } noraise {
     sql => {
-      let review = @guard.review_sql(sql, transaction~, delivery~)
+      let review = if replay {
+        if transaction != @guard.UnknownTransaction ||
+          delivery != @guard.UnknownDelivery {
+          println(
+            "Replay uses the recorded execution context; omit context overrides.",
+          )
+          @sys.exit(2)
+          return
+        }
+        @guard.decode_report(sql) catch {
+          error => {
+            println("Report replay rejected: \{Repr(error)}")
+            @sys.exit(2)
+            return
+          }
+        }
+      } else {
+        @guard.review_sql(sql, transaction~, delivery~)
+      }
       if json {
         println(review.to_json().stringify())
       } else {

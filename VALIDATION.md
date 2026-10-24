@@ -23,3 +23,15 @@ Source-level checks and generated interfaces are refreshed before each commit. S
 - Native/runtime, PostgreSQL integration and remote CI limitations above still apply.
 
 The network recovered and the current stable distribution was installed in an isolated workspace: moon/moonrun `0.1.20261023`, moonc `v0.10.17+d971670cd`. Sources and interfaces were migrated using its formatter (`Int32`, current JSON conversion), and CI pins this compiler/core pair. The first remote foundation run failed on old-formatter `Int` spelling; it did not reach test execution. That historical failure is retained rather than reported as success.
+
+The [transaction capability CI run](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/40118420700), revision `31787b8cbbf3bde141adafb6cee36e48b72dcdd5`, completed successfully on Windows, macOS and Linux. Wasm, Wasm-GC and JavaScript tests and CLI help were executed on all three. Native tests were executed on Linux and macOS; Windows native was not executed.
+
+## Report replay and real migration workflow
+
+Current local validation uses the pinned stable compiler/core pair above:
+
+- 18 test groups exercise replay across execution contexts, Unicode/CRLF locations, unknown/nested/duplicate report members, altered diagnostics, malformed SQL, bounded inputs, deterministic serialization and recovery after incomplete statements.
+- The end-to-end `.mbtx` runner executes the file CLI against both pinned Umami SQL specimens, persists a report, and replays it. It checks the 17-index complete report and the nine-statement mixed migration's incomplete verdict.
+- The script uses fenced frontmatter and current `moonbitlang/async@0.22.5`; it is run with `--deny-warn`.
+- Formatting, generated-interface consistency and strict four-target checks are included in CI. Consult the repository's [Actions history](https://github.com/TSY-D140/moonDDL-Guard/actions) for results tied to the current revision; a previous green run is not evidence for later changes.
+- Database integration and Windows-native runtime remain unverified. The tool has no live database or production-safety claim.

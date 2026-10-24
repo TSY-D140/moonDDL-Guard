@@ -1,0 +1,26 @@
+----
+import {
+  "moonbitlang/async@0.22.5",
+  "moonbitlang/async@0.22.5/shell",
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/json",
+}
+----
+
+async fn main {
+  let index = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+  assert_eq(index.exit_code(), 1)
+  let original = @json.parse(index.stdout())
+  guard original is { "statements": Array(statements), "findings": Array(findings), "complete": True, .. } else { fail("Expected a complete fixture report") }
+  assert_eq(statements.length(), 17)
+  assert_eq(findings.length(), 17)
+  @fs.write_string_to_file("_build/umami-report.json", index.stdout())
+  let replay = @shell.Cmd("moon", ["run", "engine/cli", "--", "_build/umami-report.json", "--replay", "--json"]).output()
+  assert_eq(replay.exit_code(), 1)
+  assert_eq(@json.parse(replay.stdout()), original)
+  let mixed = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/mixed.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+  assert_eq(mixed.exit_code(), 2)
+  guard @json.parse(mixed.stdout()) is { "statements": Array(statements), "complete": False, .. } else { fail("Expected incomplete mixed migration") }
+  assert_eq(statements.length(), 9)
+  println("Umami: 17 index statements assessed; mixed migration incomplete; persisted report replay passed.")
+}

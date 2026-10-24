@@ -70,6 +70,22 @@ test "determinism advisory uniqueness and no mutable array exposure" {
 }
 
 ///|
+test "unterminated comments and strings cannot pass review" {
+  for
+    sql in [
+      "/*", "/* outer /* nested */", "SELECT $$unterminated", "'unterminated",
+    ] {
+    let r = @moonddl_guard.review_sql(
+      sql,
+      transaction=@moonddl_guard.Autocommit,
+      delivery=@moonddl_guard.PerStatement,
+    )
+    assert_false(r.is_complete())
+    assert_eq(r.exit_code(), 2)
+  }
+}
+
+///|
 test "empty and lexical failure" {
   let empty = @moonddl_guard.review_sql(
     " ; /* ; */ -- hi",

@@ -6,7 +6,7 @@ The current profile targets PostgreSQL 18 and named, plain-column `CREATE [UNIQU
 
 ## Run
 
-Use the current stable MoonBit toolchain. From the repository root:
+The verified toolchain is stable MoonBit `0.10.17+d971670cd` (moon `0.1.20261023`); CI pins its compiler and core. From the repository root:
 
 ```sh
 moon update
@@ -15,6 +15,7 @@ moon run engine/cli -- specimens/ordinary.sql --transaction=autocommit --deliver
 moon run engine/cli -- specimens/ordinary.sql --json
 moon run engine/cli -- specimens/concurrent.sql --transaction=autocommit --delivery=statements
 moon run engine/cli -- specimens/transaction.sql --transaction=autocommit --delivery=statements
+moon run checks/examples.mbtx
 ```
 
 The ordinary-index example intentionally returns **1**, since ordinary index creation prevents concurrent writes while it builds. Return **2** means invalid or incompletely assessed input, and **0** means no known blocking finding under the supplied context. Read advisory findings even at exit 0. None of these codes certifies production safety.
@@ -53,5 +54,20 @@ moon test --target native --deny-warn
 ```
 
 The native backend requires a working C compiler. The tool does not open a database connection. There are no runtime lock-wait, data-uniqueness or deployment-safety claims.
+
+## Persist and replay a review
+
+```sh
+moon run engine/cli -- specimens/upstream/indexes.sql --transaction=autocommit --delivery=statements --json > review.json
+moon run engine/cli -- review.json --replay --json
+```
+
+Both commands return 1 for the Umami specimen's ordinary-index risks. `decode_report` and `--replay` recompute the current rule profile from the retained SQL/context and require the whole report to match. Unknown or missing fields, duplicate JSON keys (including escaped duplicates), changed diagnostics and unsupported versions are rejected. This is deterministic replay, not a signature or proof of authorship. Use the producing release when replaying historical reports whose rules differ.
+
+The [Umami specimens](specimens/upstream/README.md) are real, unmodified, commit-pinned SQL with their MIT license. The 17-index migration yields 17 PG101 findings. A second mixed migration remains incomplete and still reports its final supported indexes. The executable `.mbtx` check verifies these CLI behaviors and persisted-report round trips without a database.
+
+Limits: 262144 UTF-16 source code units, 512 executable statements, at most 256 tokens in an assessed plain-column index, and 8388608 UTF-16 code units for report decoding. Larger/unsupported input receives an explicit incomplete/error result; SQL is never truncated or rewritten.
+
+Planned: expression/partial indexes, timeout semantics, staged constraint validation, additional PostgreSQL versions and database integration tests. These capabilities are not implemented by version 0.3.0.
 
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).
