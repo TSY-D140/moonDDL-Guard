@@ -6,7 +6,7 @@ priv struct Segment {
 }
 
 ///|
-fn source_offsets(source : String) -> Array[Int] {
+fn source_offsets(source : String) -> Array[Int32] {
   let offsets = [0]
   let mut offset = 0
   for ch in source {
@@ -17,7 +17,7 @@ fn source_offsets(source : String) -> Array[Int] {
 }
 
 ///|
-fn location_at(source : String, start : Int, end : Int) -> Location {
+fn location_at(source : String, start : Int32, end : Int32) -> Location {
   let mut line = 1
   let mut column = 1
   let mut previous_cr = false
@@ -81,10 +81,23 @@ fn is_identifier(token : @syntax.Token) -> Bool {
 }
 
 ///|
-fn word(tokens : Array[@syntax.Token], i : Int, text : String) -> Bool {
-  i < tokens.length() &&
-  tokens[i].token_type != @syntax.IDENTIFIER &&
-  tokens[i].text.to_upper() == text
+fn word(tokens : Array[@syntax.Token], i : Int32, text : String) -> Bool {
+  if i >= tokens.length() {
+    return false
+  }
+  match tokens[i].token_type {
+    @syntax.IDENTIFIER
+    | @syntax.STRING
+    | @syntax.NUMBER
+    | @syntax.BIT_STRING
+    | @syntax.HEX_STRING
+    | @syntax.BYTE_STRING
+    | @syntax.NATIONAL_STRING
+    | @syntax.RAW_STRING
+    | @syntax.HEREDOC_STRING
+    | @syntax.UNICODE_STRING => false
+    _ => tokens[i].text.to_upper() == text
+  }
 }
 
 ///|

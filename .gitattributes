@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.sql text eol=lf
+*.mbt text eol=lf
+*.mbti text eol=lf
+*.mbtx text eol=lf

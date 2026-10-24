@@ -31,17 +31,17 @@ pub(all) enum Coverage {
 ///|
 /// Source coordinates: zero-based UTF-16 offsets, one-based line and column.
 pub(all) struct Location {
-  start : Int
-  end : Int
-  line : Int
-  column : Int
+  start : Int32
+  end : Int32
+  line : Int32
+  column : Int32
 } derive(Eq, Debug, ToJson, @json.FromJson)
 
 ///|
 pub(all) struct Finding {
   code : String
   severity : Severity
-  statement : Int
+  statement : Int32
   location : Location
   message : String
   action : String
@@ -49,7 +49,7 @@ pub(all) struct Finding {
 
 ///|
 pub(all) struct Statement {
-  number : Int
+  number : Int32
   location : Location
   sql : String
   coverage : Coverage
@@ -79,13 +79,15 @@ pub fn Review::findings(self : Review) -> Array[Finding] {
 ///|
 pub fn Review::is_complete(self : Review) -> Bool {
   self.statements.iter().all(s => s.coverage == Analyzed) &&
-  !self.findings.iter().any(f => f.code == "PG000" || f.code == "PG002")
+  !self.findings
+  .iter()
+  .any(f => f.code == "PG000" || f.code == "PG002" || f.code == "PG202")
 }
 
 ///|
 /// 2 = invalid/incomplete input; 1 = known risk; 0 = no known blocking finding.
 /// Advisory findings can remain at exit 0 and must still be read.
-pub fn Review::exit_code(self : Review) -> Int {
+pub fn Review::exit_code(self : Review) -> Int32 {
   if !self.is_complete() {
     2
   } else if self.findings.iter().any(f => f.severity != Advisory) {

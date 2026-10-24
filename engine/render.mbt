@@ -8,8 +8,8 @@ pub fn Review::to_json(self : Review) -> Json {
     "delivery": self.delivery.to_json(),
     "complete": self.is_complete(),
     "exit_code": self.exit_code(),
-    "statements": self.statements.to_json(),
-    "findings": self.findings.to_json(),
+    "statements": Json(self.statements),
+    "findings": Json(self.findings),
   }
 }
 

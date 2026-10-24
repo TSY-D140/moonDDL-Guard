@@ -37,7 +37,7 @@ pub fn Delivery::to_repr(Self) -> @debug.Repr
 pub(all) struct Finding {
   code : String
   severity : Severity
-  statement : Int
+  statement : Int32
   location : Location
   message : String
   action : String
@@ -49,10 +49,10 @@ pub fn Finding::to_json(Self) -> Json
 pub fn Finding::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Location {
-  start : Int
-  end : Int
-  line : Int
-  column : Int
+  start : Int32
+  end : Int32
+  line : Int32
+  column : Int32
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn Location::equal(Self, Self) -> Bool
 pub fn Location::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
@@ -68,7 +68,7 @@ pub struct Review {
   findings : Array[Finding]
 } derive(Eq, @debug.Debug)
 pub fn Review::equal(Self, Self) -> Bool
-pub fn Review::exit_code(Self) -> Int
+pub fn Review::exit_code(Self) -> Int32
 pub fn Review::findings(Self) -> Array[Finding]
 pub fn Review::is_complete(Self) -> Bool
 pub fn Review::not_equal(Self, Self) -> Bool
@@ -89,7 +89,7 @@ pub fn Severity::to_json(Self) -> Json
 pub fn Severity::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Statement {
-  number : Int
+  number : Int32
   location : Location
   sql : String
   coverage : Coverage
