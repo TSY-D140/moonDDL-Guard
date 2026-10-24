@@ -54,5 +54,9 @@ async fn main {
   guard @json.parse(scoped.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected LOCAL scope findings") }
   assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 100ms for this index."), .. }).length(), 1)
   assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 2000ms for this index."), .. }).length(), 1)
-  println("Umami unchanged; advanced indexes assessed; timeout scope and cross-target report replay passed.")
+  let replacement = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/replace-index.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+  assert_eq(replacement.exit_code(), 0)
+  guard @json.parse(replacement.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected complete replacement review") }
+  assert_eq(findings.filter(f => f is { "code": String("PG110"), .. }).length(), 1)
+  println("Migration specimens and portable report workflows passed.")
 }

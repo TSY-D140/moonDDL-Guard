@@ -16,6 +16,8 @@ The rule implementation and project-owned boundary tests are written for this re
 
 ## Timeout rule references
 
+Index removal rules follow [PostgreSQL 18 DROP INDEX](https://www.postgresql.org/docs/18/sql-dropindex.html). The replacement specimen and boundary tests are project-owned Apache-2.0 material; no upstream code/tests were copied.
+
 Timeout behavior follows PostgreSQL 18 [SET](https://www.postgresql.org/docs/18/sql-set.html), [client defaults](https://www.postgresql.org/docs/18/runtime-config-client.html), [setting parameters](https://www.postgresql.org/docs/18/config-setting.html) and the [GUC conversion source](https://github.com/postgres/postgres/blob/REL_18_STABLE/src/backend/utils/misc/guc.c), checked on 2026-10-25. PostgreSQL source is under the [PostgreSQL License](https://www.postgresql.org/about/licence/); no source or upstream tests are copied. The exact-duration subset deliberately rejects conversions requiring PostgreSQL rounding. `specimens/bounded-lock.sql`, `specimens/local-timeout.sql` and timeout tests are project-owned examples/tests under Apache-2.0, derived from the documented behavior rather than copied fixtures.
 
 ## Ecosystem boundary

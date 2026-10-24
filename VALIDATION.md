@@ -52,3 +52,7 @@ Local Windows validation on the same pinned compiler/core:
 - The new specimens and tests are project-owned; PostgreSQL references and license links are recorded in SOURCES.md. The profile deliberately rejects values requiring PostgreSQL rounding instead of approximating their effective timeout.
 
 For this capability's remote runtime evidence, use the Actions run attached to its commit. Earlier green runs above apply only to those exact revisions.
+
+## Index removal (0.6.0)
+
+37 test groups pass locally on Wasm, Wasm-GC and JavaScript with the pinned compiler/core. Coverage includes concurrent removal's transaction restrictions, unknown contexts, option conflicts, qualified/quoted names, name-count limits, timeout propagation and report replay. The replacement file CLI example returns 0 with explicit catalog preconditions. All-target strict compilation, formatting and interface regeneration are checked. Windows-native and PostgreSQL integration limitations remain unchanged.

@@ -81,7 +81,12 @@ pub fn Review::is_complete(self : Review) -> Bool {
   self.statements.iter().all(s => s.coverage == Analyzed) &&
   !self.findings
   .iter()
-  .any(f => f.code == "PG000" || f.code == "PG002" || f.code == "PG202")
+  .any(f => {
+    f.code == "PG000" ||
+    f.code == "PG002" ||
+    f.code == "PG202" ||
+    f.code == "PG207"
+  })
 }
 
 ///|

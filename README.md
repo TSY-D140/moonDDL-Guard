@@ -73,6 +73,8 @@ Limits: 262144 UTF-16 source code units, 512 executable statements, 256 tokens p
 
 Version 0.5.0 assesses `SET [SESSION|LOCAL] lock_timeout|statement_timeout` with a deliberately bounded exact-duration grammar. It reports ineffective LOCAL settings, disabled/unknown budgets and conflicting lock/statement budgets. Settings apply to subsequent statements on the same session; no inherited default is assumed. Read [timeout scope and runnable examples](handbook/timeouts.md) for supported conversions, limits and diagnostics.
 
-Planned: staged constraint validation, additional PostgreSQL versions and database integration tests. These capabilities are not implemented by version 0.5.0.
+Version 0.6.0 also reviews index replacement/removal: [DROP INDEX workflow](handbook/removal.md), blocking locks, concurrent-drop restrictions and unchecked catalog dependencies. The public analysis API is unchanged.
+
+Planned: staged constraint validation, additional PostgreSQL versions and database integration tests.
 
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).

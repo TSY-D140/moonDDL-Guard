@@ -89,6 +89,21 @@ pub fn review_sql(
         operation = (if setting.scoped { "set_local_" } else { "set_" }) +
           setting.parameter
       }
+    } else if drop_index_spec(part.tokens) is Some(spec) {
+      coverage = Analyzed
+      operation = if spec.concurrent {
+        "drop_index_concurrently"
+      } else {
+        "drop_index"
+      }
+      lock_budget.at_index(findings, part, number)
+      statement_budget.at_index(findings, part, number)
+      timeout_relationship(
+        lock_budget, statement_budget, findings, part, number,
+      )
+      review_drop_index(
+        spec, state, delivery, implicit_batch, findings, part, number,
+      )
     } else {
       match transaction_step(part.tokens) {
         Some(Start) => {
