@@ -22,6 +22,8 @@ Timeout behavior follows PostgreSQL 18 [SET](https://www.postgresql.org/docs/18/
 
 ## Ecosystem boundary
 
+CHECK staging and lock-retention rules follow PostgreSQL 18 [ALTER TABLE](https://www.postgresql.org/docs/18/sql-altertable.html) and [CHECK constraints](https://www.postgresql.org/docs/18/ddl-constraints.html#DDL-CONSTRAINTS-CHECK-CONSTRAINTS). The specimen/tests are project-owned Apache-2.0 material. Rechecked schema-plan and migrate on 2026-10-25: schema diff/generation and migration execution remain separate boundaries from reviewing existing SQL. Searches included `MoonBit SQL migration review DROP INDEX NOT VALID SARIF` and `site:mooncakes.io sarif`; incomplete indexing and unpublished projects remain uncertainties, so no ecosystem-uniqueness claim is made.
+
 https://github.com/kath61105/moon-schema-plan compares schema models and generates SQL; its safety model explicitly does not guarantee lock/performance behavior and its scope excludes SQL parsing. https://github.com/moonbit-community/migrate executes migrations. MoonDDL Guard adds pre-execution review of existing SQL rather than schema diff, SQL rendering, or a migration runner.
 
 The research covered Mooncakes, GitHub, awesome-moonbit and moonbit-community. It cannot establish ecosystem uniqueness or exclude unpublished projects.

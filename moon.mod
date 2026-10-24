@@ -1,6 +1,6 @@
 name = "TSY-D140/moonddl_guard"
 
-version = "0.6.0"
+version = "0.7.0"
 
 source = "engine"
 
@@ -14,7 +14,7 @@ keywords = [ "postgresql", "migration", "index", "preflight", "ci" ]
 
 preferred_target = "wasm"
 
-description = "Execution-aware PostgreSQL index migration preflight"
+description = "Execution-aware PostgreSQL migration preflight"
 
 import {
   "bobzhang/sqlglot@0.1.0",

@@ -148,6 +148,7 @@ fn TimeoutTracker::at_index(
   output : Array[Finding],
   part : Segment,
   number : Int32,
+  subject~ : String = "index",
 ) -> Unit {
   if !self.touched {
     return
@@ -168,7 +169,7 @@ fn TimeoutTracker::at_index(
         } else {
           Advisory
         },
-        "\{self.parameter} is explicitly disabled for this index.",
+        "\{self.parameter} is explicitly disabled for this \{subject}.",
         "Choose an intentional budget; other timeouts may still apply, and this is not a runtime duration estimate.",
       )
     Milliseconds(ms) =>
@@ -182,7 +183,7 @@ fn TimeoutTracker::at_index(
           "PG307"
         },
         Advisory,
-        "Effective \{self.parameter} is \{ms}ms for this index.",
+        "Effective \{self.parameter} is \{ms}ms for this \{subject}.",
         if self.parameter == "lock_timeout" {
           "This bounds each lock acquisition wait, not the index build's total duration."
         } else {

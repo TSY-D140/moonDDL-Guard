@@ -1,6 +1,6 @@
 # MoonDDL Guard
 
-Static preflight for PostgreSQL index migrations, exposed as a MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it.
+Static preflight for PostgreSQL index and CHECK-constraint migrations, exposed as a MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it.
 
 The current profile targets PostgreSQL 18 named B-tree `CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]` statements, including a bounded expression/predicate subset and `INCLUDE` columns. It reports write blocking, transaction incompatibility, expression immutability, conditional uniqueness and unchecked database preconditions. Explicit `lock_timeout` / `statement_timeout` settings are tracked through session, transaction-local, commit and rollback scopes. Every unsupported statement is retained and prevents a complete verdict.
 
@@ -75,6 +75,8 @@ Version 0.5.0 assesses `SET [SESSION|LOCAL] lock_timeout|statement_timeout` with
 
 Version 0.6.0 also reviews index replacement/removal: [DROP INDEX workflow](handbook/removal.md), blocking locks, concurrent-drop restrictions and unchecked catalog dependencies. The public analysis API is unchanged.
 
-Planned: staged constraint validation, additional PostgreSQL versions and database integration tests.
+Version 0.7.0 adds [staged CHECK validation review](handbook/constraints.md), including the stronger-lock retention hazard when ADD and VALIDATE share a transaction or Simple Query message.
+
+Planned: additional PostgreSQL versions, broader constraint operations and database integration tests.
 
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).

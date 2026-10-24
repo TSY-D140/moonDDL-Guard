@@ -56,3 +56,7 @@ For this capability's remote runtime evidence, use the Actions run attached to i
 ## Index removal (0.6.0)
 
 37 test groups pass locally on Wasm, Wasm-GC and JavaScript with the pinned compiler/core. Coverage includes concurrent removal's transaction restrictions, unknown contexts, option conflicts, qualified/quoted names, name-count limits, timeout propagation and report replay. The replacement file CLI example returns 0 with explicit catalog preconditions. All-target strict compilation, formatting and interface regeneration are checked. Windows-native and PostgreSQL integration limitations remain unchanged.
+
+## CHECK validation staging (0.7.0)
+
+42 test groups passed on Wasm, Wasm-GC and JavaScript, including the new bounded CHECK grammar, malformed/unsupported predicates, schema/quote-sensitive identity, autocommit versus implicit/explicit transactions, rollback/chain release and incomplete-input recovery. The file CLI checks separate phases and whole-file delivery; only the latter emits PG405 for retained strong locks. Prior index and timeout workflows remain covered. Formatting, generated interfaces, strict all-target compilation and CLI acceptance pass on the pinned compiler/core.

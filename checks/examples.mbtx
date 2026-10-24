@@ -58,5 +58,11 @@ async fn main {
   assert_eq(replacement.exit_code(), 0)
   guard @json.parse(replacement.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected complete replacement review") }
   assert_eq(findings.filter(f => f is { "code": String("PG110"), .. }).length(), 1)
+  for delivery in ["statements", "simple-query"] {
+    let phases = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/check-phases.sql", "--json", "--transaction=autocommit", "--delivery=" + delivery]).output()
+    assert_eq(phases.exit_code(), 1)
+    guard @json.parse(phases.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected assessed CHECK phases") }
+    assert_eq(findings.filter(f => f is { "code": String("PG405"), .. }).length(), if delivery == "simple-query" { 1 } else { 0 })
+  }
   println("Migration specimens and portable report workflows passed.")
 }

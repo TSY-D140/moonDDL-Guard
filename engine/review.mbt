@@ -19,7 +19,7 @@ fn finding(
 }
 
 ///|
-/// Review PostgreSQL 18 index migrations on their successful execution path.
+/// Review supported PostgreSQL 18 migrations on their successful execution path.
 /// Unknown statements are retained and invalidate subsequent transaction knowledge.
 pub fn review_sql(
   source : String,
@@ -65,12 +65,16 @@ pub fn review_sql(
     return { source, transaction, delivery, statements, findings, }
   }
   let mut opened_here = false
+  let held_tables : Map[String, Bool] = Map([])
   let implicit_batch = delivery == SimpleQuery && parts.length() > 1
   let lock_budget = new_timeout("lock_timeout", transaction, implicit_batch)
   let statement_budget = new_timeout(
     "statement_timeout", transaction, implicit_batch,
   )
   for part in parts {
+    if state == Autocommit && delivery == PerStatement {
+      held_tables.clear()
+    }
     let number = statements.length() + 1
     let mut coverage = Unsupported
     let mut operation = "unassessed"
@@ -89,6 +93,14 @@ pub fn review_sql(
         operation = (if setting.scoped { "set_local_" } else { "set_" }) +
           setting.parameter
       }
+    } else if constraint_spec(part) is Some(spec) {
+      coverage = Analyzed
+      operation = review_constraint(spec, held_tables, findings, part, number)
+      lock_budget.at_index(findings, part, number, subject="statement")
+      statement_budget.at_index(findings, part, number, subject="statement")
+      timeout_relationship(
+        lock_budget, statement_budget, findings, part, number,
+      )
     } else if drop_index_spec(part.tokens) is Some(spec) {
       coverage = Analyzed
       operation = if spec.concurrent {
@@ -127,6 +139,7 @@ pub fn review_sql(
           state = Active
         }
         Some(Finish(kind, chain)) => {
+          held_tables.clear()
           lock_budget.finish(kind == "rollback", chain, state, delivery)
           statement_budget.finish(kind == "rollback", chain, state, delivery)
           coverage = Analyzed
@@ -291,6 +304,7 @@ pub fn review_sql(
       )
     }
     if coverage != Analyzed {
+      held_tables.clear()
       lock_budget.invalidate()
       statement_budget.invalidate()
       state = UnknownTransaction
