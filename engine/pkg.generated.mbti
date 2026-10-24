@@ -1,0 +1,117 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "TSY-D140/moonddl_guard"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn review_sql(String, transaction~ : Transaction, delivery~ : Delivery) -> Review
+
+// Errors
+
+// Types and methods
+pub(all) enum Coverage {
+  Analyzed
+  Unsupported
+  Invalid
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Coverage::equal(Self, Self) -> Bool
+pub fn Coverage::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Coverage::not_equal(Self, Self) -> Bool
+pub fn Coverage::to_json(Self) -> Json
+pub fn Coverage::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Delivery {
+  PerStatement
+  SimpleQuery
+  UnknownDelivery
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Delivery::equal(Self, Self) -> Bool
+pub fn Delivery::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Delivery::not_equal(Self, Self) -> Bool
+pub fn Delivery::to_json(Self) -> Json
+pub fn Delivery::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Finding {
+  code : String
+  severity : Severity
+  statement : Int
+  location : Location
+  message : String
+  action : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Finding::equal(Self, Self) -> Bool
+pub fn Finding::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Finding::not_equal(Self, Self) -> Bool
+pub fn Finding::to_json(Self) -> Json
+pub fn Finding::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Location {
+  start : Int
+  end : Int
+  line : Int
+  column : Int
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Location::equal(Self, Self) -> Bool
+pub fn Location::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Location::not_equal(Self, Self) -> Bool
+pub fn Location::to_json(Self) -> Json
+pub fn Location::to_repr(Self) -> @debug.Repr
+
+pub struct Review {
+  source : String
+  transaction : Transaction
+  delivery : Delivery
+  statements : Array[Statement]
+  findings : Array[Finding]
+} derive(Eq, @debug.Debug)
+pub fn Review::equal(Self, Self) -> Bool
+pub fn Review::exit_code(Self) -> Int
+pub fn Review::findings(Self) -> Array[Finding]
+pub fn Review::is_complete(Self) -> Bool
+pub fn Review::not_equal(Self, Self) -> Bool
+pub fn Review::statements(Self) -> Array[Statement]
+pub fn Review::to_json(Self) -> Json
+pub fn Review::to_repr(Self) -> @debug.Repr
+pub fn Review::to_text(Self) -> String
+
+pub(all) enum Severity {
+  Error
+  Warning
+  Advisory
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Severity::equal(Self, Self) -> Bool
+pub fn Severity::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Severity::not_equal(Self, Self) -> Bool
+pub fn Severity::to_json(Self) -> Json
+pub fn Severity::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Statement {
+  number : Int
+  location : Location
+  sql : String
+  coverage : Coverage
+  operation : String
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Statement::equal(Self, Self) -> Bool
+pub fn Statement::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Statement::not_equal(Self, Self) -> Bool
+pub fn Statement::to_json(Self) -> Json
+pub fn Statement::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Transaction {
+  Autocommit
+  Active
+  UnknownTransaction
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Transaction::equal(Self, Self) -> Bool
+pub fn Transaction::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Transaction::not_equal(Self, Self) -> Bool
+pub fn Transaction::to_json(Self) -> Json
+pub fn Transaction::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,6 @@
+import {
+  "bobzhang/sqlglot",
+  "bobzhang/sqlglot/core" @syntax,
+  "moonbitlang/core/json",
+  "moonbitlang/core/debug",
+}

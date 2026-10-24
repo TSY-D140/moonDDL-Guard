@@ -1,0 +1,32 @@
+name: verify
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  portable:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hustcer/setup-moonbit@v1
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: moon update
+      - run: moon fmt --check
+      - run: moon info
+      - run: git diff --exit-code -- engine
+      - run: moon check --target all --deny-warn
+      - run: moon test --target wasm --deny-warn
+      - run: moon test --target wasm-gc --deny-warn
+      - run: moon test --target js --deny-warn
+      - run: moon run engine/cli -- --help
+      - run: moon run --target js engine/cli -- --help
+      - run: moon run --target wasm-gc engine/cli -- --help
+      - if: runner.os != 'Windows'
+        run: moon test --target native --deny-warn

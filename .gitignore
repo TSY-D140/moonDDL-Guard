@@ -1,0 +1,6 @@
+/_build/
+/.mooncakes/
+/target/
+*.exe
+*.obj
+*.o

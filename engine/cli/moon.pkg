@@ -1,0 +1,16 @@
+import {
+  "TSY-D140/moonddl_guard" @guard,
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x/fs",
+  "moonbitlang/x/sys",
+}
+
+pkgtype(kind: "executable")
+
+options(
+  targets: {
+    "args_js.mbt": [ "js" ],
+    "args_host.mbt": [ "wasm", "wasm-gc", "native" ],
+  },
+)
