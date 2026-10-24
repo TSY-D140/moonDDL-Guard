@@ -123,7 +123,7 @@ pub fn review_sql(
               }
             } noraise {
               ast =>
-                if ast.kind == @syntax.Create && ast.text("kind") == "INDEX" {
+                if index_features(ast) is Some(features) {
                   coverage = Analyzed
                   operation = if spec.concurrent {
                     "create_index_concurrently"
@@ -175,6 +175,39 @@ pub fn review_sql(
                       "Assess the write window; consider CONCURRENTLY with a compatible runner and appropriate lock timeout.",
                     )
                   }
+                  if features.expression {
+                    finding(
+                      findings,
+                      part,
+                      number,
+                      "PG106",
+                      Advisory,
+                      "Index expressions require immutable functions/operators; their catalog properties were not checked.",
+                      "Verify function resolution, immutability and expression-based duplicate keys in the target database.",
+                    )
+                  }
+                  if features.partial {
+                    finding(
+                      findings,
+                      part,
+                      number,
+                      "PG107",
+                      Advisory,
+                      "This partial index covers only rows satisfying its predicate; uniqueness and query applicability are conditional.",
+                      "Verify predicate immutability and use the same predicate when checking duplicate keys; validate query predicate implication separately.",
+                    )
+                  }
+                  if features.covering {
+                    finding(
+                      findings,
+                      part,
+                      number,
+                      "PG108",
+                      Advisory,
+                      "INCLUDE columns are payload, not uniqueness keys; their values can increase index tuple size.",
+                      "Check payload width and index tuple limits; do not include payload columns in the uniqueness precheck.",
+                    )
+                  }
                   if spec.unique {
                     finding(
                       findings,
@@ -209,7 +242,7 @@ pub fn review_sql(
         number,
         "PG002",
         Error,
-        "Statement is outside the named plain-column index/transaction profile.",
+        "Statement is outside the supported B-tree index/transaction profile.",
         "Retain this SQL for manual review; unsupported input cannot receive a complete verdict.",
       )
     }

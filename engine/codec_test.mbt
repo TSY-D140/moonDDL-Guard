@@ -161,7 +161,7 @@ test "source limit accepts boundary and rejects overflow without truncation" {
 
 ///|
 test "nested comments strings and unsupported suffixes preserve all statements" {
-  let sql = "/* outer /* inner ; */ still ; */ CREATE INDEX \"x;😀\" ON t (a); SELECT 'COMMIT;'; CREATE INDEX y ON t (a) INCLUDE (b); CREATE INDEX z ON t (a);"
+  let sql = "/* outer /* inner ; */ still ; */ CREATE INDEX \"x;😀\" ON t (a); SELECT 'COMMIT;'; CREATE INDEX y ON t (a) WITH (fillfactor=70); CREATE INDEX z ON t (a);"
   let r = @moonddl_guard.review_sql(
     sql,
     transaction=@moonddl_guard.Autocommit,

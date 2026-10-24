@@ -35,3 +35,7 @@ Current local validation uses the pinned stable compiler/core pair above:
 - The script uses fenced frontmatter and current `moonbitlang/async@0.22.5`; it is run with `--deny-warn`.
 - Formatting, generated-interface consistency and strict four-target checks are included in CI. Consult the repository's [Actions history](https://github.com/TSY-D140/moonDDL-Guard/actions) for results tied to the current revision; a previous green run is not evidence for later changes.
 - Database integration and Windows-native runtime remain unverified. The tool has no live database or production-safety claim.
+
+## B-tree expression, partial and covering indexes (0.4.0)
+
+The profile adds independent PG106/PG107/PG108 preconditions without changing the public API. Tests cover allowed scalar shapes, rejection of unparenthesized arithmetic/subqueries/unknown functions/options, 32 key-plus-payload boundaries, nesting limits, transaction conflicts, source retention and replay. The CLI acceptance script also checks `specimens/advanced.sql` while retaining both original Umami outcomes. The pinned compiler/core remains `0.10.17+d971670cd`.

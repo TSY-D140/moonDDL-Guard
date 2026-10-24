@@ -10,6 +10,7 @@
 
 - PostgreSQL 18 CREATE INDEX: https://www.postgresql.org/docs/18/sql-createindex.html . Ordinary index builds block writes; IF NOT EXISTS is not a definition/validity check; uniqueness is a database-state precondition.
 - PostgreSQL 18 protocol: https://www.postgresql.org/docs/18/protocol-flow.html#PROTOCOL-FLOW-MULTI-STATEMENT . Execution grouping changes transaction semantics.
+- PostgreSQL 18 expression and partial-index semantics: https://www.postgresql.org/docs/18/indexes-expressional.html and https://www.postgresql.org/docs/18/indexes-partial.html . `specimens/advanced.sql` is a project-owned example illustrating those documented rules; it is not an upstream production migration.
 
 The rule implementation and project-owned boundary tests are written for this repository. No Squawk, Strong Migrations or Unison implementation/test source has been copied. These projects informed the demand research, not an originality or performance claim.
 

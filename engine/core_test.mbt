@@ -16,7 +16,8 @@ test "ordinary indexes report writes and preserve source" {
 test "unsupported and malformed SQL never look complete" {
   for
     sql in [
-      "SELECT 1;", "BOGUS SOMETHING;", "CREATE INDEX x ON t (a) WHERE a > 0;", "CREATE INDEX x ON t (a",
+      "SELECT 1;", "BOGUS SOMETHING;", "CREATE INDEX x ON t (a) WITH (fillfactor=70);",
+      "CREATE INDEX x ON t (a",
     ] {
     let r = @moonddl_guard.review_sql(
       sql,

@@ -2,7 +2,7 @@
 
 Static preflight for PostgreSQL index migrations, exposed as a MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it.
 
-The current profile targets PostgreSQL 18 and named, plain-column `CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]` statements. It reports write blocking, concurrent-index transaction incompatibility and unchecked database preconditions. Every unsupported statement is retained and prevents a complete verdict.
+The current profile targets PostgreSQL 18 named B-tree `CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]` statements, including a bounded expression/predicate subset and `INCLUDE` columns. It reports write blocking, transaction incompatibility, expression immutability, conditional uniqueness and unchecked database preconditions. Every unsupported statement is retained and prevents a complete verdict.
 
 ## Run
 
@@ -15,6 +15,7 @@ moon run engine/cli -- specimens/ordinary.sql --transaction=autocommit --deliver
 moon run engine/cli -- specimens/ordinary.sql --json
 moon run engine/cli -- specimens/concurrent.sql --transaction=autocommit --delivery=statements
 moon run engine/cli -- specimens/transaction.sql --transaction=autocommit --delivery=statements
+moon run engine/cli -- specimens/advanced.sql --transaction=autocommit --delivery=statements
 moon run checks/examples.mbtx
 ```
 
@@ -37,7 +38,7 @@ Import `TSY-D140/moonddl_guard` with alias `guard`. The API does not expose its 
 
 ## Scope
 
-SQLGlot supplies PostgreSQL tokenization and syntax parsing; a separate whitelist defines what this project assesses. Parsing successfully is not evidence that an operation is supported. Expression/partial indexes, arbitrary DDL, procedural SQL, psql commands, database inspection and automatic SQL rewrites are outside this first profile.
+SQLGlot supplies PostgreSQL tokenization and syntax parsing; token and active-AST whitelists define what this project assesses. Supported scalars are unqualified columns, literals, `lower`/`upper`/`abs`, parenthesized arithmetic/concatenation, comparison/boolean operators and `IS [NOT] NULL`. Keys support ASC/DESC and NULLS FIRST/LAST; B-tree is implicit or explicit. Unknown functions, casts, subqueries, aggregates, opclasses, collations, storage parameters, tablespaces and non-B-tree methods remain unassessed. See [index semantics](handbook/indexes.md). Arbitrary DDL, procedural SQL, psql commands, database inspection and automatic SQL rewrites are outside the profile.
 
 The pure library targets Wasm, Wasm-GC, JavaScript and native. The file CLI runs through moonrun, Node.js or a native executable. Platform support is validated by actual tests, separately from compilation. See [design](DESIGN.md), [execution semantics](handbook/execution.md) and [sources](SOURCES.md).
 
@@ -66,8 +67,8 @@ Both commands return 1 for the Umami specimen's ordinary-index risks. `decode_re
 
 The [Umami specimens](specimens/upstream/README.md) are real, unmodified, commit-pinned SQL with their MIT license. The 17-index migration yields 17 PG101 findings. A second mixed migration remains incomplete and still reports its final supported indexes. The executable `.mbtx` check verifies these CLI behaviors and persisted-report round trips without a database.
 
-Limits: 262144 UTF-16 source code units, 512 executable statements, at most 256 tokens in an assessed plain-column index, and 8388608 UTF-16 code units for report decoding. Larger/unsupported input receives an explicit incomplete/error result; SQL is never truncated or rewritten.
+Limits: 262144 UTF-16 source code units, 512 executable statements, 256 tokens per assessed index, 32 nested key-expression parentheses, 32 total key/payload columns (standard PostgreSQL build), and 8388608 UTF-16 code units for report decoding. Larger/unsupported input receives an explicit incomplete/error result; SQL is never truncated or rewritten.
 
-Planned: expression/partial indexes, timeout semantics, staged constraint validation, additional PostgreSQL versions and database integration tests. These capabilities are not implemented by version 0.3.0.
+Planned: timeout semantics, staged constraint validation, additional PostgreSQL versions and database integration tests. These capabilities are not implemented by version 0.4.0.
 
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).

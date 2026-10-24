@@ -22,5 +22,11 @@ async fn main {
   assert_eq(mixed.exit_code(), 2)
   guard @json.parse(mixed.stdout()) is { "statements": Array(statements), "complete": False, .. } else { fail("Expected incomplete mixed migration") }
   assert_eq(statements.length(), 9)
+  let advanced = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/advanced.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+  assert_eq(advanced.exit_code(), 1)
+  guard @json.parse(advanced.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected assessed advanced indexes") }
+  assert_eq(findings.filter(f => f is { "code": String("PG106"), .. }).length(), 2)
+  assert_eq(findings.filter(f => f is { "code": String("PG107"), .. }).length(), 1)
+  assert_eq(findings.filter(f => f is { "code": String("PG108"), .. }).length(), 1)
   println("Umami: 17 index statements assessed; mixed migration incomplete; persisted report replay passed.")
 }

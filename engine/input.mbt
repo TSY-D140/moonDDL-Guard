@@ -152,27 +152,70 @@ fn index_spec(tokens : Array[@syntax.Token]) -> IndexSpec? {
     }
     i += 1
   }
-  if i >= tokens.length() || tokens[i].token_type != @syntax.L_PAREN {
-    return None
+  if word(tokens, i, "USING") {
+    if !word(tokens, i + 1, "BTREE") {
+      return None
+    }
+    i += 2
   }
-  i += 1
-  for ;; {
-    if i >= tokens.length() || !is_identifier(tokens[i]) {
+  i = match parenthesized_end(tokens, i) {
+    Some(end) => end
+    None => return None
+  }
+  if word(tokens, i, "INCLUDE") {
+    i += 1
+    if i >= tokens.length() || tokens[i].token_type != @syntax.L_PAREN {
       return None
     }
     i += 1
-    if i < tokens.length() && tokens[i].token_type == @syntax.COMMA {
+    for ;; {
+      if i >= tokens.length() || !is_identifier(tokens[i]) {
+        return None
+      }
       i += 1
-      continue
+      if i < tokens.length() && tokens[i].token_type == @syntax.COMMA {
+        i += 1
+        continue
+      }
+      break
     }
-    break
+    if i >= tokens.length() || tokens[i].token_type != @syntax.R_PAREN {
+      return None
+    }
+    i += 1
   }
-  if i >= tokens.length() || tokens[i].token_type != @syntax.R_PAREN {
-    return None
+  if word(tokens, i, "WHERE") {
+    if i + 1 == tokens.length() {
+      return None
+    }
+    // SQLGlot parses the predicate; the AST whitelist below checks its scope.
+    i = tokens.length()
   }
-  i += 1
   if i != tokens.length() {
     return None
   }
   Some({ unique, concurrent, exists, })
+}
+
+///|
+fn parenthesized_end(tokens : Array[@syntax.Token], start : Int32) -> Int32? {
+  if start >= tokens.length() || tokens[start].token_type != @syntax.L_PAREN {
+    return None
+  }
+  let mut depth = 0
+  for i in start..<tokens.length() {
+    if tokens[i].token_type == @syntax.L_PAREN {
+      depth += 1
+    }
+    if depth > 32 {
+      return None
+    }
+    if tokens[i].token_type == @syntax.R_PAREN {
+      depth -= 1
+      if depth == 0 {
+        return Some(i + 1)
+      }
+    }
+  }
+  None
 }
