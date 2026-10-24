@@ -1,0 +1,26 @@
+----
+import {
+  "moonbitlang/async@0.22.5",
+  "moonbitlang/async@0.22.5/shell",
+  "moonbitlang/core/env",
+  "moonbitlang/x@0.5.5/fs",
+}
+----
+
+async fn main {
+  let args = @env.args()
+  let python = if args.length() > 1 { args[1] } else { "python" }
+  let schema = "_build/sarif-schema.json"
+  let download = @shell.Cmd("curl", ["--fail", "--location", "--silent", "--show-error", "--max-time", "45", "--output", schema, "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json"]).output()
+  if download.exit_code() != 0 { fail("Schema download failed: " + download.stderr()) }
+  @fs.write_string_to_file("_build/lexical.sql", "/*")
+  @fs.write_string_to_file("_build/empty.sql", "")
+  for i, file in ["specimens/ordinary.sql", "specimens/transaction.sql", "specimens/upstream/mixed.sql", "_build/lexical.sql", "_build/empty.sql"] {
+    let report = @shell.Cmd("moon", ["run", "engine/cli", "--", file, "--sarif", "--transaction=autocommit", "--delivery=statements"]).output()
+    let out = "_build/schema-case-\{i}.sarif"
+    @fs.write_string_to_file(out, report.stdout())
+    let validated = @shell.Cmd(python, ["-m", "jsonschema", "--instance", out, schema]).output()
+    if validated.exit_code() != 0 { fail("Invalid SARIF for " + file + ": " + validated.stderr()) }
+  }
+  println("Five generated SARIF reports passed the OASIS 2.1.0 schema.")
+}

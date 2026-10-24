@@ -3,7 +3,7 @@ fn main {
   let args = process_args()
   if args.length() == 2 && args[1] == "--help" {
     println(
-      "Usage: moon run engine/cli -- FILE [--json] [--replay] [--transaction=autocommit|active|unknown] [--delivery=statements|simple-query|unknown]",
+      "Usage: moon run engine/cli -- FILE [--json|--sarif] [--artifact=REPO_PATH] [--replay] [--transaction=autocommit|active|unknown] [--delivery=statements|simple-query|unknown]",
     )
     println(
       "Defaults: unknown transaction and delivery. PostgreSQL 18 rules. Exit 0: no blocking finding; 1: risk; 2: incomplete/input error.",
@@ -17,12 +17,17 @@ fn main {
   }
   let path = args[1]
   let mut json = false
+  let mut sarif = false
+  let mut artifact : String? = None
   let mut replay = false
   let mut transaction = @guard.UnknownTransaction
   let mut delivery = @guard.UnknownDelivery
   for arg in args[2:] {
     match arg {
       "--json" => json = true
+      "--sarif" => sarif = true
+      option if option.has_prefix("--artifact=") =>
+        artifact = Some(option[11:].to_owned())
       "--replay" => replay = true
       "--transaction=autocommit" => transaction = @guard.Autocommit
       "--transaction=active" => transaction = @guard.Active
@@ -36,6 +41,15 @@ fn main {
         return
       }
     }
+  }
+  if (json && sarif) ||
+    (artifact is Some(_) && !sarif) ||
+    (replay && sarif && artifact is None) {
+    println(
+      "Choose one format; --artifact requires --sarif and is mandatory for SARIF replay.",
+    )
+    @sys.exit(2)
+    return
   }
   try @utf8.decode(@fs.read_file_to_bytes(path)) catch {
     _ => {
@@ -63,7 +77,16 @@ fn main {
       } else {
         @guard.review_sql(sql, transaction~, delivery~)
       }
-      if json {
+      if sarif {
+        let value = review.to_sarif(artifact.unwrap_or(path)) catch {
+          error => {
+            println("SARIF export rejected: \{Repr(error)}")
+            @sys.exit(2)
+            return
+          }
+        }
+        println(value.stringify())
+      } else if json {
         println(review.to_json().stringify())
       } else {
         println(review.to_text())

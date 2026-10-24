@@ -60,3 +60,7 @@ For this capability's remote runtime evidence, use the Actions run attached to i
 ## CHECK validation staging (0.7.0)
 
 42 test groups passed on Wasm, Wasm-GC and JavaScript, including the new bounded CHECK grammar, malformed/unsupported predicates, schema/quote-sensitive identity, autocommit versus implicit/explicit transactions, rollback/chain release and incomplete-input recovery. The file CLI checks separate phases and whole-file delivery; only the latter emits PG405 for retained strong locks. Prior index and timeout workflows remain covered. Formatting, generated interfaces, strict all-target compilation and CLI acceptance pass on the pinned compiler/core.
+
+## SARIF export (0.8.0)
+
+46 test groups passed on Wasm, Wasm-GC and JavaScript, with strict all-target compilation, formatting and refreshed interfaces. Export tests cover Unicode/CRLF coordinates, URI byte encoding, path rejection, JSON round trips, deterministic results, severity mapping and preservation of incomplete/empty reports. The acceptance script exercises the three portable CLI targets and replay/invalid-option handling. Five generated reports passed the downloaded OASIS 2.1.0 schema locally using jsonschema 4.25.1; CI runs that check on Linux. Actual GitHub code-scanning ingestion is not verified.

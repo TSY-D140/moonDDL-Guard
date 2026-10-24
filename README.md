@@ -79,4 +79,6 @@ Version 0.7.0 adds [staged CHECK validation review](handbook/constraints.md), in
 
 Planned: additional PostgreSQL versions, broader constraint operations and database integration tests.
 
+Version 0.8.0 exports [SARIF reports](handbook/sarif.md) through `Review::to_sarif` and CLI `--sarif`, including source locations, next actions, completion status and the retained original review.
+
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).

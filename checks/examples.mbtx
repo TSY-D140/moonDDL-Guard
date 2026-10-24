@@ -44,6 +44,11 @@ async fn main {
     let replay = @shell.Cmd("moon", ["run", "--target", target, "engine/cli", "--", "_build/timeout-report.json", "--replay", "--json"]).output()
     assert_eq(replay.exit_code(), 0)
     assert_eq(@json.parse(replay.stdout()), report)
+    let sarif = @shell.Cmd("moon", ["run", "--target", target, "engine/cli", "--", "specimens/bounded-lock.sql", "--sarif", "--transaction=autocommit", "--delivery=statements"]).output()
+    assert_eq(sarif.exit_code(), 0)
+    guard @json.parse(sarif.stdout()) is { "version": String("2.1.0"), "runs": Array(runs), .. } else { fail("Expected SARIF output") }
+    guard runs[0] is { "properties": { "moonddlReview": retained, .. }, .. } else { fail("Missing retained review") }
+    assert_eq(retained, report)
   }
   let grouped = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/bounded-lock.sql", "--json", "--transaction=autocommit", "--delivery=simple-query"]).output()
   assert_eq(grouped.exit_code(), 1)
@@ -64,5 +69,13 @@ async fn main {
     guard @json.parse(phases.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected assessed CHECK phases") }
     assert_eq(findings.filter(f => f is { "code": String("PG405"), .. }).length(), if delivery == "simple-query" { 1 } else { 0 })
   }
+  for options in [["--sarif", "--json"], ["--artifact=x"], ["--sarif", "--artifact=../x"]] {
+    let args = ["run", "engine/cli", "--", "specimens/ordinary.sql"]
+    args.append(options)
+    assert_eq(@shell.Cmd("moon", args).output().exit_code(), 2)
+  }
+  let sarif_replay = @shell.Cmd("moon", ["run", "engine/cli", "--", "_build/timeout-report.json", "--replay", "--sarif", "--artifact=specimens/bounded-lock.sql"]).output()
+  assert_eq(sarif_replay.exit_code(), 0)
+  assert_eq(@shell.Cmd("moon", ["run", "engine/cli", "--", "_build/timeout-report.json", "--replay", "--sarif"]).output().exit_code(), 2)
   println("Migration specimens and portable report workflows passed.")
 }

@@ -12,6 +12,11 @@ pub fn decode_report(String) -> Review raise ReportError
 pub fn review_sql(String, transaction~ : Transaction, delivery~ : Delivery) -> Review
 
 // Errors
+pub(all) suberror ExportError {
+  InvalidArtifactPath(String)
+} derive(@debug.Debug)
+pub fn ExportError::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror ReportError {
   InvalidReport(String)
 } derive(@debug.Debug)
@@ -81,6 +86,7 @@ pub fn Review::not_equal(Self, Self) -> Bool
 pub fn Review::statements(Self) -> Array[Statement]
 pub fn Review::to_json(Self) -> Json
 pub fn Review::to_repr(Self) -> @debug.Repr
+pub fn Review::to_sarif(Self, String) -> Json raise ExportError
 pub fn Review::to_text(Self) -> String
 
 pub(all) enum Severity {
