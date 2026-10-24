@@ -64,3 +64,7 @@ For this capability's remote runtime evidence, use the Actions run attached to i
 ## SARIF export (0.8.0)
 
 46 test groups passed on Wasm, Wasm-GC and JavaScript, with strict all-target compilation, formatting and refreshed interfaces. Export tests cover Unicode/CRLF coordinates, URI byte encoding, path rejection, JSON round trips, deterministic results, severity mapping and preservation of incomplete/empty reports. The acceptance script exercises the three portable CLI targets and replay/invalid-option handling. Five generated reports passed the downloaded OASIS 2.1.0 schema locally using jsonschema 4.25.1; CI runs that check on Linux. Actual GitHub code-scanning ingestion is not verified.
+
+## Baseline comparison (0.9.0)
+
+52 test groups pass on Wasm, Wasm-GC and JavaScript with strict all-target compilation and refreshed interfaces. They check occurrence-counted matching, FIFO duplicate resolution, introduced/resolved conservation, exact SQL identity, changed timeout diagnostics, moved Unicode/CRLF positions, copied arrays, deterministic comparison and strict delta replay. Incomplete current analysis remains exit 2; incomplete or context-mismatched baselines are rejected. The acceptance script passed against the real 17-index Umami baseline, a temporary candidate with one appended index and invalid baseline/context/format combinations.

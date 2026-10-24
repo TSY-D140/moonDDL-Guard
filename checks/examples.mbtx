@@ -11,7 +11,7 @@ async fn main {
   let index = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
   assert_eq(index.exit_code(), 1)
   let original = @json.parse(index.stdout())
-  guard original is { "statements": Array(statements), "findings": Array(findings), "complete": True, .. } else { fail("Expected a complete fixture report") }
+  guard original is { "source": String(upstream_sql), "statements": Array(statements), "findings": Array(findings), "complete": True, .. } else { fail("Expected a complete fixture report") }
   assert_eq(statements.length(), 17)
   assert_eq(findings.length(), 17)
   @fs.write_string_to_file("_build/umami-report.json", index.stdout())
@@ -77,5 +77,19 @@ async fn main {
   let sarif_replay = @shell.Cmd("moon", ["run", "engine/cli", "--", "_build/timeout-report.json", "--replay", "--sarif", "--artifact=specimens/bounded-lock.sql"]).output()
   assert_eq(sarif_replay.exit_code(), 0)
   assert_eq(@shell.Cmd("moon", ["run", "engine/cli", "--", "_build/timeout-report.json", "--replay", "--sarif"]).output().exit_code(), 2)
-  println("Migration specimens and portable report workflows passed.")
+  let unchanged = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--json", "--transaction=autocommit", "--delivery=statements", "--baseline=_build/umami-report.json"]).output()
+  assert_eq(unchanged.exit_code(), 0)
+  @fs.write_string_to_file("_build/umami-candidate.sql", upstream_sql + "\nCREATE INDEX added_idx ON website (name);")
+  let candidate = @shell.Cmd("moon", ["run", "engine/cli", "--", "_build/umami-candidate.sql", "--json", "--transaction=autocommit", "--delivery=statements", "--baseline=_build/umami-report.json"]).output()
+  assert_eq(candidate.exit_code(), 1)
+  guard @json.parse(candidate.stdout()) is { "format": String("moonddl.delta.v1"), "introduced": Array(introduced), "resolved": Array(resolved), "unchanged": Number(count, ..), .. } else { fail("Expected a review delta") }
+  assert_eq(count, 17)
+  assert_eq(introduced.length(), 1)
+  assert_eq(resolved.length(), 0)
+  for extra in ["--sarif", "--transaction=active"] {
+    assert_eq(@shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--baseline=_build/umami-report.json", "--transaction=autocommit", "--delivery=statements", extra]).output().exit_code(), 2)
+  }
+  @fs.write_string_to_file("_build/incomplete-report.json", mixed.stdout())
+  assert_eq(@shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--baseline=_build/incomplete-report.json", "--transaction=autocommit", "--delivery=statements"]).output().exit_code(), 2)
+  println("Migration specimens, portable reports and baseline gates passed.")
 }

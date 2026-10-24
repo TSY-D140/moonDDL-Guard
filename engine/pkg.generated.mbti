@@ -7,11 +7,20 @@ import {
 }
 
 // Values
+pub fn compare_reviews(Review, Review) -> ReviewDelta raise ComparisonError
+
+pub fn decode_delta(String) -> ReviewDelta raise ReportError
+
 pub fn decode_report(String) -> Review raise ReportError
 
 pub fn review_sql(String, transaction~ : Transaction, delivery~ : Delivery) -> Review
 
 // Errors
+pub(all) suberror ComparisonError {
+  IncompatibleBaseline(String)
+} derive(@debug.Debug)
+pub fn ComparisonError::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror ExportError {
   InvalidArtifactPath(String)
 } derive(@debug.Debug)
@@ -88,6 +97,20 @@ pub fn Review::to_json(Self) -> Json
 pub fn Review::to_repr(Self) -> @debug.Repr
 pub fn Review::to_sarif(Self, String) -> Json raise ExportError
 pub fn Review::to_text(Self) -> String
+
+pub struct ReviewDelta {
+  baseline : Review
+  current : Review
+  introduced : Array[Finding]
+  resolved : Array[Finding]
+  unchanged : Int32
+}
+pub fn ReviewDelta::exit_code(Self) -> Int32
+pub fn ReviewDelta::introduced(Self) -> Array[Finding]
+pub fn ReviewDelta::resolved(Self) -> Array[Finding]
+pub fn ReviewDelta::to_json(Self) -> Json
+pub fn ReviewDelta::to_text(Self) -> String
+pub fn ReviewDelta::unchanged_count(Self) -> Int32
 
 pub(all) enum Severity {
   Error

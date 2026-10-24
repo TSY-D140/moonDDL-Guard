@@ -173,7 +173,7 @@ pub fn Review::to_sarif(
         "tool": {
           "driver": {
             "name": "MoonDDL Guard",
-            "semanticVersion": "0.8.0",
+            "semanticVersion": "0.9.0",
             "informationUri": "https://github.com/TSY-D140/moonDDL-Guard",
             "rules": Json(sarif_rules()),
           },

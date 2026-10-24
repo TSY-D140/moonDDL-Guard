@@ -30,6 +30,8 @@ The research covered Mooncakes, GitHub, awesome-moonbit and moonbit-community. I
 
 ## Upstream specimens and verification tooling
 
+Baseline comparison and its property tests are project-owned Apache-2.0 code. The end-to-end check copies the licensed Umami SQL to _build and appends a project-owned example to verify new-finding gating; the original fixture is retained unmodified.
+
 SARIF export follows the [OASIS SARIF 2.1.0 standard](https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html) and its versioned schema; schema verification downloads an unmodified external schema at runtime and does not vendor it. OASIS notices and IPR terms are linked in the standard. The generator/tests are project-owned Apache-2.0 code. Optional validation uses [jsonschema 4.25.1](https://pypi.org/project/jsonschema/4.25.1/), MIT, as an external CLI; none of its source is copied. GitHub's official SARIF documentation informed paths/completion handling, without an upload-compatibility guarantee.
 
 `specimens/upstream/indexes.sql` and `mixed.sql` are unmodified Umami migrations, commit `559e3c607c23d2c72d9bd4f6481bda428255323c`, copyright Umami Software, Inc., MIT. Exact source URLs and the full upstream license accompany the files. They are examples from a real project, not a claim that this tool has reviewed Umami's complete schema or deployment process.
