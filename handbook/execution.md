@@ -4,7 +4,7 @@
 
 A Simple Query message with multiple executable statements runs in an implicit transaction, except where explicit transaction controls change its boundaries. New implicit blocks after COMMIT still belong to the same multi-statement message, so concurrent indexes are rejected there too. Empty delimiters and comments do not count as executable statements.
 
-Supported controls: BEGIN [WORK|TRANSACTION], START TRANSACTION, COMMIT/END and ROLLBACK/ABORT with optional WORK/TRANSACTION and AND [NO] CHAIN. BEGIN inside an active transaction does not nest it. A transaction opened by this migration and not closed is reported; an inherited active transaction is not automatically called dangling. Savepoints, prepared transactions and isolation options are unassessed rather than guessed.
+Supported controls: BEGIN [WORK|TRANSACTION], START TRANSACTION, COMMIT/END and ROLLBACK/ABORT with optional WORK/TRANSACTION and AND [NO] CHAIN. BEGIN inside an active transaction does not nest it. A transaction opened by this migration and not closed is reported; an inherited active transaction is not automatically called dangling. [Savepoint rollback/release](savepoints.md) restores tracked settings and locks in known explicit scopes. Prepared transactions and isolation options remain unassessed.
 
 This models the successful execution path. It does not assume SQL after a database error was executed. An unknown statement may change transaction state, so subsequent context becomes unknown until an explicit recognized boundary restores it. The whole review remains incomplete even after that recovery.
 

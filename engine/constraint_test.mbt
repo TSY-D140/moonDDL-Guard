@@ -113,7 +113,7 @@ test "CHECK predicate bounds malformed and unknown clauses are preserved" {
 
 ///|
 test "unknown SQL never leaves a complete verdict or fabricated retained lock" {
-  let sql = "BEGIN; ALTER TABLE t ADD CONSTRAINT c CHECK (a > 0) NOT VALID; SAVEPOINT s; ALTER TABLE t VALIDATE CONSTRAINT c; ROLLBACK; CREATE INDEX CONCURRENTLY x ON t(a);"
+  let sql = "BEGIN; ALTER TABLE t ADD CONSTRAINT c CHECK (a > 0) NOT VALID; SELECT 1; ALTER TABLE t VALIDATE CONSTRAINT c; ROLLBACK; CREATE INDEX CONCURRENTLY x ON t(a);"
   let r = check_review(sql)
   assert_false(r.is_complete())
   assert_eq(r.findings().filter(f => f.code == "PG405").length(), 0)

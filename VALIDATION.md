@@ -68,3 +68,7 @@ For this capability's remote runtime evidence, use the Actions run attached to i
 ## Baseline comparison (0.9.0)
 
 52 test groups pass on Wasm, Wasm-GC and JavaScript with strict all-target compilation and refreshed interfaces. They check occurrence-counted matching, FIFO duplicate resolution, introduced/resolved conservation, exact SQL identity, changed timeout diagnostics, moved Unicode/CRLF positions, copied arrays, deterministic comparison and strict delta replay. Incomplete current analysis remains exit 2; incomplete or context-mismatched baselines are rejected. The acceptance script passed against the real 17-index Umami baseline, a temporary candidate with one appended index and invalid baseline/context/format combinations.
+
+## Savepoint scope (0.10.0)
+
+57 groups pass on Wasm, Wasm-GC and JavaScript, covering prior behavior plus duplicate-name shadowing, release/rollback differences, timeout restoration, strong-lock lifetime, 64-point and 63-byte identifier boundaries, unknown/inherited scopes and error recovery. The file CLI example checks 100ms before rollback and 2000ms afterward. Strict all-target compilation and interface generation pass on the pinned toolchain; Windows-native and PostgreSQL-server integration remain unverified.

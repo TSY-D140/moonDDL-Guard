@@ -91,5 +91,10 @@ async fn main {
   }
   @fs.write_string_to_file("_build/incomplete-report.json", mixed.stdout())
   assert_eq(@shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--baseline=_build/incomplete-report.json", "--transaction=autocommit", "--delivery=statements"]).output().exit_code(), 2)
+  let point = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/savepoint-budget.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+  assert_eq(point.exit_code(), 1)
+  guard @json.parse(point.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected complete savepoint review") }
+  assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 100ms for this index."), .. }).length(), 1)
+  assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 2000ms for this index."), .. }).length(), 1)
   println("Migration specimens, portable reports and baseline gates passed.")
 }

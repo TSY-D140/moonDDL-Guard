@@ -8,6 +8,8 @@
 
 ## Rule references
 
+Savepoint handling follows PostgreSQL 18 SAVEPOINT, ROLLBACK TO, RELEASE SAVEPOINT, the multi-statement protocol and lock-lifetime documentation linked in handbook/savepoints.md. Implementation and tests are project-owned Apache-2.0, without copied upstream code. The existing review layer remains complementary to schema-plan and migrate; this adds no schema generation or migration execution.
+
 - PostgreSQL 18 CREATE INDEX: https://www.postgresql.org/docs/18/sql-createindex.html . Ordinary index builds block writes; IF NOT EXISTS is not a definition/validity check; uniqueness is a database-state precondition.
 - PostgreSQL 18 protocol: https://www.postgresql.org/docs/18/protocol-flow.html#PROTOCOL-FLOW-MULTI-STATEMENT . Execution grouping changes transaction semantics.
 - PostgreSQL 18 expression and partial-index semantics: https://www.postgresql.org/docs/18/indexes-expressional.html and https://www.postgresql.org/docs/18/indexes-partial.html . `specimens/advanced.sql` is a project-owned example illustrating those documented rules; it is not an upstream production migration.

@@ -66,6 +66,7 @@ pub fn review_sql(
   }
   let mut opened_here = false
   let held_tables : Map[String, Bool] = Map([])
+  let savepoints : Array[SavepointFrame] = []
   let implicit_batch = delivery == SimpleQuery && parts.length() > 1
   let lock_budget = new_timeout("lock_timeout", transaction, implicit_batch)
   let statement_budget = new_timeout(
@@ -80,7 +81,27 @@ pub fn review_sql(
     let mut operation = "unassessed"
     lock_budget.before(implicit_batch)
     statement_budget.before(implicit_batch)
-    if timeout_setting(part.tokens) is Some(setting) {
+    if savepoint_step(part.tokens) is Some(step) {
+      match
+        apply_savepoint(
+          step, savepoints, state, lock_budget, statement_budget, held_tables,
+        ) {
+        Some(name) => {
+          coverage = Analyzed
+          operation = name
+        }
+        None =>
+          finding(
+            findings,
+            part,
+            number,
+            "PG208",
+            Error,
+            "Savepoint scope cannot be established, its name is unknown, or the 64-point limit was exceeded.",
+            "Use a known explicit transaction and a savepoint created within the assessed input; implicit transaction blocks do not support savepoints.",
+          )
+      }
+    } else if timeout_setting(part.tokens) is Some(setting) {
       let tracker = if setting.parameter == "lock_timeout" {
         lock_budget
       } else {
@@ -139,6 +160,7 @@ pub fn review_sql(
           state = Active
         }
         Some(Finish(kind, chain)) => {
+          savepoints.clear()
           held_tables.clear()
           lock_budget.finish(kind == "rollback", chain, state, delivery)
           statement_budget.finish(kind == "rollback", chain, state, delivery)
@@ -304,6 +326,7 @@ pub fn review_sql(
       )
     }
     if coverage != Analyzed {
+      savepoints.clear()
       held_tables.clear()
       lock_budget.invalidate()
       statement_budget.invalidate()

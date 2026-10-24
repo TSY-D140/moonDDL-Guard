@@ -91,6 +91,7 @@ fn sarif_rules() -> Array[Json] {
     ("PG205", "Unmatched transaction end"),
     ("PG206", "Concurrent drop in transaction"),
     ("PG207", "Unknown drop context"),
+    ("PG208", "Unknown or unsupported savepoint scope"),
     ("PG301", "Disabled lock timeout"),
     ("PG302", "Ineffective LOCAL"),
     ("PG303", "Unknown timeout"),
@@ -173,7 +174,7 @@ pub fn Review::to_sarif(
         "tool": {
           "driver": {
             "name": "MoonDDL Guard",
-            "semanticVersion": "0.9.0",
+            "semanticVersion": "0.10.0",
             "informationUri": "https://github.com/TSY-D140/moonDDL-Guard",
             "rules": Json(sarif_rules()),
           },
