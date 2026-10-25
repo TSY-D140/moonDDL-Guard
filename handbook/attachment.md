@@ -6,6 +6,8 @@ PG407 reports ACCESS EXCLUSIVE during attachment even if the preceding index was
 
 PG409 records index renaming/ownership transfer: dropping the constraint also drops its index. PG410 separately warns that PRIMARY KEY attachment can scan nullable key columns while establishing NOT NULL. A prebuilt unique index is not proof that columns have NOT NULL metadata.
 
+See [column nullability preflight](nullability.md) for explicit SET/DROP NOT NULL and catalog-proof limitations.
+
 The attachment's strong table lock participates in the existing retention analysis: a following VALIDATE in the same transaction may retain it (PG405); commit/rollback ends the lock, while savepoint rollback removes only later acquisitions. Timeouts, source retention, SARIF and strict replay apply without a new public API.
 
 ```sh

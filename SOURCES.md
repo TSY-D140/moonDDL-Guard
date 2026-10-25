@@ -8,6 +8,8 @@
 
 ## Rule references
 
+Column SET/DROP NOT NULL behavior follows PostgreSQL 18 ALTER TABLE (nullability, scan-elision conditions, inheritance/partition and locking sections), linked in handbook/nullability.md. The implementation and property/edge tests are project-owned Apache-2.0. No database metadata, production data or external source code is copied into the implementation.
+
 Index-backed UNIQUE/PRIMARY KEY attachment follows PostgreSQL 18 ALTER TABLE, including ownership transfer, catalog eligibility, partition restrictions and nullable-key scans. Exact links and search limitations are in handbook/attachment.md; new code, examples and tests are project-owned Apache-2.0.
 
 Savepoint handling follows PostgreSQL 18 SAVEPOINT, ROLLBACK TO, RELEASE SAVEPOINT, the multi-statement protocol and lock-lifetime documentation linked in handbook/savepoints.md. Implementation and tests are project-owned Apache-2.0, without copied upstream code. The existing review layer remains complementary to schema-plan and migrate; this adds no schema generation or migration execution.

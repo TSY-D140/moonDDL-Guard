@@ -1,6 +1,6 @@
 # Stage CHECK validation deliberately
 
-PG405 also covers a retained strong lock from an assessed index-backed constraint attachment; see [attachment workflow](attachment.md). Savepoint rollback restores the tracked lock set.
+PG405 also covers a retained strong lock from an assessed [index attachment](attachment.md) or [column nullability change](nullability.md). Savepoint rollback restores the tracked lock set. This chapter describes CHECK-specific input; those other ALTER forms have their own bounded profiles.
 
 Supported input is a single `ALTER TABLE [ONLY] table ADD CONSTRAINT name CHECK (predicate) [NOT VALID]` action or `ALTER TABLE [ONLY] table VALIDATE CONSTRAINT name`. Names may be quoted and schema-qualified (constraint names are unqualified). Statements are bounded to 256 tokens, predicate nesting to 32; the predicate uses the same bounded scalar subset as index predicates. Foreign-key additions, unnamed checks, multiple actions, NO INHERIT, NOT ENFORCED, IF EXISTS and other ALTER clauses remain incomplete.
 

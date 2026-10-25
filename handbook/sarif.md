@@ -16,6 +16,6 @@ python -m pip install jsonschema==4.25.1
 moon run checks/sarif-schema.mbtx
 ```
 
-This optional verification requires curl, Python and network access to download the versioned OASIS schema into _build. It validates five generated reports (warning, transaction error, unsupported SQL, lexical failure, empty SQL). CI runs it on Linux. Portable tests and the acceptance script check SARIF generation on Wasm, Wasm-GC and JavaScript. No schema copy is vendored.
+This optional verification requires curl, Python and network access to download the versioned OASIS schema into _build. It validates eight generated reports (warning, transaction error, unsupported SQL, lexical failure, empty SQL, savepoints, attachment and nullability). CI runs it on Linux. Portable tests and the acceptance script check SARIF generation on Wasm, Wasm-GC and JavaScript. No schema copy is vendored.
 
 The output is tested against the [OASIS schema](https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json). GitHub's [SARIF ingestion requirements](https://docs.github.com/en/code-security/reference/code-scanning/sarif-files/sarif-support) include additional UI limits. No actual GitHub code-scanning upload has been performed, and no custom cross-run fingerprint is emitted. Do not treat schema validation as proof of every consumer's behavior.

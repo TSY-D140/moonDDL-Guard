@@ -1,6 +1,6 @@
 # MoonDDL Guard
 
-Static preflight for PostgreSQL index and CHECK-constraint migrations, exposed as a MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it.
+Static preflight for PostgreSQL index and constraint migrations, exposed as a MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it.
 
 The current profile targets PostgreSQL 18 named B-tree `CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]` statements, including a bounded expression/predicate subset and `INCLUDE` columns. It reports write blocking, transaction incompatibility, expression immutability, conditional uniqueness and unchecked database preconditions. Explicit `lock_timeout` / `statement_timeout` settings are tracked through session, transaction-local, commit and rollback scopes. Every unsupported statement is retained and prevents a complete verdict.
 
@@ -79,6 +79,6 @@ Version 0.7.0 adds [staged CHECK validation review](handbook/constraints.md), in
 
 Planned: additional PostgreSQL versions, broader constraint operations and database integration tests.
 
-The current release is 0.11.0. It exports [SARIF reports](handbook/sarif.md) through `Review::to_sarif` / `--sarif`, and supports [baseline comparison](handbook/baselines.md) through `compare_reviews` / `--baseline=REPORT`. Baselines never suppress incomplete current analysis. Reports and comparisons can both be persisted and strictly replayed. [Savepoint-aware review](handbook/savepoints.md) restores timeout values and tracked table locks after partial rollback. [Index-backed constraint attachment](handbook/attachment.md) adds cutover-lock, catalog-eligibility, ownership and PRIMARY KEY scan preconditions.
+The current release is 0.12.0. It exports [SARIF reports](handbook/sarif.md) through `Review::to_sarif` / `--sarif`, and supports [baseline comparison](handbook/baselines.md) through `compare_reviews` / `--baseline=REPORT`. Baselines never suppress incomplete current analysis. Reports and comparisons can both be persisted and strictly replayed. [Savepoint-aware review](handbook/savepoints.md) restores timeout values and tracked table locks after partial rollback. [Index-backed constraint attachment](handbook/attachment.md) adds cutover-lock, catalog-eligibility, ownership and PRIMARY KEY scan preconditions. [Column nullability review](handbook/nullability.md) assesses SET/DROP NOT NULL without fabricating a no-scan catalog proof.
 
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).

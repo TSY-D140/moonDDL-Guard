@@ -101,5 +101,13 @@ async fn main {
   guard @json.parse(attachment.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected complete attachment review") }
   assert_eq(findings.filter(f => f is { "code": String("PG407"), .. }).length(), 1)
   assert_eq(findings.filter(f => f is { "code": String("PG409"), .. }).length(), 1)
+  for delivery in ["statements", "simple-query"] {
+    let nonnull = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/non-null.sql", "--json", "--transaction=autocommit", "--delivery=" + delivery]).output()
+    assert_eq(nonnull.exit_code(), 1)
+    guard @json.parse(nonnull.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected complete nullability review") }
+    assert_eq(findings.filter(f => f is { "code": String("PG412"), .. }).length(), 1)
+    assert_eq(findings.filter(f => f is { "code": String("PG405"), .. }).length(), if delivery == "simple-query" { 1 } else { 0 })
+    assert_eq(findings.filter(f => f is { "code": String("PG305"), .. }).length(), 3)
+  }
   println("Migration specimens, portable reports and baseline gates passed.")
 }

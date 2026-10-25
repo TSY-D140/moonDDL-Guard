@@ -76,3 +76,9 @@ For this capability's remote runtime evidence, use the Actions run attached to i
 ## Index-backed constraint attachment (0.11.0)
 
 61 groups cover concurrent-build/cutover separation, UNIQUE versus PRIMARY KEY conditions, ownership/catalog preconditions, quoted identifiers, explicit/implicit transactions and strong-lock release at commit/savepoint rollback. Empty quoted identifiers and unsupported suffixes are rejected without dropping SQL. The attachment CLI specimen retains its 1000ms budget and reports the cutover lock. Formatting, interface regeneration, strict all-target compilation and portable target tests use the pinned compiler/core.
+
+## Column nullability (0.12.0)
+
+66 groups passed on Wasm, Wasm-GC and JavaScript with formatting, interface generation and strict all-target checks. They check SET versus DROP semantics, no fabricated scan-elision proof, timeout budgets, strong-lock lifetime across commit/savepoint rollback, unsupported/malformed input retention, recovery, SARIF and strict baseline/report/delta replay. The nullability CLI specimen passed under per-statement and whole-file delivery. All eight generated reports passed the OASIS schema locally, including all three added workflows. Added fixtures/tests are project-owned; native execution and PostgreSQL integration limitations above still apply.
+
+One local all-target invocation stopped while checking SQLGlot without a source diagnostic. The identical command and subsequent full verification passed; no dependency source files were edited. Remote evidence must be read from the CI run for the pushed revision, rather than inferred from earlier green runs.

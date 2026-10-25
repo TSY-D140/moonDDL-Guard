@@ -3,6 +3,7 @@ priv enum ConstraintAction {
   AddCheck(Bool)
   Validate
   AttachIndex(Bool)
+  Nullability(Bool)
 }
 
 ///|
@@ -81,6 +82,9 @@ fn constraint_spec(part : Segment) -> ConstraintSpec? {
     None => return None
   }
   let table_key = constraint_table_key(tokens, start, i)
+  if nullability_action(tokens, i) is Some(tightening) {
+    return Some({ table_key, action: Nullability(tightening), })
+  }
   if word(tokens, i, "VALIDATE") &&
     word(tokens, i + 1, "CONSTRAINT") &&
     i + 3 == tokens.length() &&
@@ -150,6 +154,10 @@ fn review_constraint(
   number : Int32,
 ) -> String {
   match spec.action {
+    Nullability(tightening) => {
+      held_tables[spec.table_key] = true
+      review_nullability(tightening, output, part, number)
+    }
     AttachIndex(primary) => {
       held_tables[spec.table_key] = true
       finding(
