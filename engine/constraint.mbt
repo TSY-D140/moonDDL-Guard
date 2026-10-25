@@ -2,6 +2,7 @@
 priv enum ConstraintAction {
   AddCheck(Bool)
   Validate
+  AttachIndex(Bool)
 }
 
 ///|
@@ -83,13 +84,41 @@ fn constraint_spec(part : Segment) -> ConstraintSpec? {
   if word(tokens, i, "VALIDATE") &&
     word(tokens, i + 1, "CONSTRAINT") &&
     i + 3 == tokens.length() &&
-    is_identifier(tokens[i + 2]) {
+    is_identifier(tokens[i + 2]) &&
+    !tokens[i + 2].text.is_empty() {
     return Some({ table_key, action: Validate, })
+  }
+  if word(tokens, i, "ADD") &&
+    word(tokens, i + 1, "CONSTRAINT") &&
+    i + 3 < tokens.length() &&
+    is_identifier(tokens[i + 2]) &&
+    !tokens[i + 2].text.is_empty() {
+    let mut end = i + 3
+    let merged_primary = tokens[end].token_type == @syntax.PRIMARY_KEY
+    let primary = merged_primary ||
+      (word(tokens, end, "PRIMARY") && word(tokens, end + 1, "KEY"))
+    let unique = word(tokens, end, "UNIQUE")
+    if merged_primary {
+      end += 1
+    } else if primary {
+      end += 2
+    } else if unique {
+      end += 1
+    }
+    if (primary || unique) &&
+      word(tokens, end, "USING") &&
+      word(tokens, end + 1, "INDEX") &&
+      end + 3 == tokens.length() &&
+      is_identifier(tokens[end + 2]) &&
+      !tokens[end + 2].text.is_empty() {
+      return Some({ table_key, action: AttachIndex(primary), })
+    }
   }
   if !word(tokens, i, "ADD") ||
     !word(tokens, i + 1, "CONSTRAINT") ||
     i + 4 >= tokens.length() ||
     !is_identifier(tokens[i + 2]) ||
+    tokens[i + 2].text.is_empty() ||
     !word(tokens, i + 3, "CHECK") {
     return None
   }
@@ -121,6 +150,52 @@ fn review_constraint(
   number : Int32,
 ) -> String {
   match spec.action {
+    AttachIndex(primary) => {
+      held_tables[spec.table_key] = true
+      finding(
+        output,
+        part,
+        number,
+        "PG407",
+        Warning,
+        "Attaching an index-backed constraint takes ACCESS EXCLUSIVE until transaction end.",
+        "Budget the cutover lock and commit promptly; concurrent index construction does not make the attachment lock-free.",
+      )
+      finding(
+        output,
+        part,
+        number,
+        "PG408",
+        Advisory,
+        "The existing index's eligibility and validity have not been inspected.",
+        "Verify a valid eligible unique B-tree on this table, with default ordering, no predicate or expression keys, and no existing constraint ownership; partitioned tables are unsupported by PostgreSQL for this form.",
+      )
+      finding(
+        output,
+        part,
+        number,
+        "PG409",
+        Advisory,
+        "The constraint takes ownership of the index and can rename it; dropping the constraint also drops that index.",
+        "Inspect dependencies and update cleanup/rollback plans before attaching; do not subsequently remove it as an independent index.",
+      )
+      if primary {
+        finding(
+          output,
+          part,
+          number,
+          "PG410",
+          Warning,
+          "PRIMARY KEY attachment can need NOT NULL validation scans for nullable key columns.",
+          "Inspect key-column nullability and existing data before cutover; do not assume a prebuilt unique index removes that scan.",
+        )
+      }
+      if primary {
+        "attach_primary_key"
+      } else {
+        "attach_unique_constraint"
+      }
+    }
     AddCheck(not_valid) => {
       held_tables[spec.table_key] = true
       finding(
@@ -185,8 +260,8 @@ fn review_constraint(
           number,
           "PG405",
           Warning,
-          "An earlier CHECK addition may retain ACCESS EXCLUSIVE during this validation.",
-          "Commit the ADD phase before validation, and submit phases separately; validation does not release an earlier stronger lock.",
+          "An earlier assessed table change may retain ACCESS EXCLUSIVE during this validation.",
+          "Commit the blocking phase before validation and submit phases separately; validation does not release an earlier stronger lock.",
         )
       }
       "validate_constraint"

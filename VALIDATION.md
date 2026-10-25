@@ -72,3 +72,7 @@ For this capability's remote runtime evidence, use the Actions run attached to i
 ## Savepoint scope (0.10.0)
 
 57 groups pass on Wasm, Wasm-GC and JavaScript, covering prior behavior plus duplicate-name shadowing, release/rollback differences, timeout restoration, strong-lock lifetime, 64-point and 63-byte identifier boundaries, unknown/inherited scopes and error recovery. The file CLI example checks 100ms before rollback and 2000ms afterward. Strict all-target compilation and interface generation pass on the pinned toolchain; Windows-native and PostgreSQL-server integration remain unverified.
+
+## Index-backed constraint attachment (0.11.0)
+
+61 groups cover concurrent-build/cutover separation, UNIQUE versus PRIMARY KEY conditions, ownership/catalog preconditions, quoted identifiers, explicit/implicit transactions and strong-lock release at commit/savepoint rollback. Empty quoted identifiers and unsupported suffixes are rejected without dropping SQL. The attachment CLI specimen retains its 1000ms budget and reports the cutover lock. Formatting, interface regeneration, strict all-target compilation and portable target tests use the pinned compiler/core.

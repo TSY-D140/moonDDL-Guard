@@ -96,5 +96,10 @@ async fn main {
   guard @json.parse(point.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected complete savepoint review") }
   assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 100ms for this index."), .. }).length(), 1)
   assert_eq(findings.filter(f => f is { "code": String("PG305"), "message": String("Effective lock_timeout is 2000ms for this index."), .. }).length(), 1)
+  let attachment = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/attach-unique.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+  assert_eq(attachment.exit_code(), 1)
+  guard @json.parse(attachment.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected complete attachment review") }
+  assert_eq(findings.filter(f => f is { "code": String("PG407"), .. }).length(), 1)
+  assert_eq(findings.filter(f => f is { "code": String("PG409"), .. }).length(), 1)
   println("Migration specimens, portable reports and baseline gates passed.")
 }

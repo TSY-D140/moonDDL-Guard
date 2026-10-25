@@ -185,9 +185,15 @@ fn TimeoutTracker::at_index(
         Advisory,
         "Effective \{self.parameter} is \{ms}ms for this \{subject}.",
         if self.parameter == "lock_timeout" {
-          "This bounds each lock acquisition wait, not the index build's total duration."
-        } else {
+          if subject == "index" {
+            "This bounds each lock acquisition wait, not the index build's total duration."
+          } else {
+            "This bounds each lock acquisition wait, not the statement's total duration."
+          }
+        } else if subject == "index" {
           "This bounds the statement, including build work; a timeout may abort a concurrent index build."
+        } else {
+          "This bounds the statement; budget its work and plan transaction recovery if a timeout occurs."
         },
       )
     _ =>

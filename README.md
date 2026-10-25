@@ -79,6 +79,6 @@ Version 0.7.0 adds [staged CHECK validation review](handbook/constraints.md), in
 
 Planned: additional PostgreSQL versions, broader constraint operations and database integration tests.
 
-The current release is 0.10.0. It exports [SARIF reports](handbook/sarif.md) through `Review::to_sarif` / `--sarif`, and supports [baseline comparison](handbook/baselines.md) through `compare_reviews` / `--baseline=REPORT`. Baselines never suppress incomplete current analysis. Reports and comparisons can both be persisted and strictly replayed. [Savepoint-aware review](handbook/savepoints.md) restores timeout values and tracked table locks after partial rollback.
+The current release is 0.11.0. It exports [SARIF reports](handbook/sarif.md) through `Review::to_sarif` / `--sarif`, and supports [baseline comparison](handbook/baselines.md) through `compare_reviews` / `--baseline=REPORT`. Baselines never suppress incomplete current analysis. Reports and comparisons can both be persisted and strictly replayed. [Savepoint-aware review](handbook/savepoints.md) restores timeout values and tracked table locks after partial rollback. [Index-backed constraint attachment](handbook/attachment.md) adds cutover-lock, catalog-eligibility, ownership and PRIMARY KEY scan preconditions.
 
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).

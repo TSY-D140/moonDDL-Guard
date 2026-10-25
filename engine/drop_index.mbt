@@ -8,13 +8,17 @@ priv struct DropIndexSpec {
 
 ///|
 fn qualified_name_end(tokens : Array[@syntax.Token], start : Int32) -> Int32? {
-  if start >= tokens.length() || !is_identifier(tokens[start]) {
+  if start >= tokens.length() ||
+    !is_identifier(tokens[start]) ||
+    tokens[start].text.is_empty() {
     return None
   }
   let mut i = start + 1
   if i < tokens.length() && tokens[i].token_type == @syntax.DOT {
     i += 1
-    if i >= tokens.length() || !is_identifier(tokens[i]) {
+    if i >= tokens.length() ||
+      !is_identifier(tokens[i]) ||
+      tokens[i].text.is_empty() {
       return None
     }
     i += 1

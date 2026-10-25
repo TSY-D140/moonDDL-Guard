@@ -8,6 +8,8 @@
 
 ## Rule references
 
+Index-backed UNIQUE/PRIMARY KEY attachment follows PostgreSQL 18 ALTER TABLE, including ownership transfer, catalog eligibility, partition restrictions and nullable-key scans. Exact links and search limitations are in handbook/attachment.md; new code, examples and tests are project-owned Apache-2.0.
+
 Savepoint handling follows PostgreSQL 18 SAVEPOINT, ROLLBACK TO, RELEASE SAVEPOINT, the multi-statement protocol and lock-lifetime documentation linked in handbook/savepoints.md. Implementation and tests are project-owned Apache-2.0, without copied upstream code. The existing review layer remains complementary to schema-plan and migrate; this adds no schema generation or migration execution.
 
 - PostgreSQL 18 CREATE INDEX: https://www.postgresql.org/docs/18/sql-createindex.html . Ordinary index builds block writes; IF NOT EXISTS is not a definition/validity check; uniqueness is a database-state precondition.
