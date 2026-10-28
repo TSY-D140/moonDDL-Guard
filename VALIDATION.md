@@ -95,3 +95,7 @@ One local all-target invocation stopped while checking SQLGlot without a source 
 - Remote main was `15aaa7c9290a3e385091f50477adf420a2b112ec` when checked before the new push. Remote CI/author association and hash synchronization for this revision remain pending until an authorized push.
 
 New rule code, tests, semantic harness and illustrative fixtures are project-owned Apache-2.0; upstream Umami fixtures and their MIT notice are unchanged. The reproducibility matrix is in `handbook/coverage.md`, and the concise updated application is in `handbook/registration.md`.
+
+### PostgreSQL CI bootstrap correction
+
+The authorized push of `a55a46f7d568ba7a03a384af9b8e85e1494f1208` synchronized remote main and GitHub associated both author and committer with TSY-D140. [Run 40717449664](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/40717449664) started its PostgreSQL 18.6 service successfully, but the new standalone job lacked `moon update`: its fresh registry could not resolve `moonbitlang/async`, so no SQL checks ran. The job now initializes the registry explicitly, matching the portable job. This fixes CI dependency bootstrap; actual semantic checks still need a successful rerun.

@@ -65,6 +65,7 @@ jobs:
         with:
           version: 0.10.17+d971670cd
           core-version: 0.10.17+d971670cd
+      - run: moon update
       - run: sudo apt-get update
       - run: sudo apt-get install -y postgresql-client
       - run: psql --version
