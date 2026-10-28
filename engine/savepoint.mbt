@@ -10,7 +10,7 @@ priv struct SavepointFrame {
   name : String
   lock : TimeoutTracker
   statement : TimeoutTracker
-  held : Map[String, Bool]
+  held : Map[String, HeldTableLock]
 }
 
 ///|
@@ -82,7 +82,7 @@ fn apply_savepoint(
   transaction : Transaction,
   lock : TimeoutTracker,
   statement : TimeoutTracker,
-  held : Map[String, Bool],
+  held : Map[String, HeldTableLock],
 ) -> String? {
   // Implicit Simple Query blocks do not allow savepoints.
   if transaction != Active {

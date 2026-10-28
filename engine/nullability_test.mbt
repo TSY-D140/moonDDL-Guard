@@ -82,7 +82,7 @@ test "unsupported nullability options malformed names and extra ALTER actions ar
     sql in [
       "ALTER TABLE t ALTER COLUMN a SET NOT NULL NOT VALID;", "ALTER TABLE t ALTER COLUMN a SET NOT NULL, ALTER COLUMN b SET NOT NULL;",
       "ALTER TABLE IF EXISTS t ALTER a SET NOT NULL;", "ALTER TABLE t ALTER a DROP NOT NULL CASCADE;",
-      "ALTER TABLE t ALTER a SET NULL;", "ALTER TABLE t ALTER a SET DEFAULT NULL;",
+      "ALTER TABLE t ALTER a SET NULL;", "ALTER TABLE t ALTER a SET DEFAULT custom();",
       "ALTER TABLE t ALTER \"\" SET NOT NULL;", "ALTER TABLE t ALTER a SET NOT;",
       "ALTER TABLE t ALTER a SET NOT NULL trailing;",
     ] {

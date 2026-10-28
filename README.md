@@ -1,8 +1,20 @@
 # MoonDDL Guard
 
-Static preflight for PostgreSQL index and constraint migrations, exposed as a MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it.
+Static preflight for PostgreSQL migration SQL, exposed as a reusable MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it, preserving source locations, unsupported input and catalog conditions that need human verification.
 
-The current profile targets PostgreSQL 18 named B-tree `CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]` statements, including a bounded expression/predicate subset and `INCLUDE` columns. It reports write blocking, transaction incompatibility, expression immutability, conditional uniqueness and unchecked database preconditions. Explicit `lock_timeout` / `statement_timeout` settings are tracked through session, transaction-local, commit and rollback scopes. Every unsupported statement is retained and prevents a complete verdict.
+The current release is **0.13.0**, with a bounded PostgreSQL **18** rule profile:
+
+| Workflow | Implemented review |
+| --- | --- |
+| [Indexes](handbook/indexes.md), [replacement/removal](handbook/removal.md) | Named B-tree CREATE/DROP, concurrent transaction restrictions, expression/partial/covering indexes and catalog preconditions |
+| [Foreign keys](handbook/foreign-keys.md) | Immediate versus NOT VALID rollout, locks on both tables, referential actions and retained write-blocking locks during validation |
+| [CHECK](handbook/constraints.md), [NOT NULL](handbook/nullability.md), [index attachment](handbook/attachment.md) | Scans, strong-lock retention, existing-index ownership/eligibility and integrity conditions |
+| [Column changes and rewrites](handbook/column-changes.md) | Type/USING conversion risks; constant, stable and volatile ADD defaults; unknown domains; future-default versus backfill distinction |
+| [Destructive DDL](handbook/destructive.md) | DROP TABLE/COLUMN/CONSTRAINT, dependency CASCADE, owned-index loss, TRUNCATE data/identity/trigger effects |
+| [Execution context](handbook/execution.md), [timeouts](handbook/timeouts.md), [savepoints](handbook/savepoints.md) | Explicit/implicit transactions, lock/statement budgets, partial rollback of settings and tracked lock classes |
+| [Reporting](handbook/sarif.md), [baseline gates](handbook/baselines.md) | Deterministic text/JSON/SARIF, strict full-report/delta replay, occurrence-aware new-risk gates |
+
+Every unsupported statement or clause is retained and prevents a complete verdict. No SQL is rewritten or executed. The [coverage and reproducibility matrix](handbook/coverage.md) maps the implemented workflows to tests and commands.
 
 ## Run
 
@@ -18,6 +30,9 @@ moon run engine/cli -- specimens/transaction.sql --transaction=autocommit --deli
 moon run engine/cli -- specimens/advanced.sql --transaction=autocommit --delivery=statements
 moon run engine/cli -- specimens/bounded-lock.sql --transaction=autocommit --delivery=statements
 moon run engine/cli -- specimens/local-timeout.sql --transaction=autocommit --delivery=statements
+moon run engine/cli -- specimens/foreign-key-phases.sql --transaction=autocommit --delivery=statements
+moon run engine/cli -- specimens/column-changes.sql --transaction=autocommit --delivery=statements --json
+moon run engine/cli -- specimens/destructive.sql --transaction=autocommit --delivery=statements --sarif
 moon run checks/examples.mbtx
 ```
 
@@ -67,9 +82,9 @@ moon run engine/cli -- review.json --replay --json
 
 Both commands return 1 for the Umami specimen's ordinary-index risks. `decode_report` and `--replay` recompute the current rule profile from the retained SQL/context and require the whole report to match. Unknown or missing fields, duplicate JSON keys (including escaped duplicates), changed diagnostics and unsupported versions are rejected. This is deterministic replay, not a signature or proof of authorship. Use the producing release when replaying historical reports whose rules differ.
 
-The [Umami specimens](specimens/upstream/README.md) are real, unmodified, commit-pinned SQL with their MIT license. The 17-index migration yields 17 PG101 findings. A second mixed migration remains incomplete and still reports its final supported indexes. The executable `.mbtx` check verifies these CLI behaviors and persisted-report round trips without a database.
+The [Umami specimens](specimens/upstream/README.md) are real, unmodified, commit-pinned SQL with their MIT license. The 17-index migration yields 17 PG101 findings. A second mixed migration now also diagnoses its VARCHAR addition and two dropped columns, while UPDATE/RENAME remain incomplete. The executable `.mbtx` check verifies these CLI behaviors and persisted-report round trips without a database. New order-service examples are project-owned illustrative SQL, clearly identified as such.
 
-Limits: 262144 UTF-16 source code units, 512 executable statements, 256 tokens per assessed index, 32 nested key-expression parentheses, 32 total key/payload columns (standard PostgreSQL build), and 8388608 UTF-16 code units for report decoding. Larger/unsupported input receives an explicit incomplete/error result; SQL is never truncated or rewritten.
+Limits: 262144 UTF-16 source code units, 512 executable statements, 256 tokens per assessed index/table-change statement, 32 nested expression parentheses, 32 index key/payload columns or foreign-key columns, 32 DROP/TRUNCATE targets, and 8388608 UTF-16 code units for report decoding. Tracked relation/schema names are limited to 63 UTF-8 bytes per identifier: server-side truncation must not create an untracked lock alias. Larger/unsupported input receives an explicit incomplete/error result; SQL is never truncated or rewritten.
 
 Version 0.5.0 assesses `SET [SESSION|LOCAL] lock_timeout|statement_timeout` with a deliberately bounded exact-duration grammar. It reports ineffective LOCAL settings, disabled/unknown budgets and conflicting lock/statement budgets. Settings apply to subsequent statements on the same session; no inherited default is assumed. Read [timeout scope and runnable examples](handbook/timeouts.md) for supported conversions, limits and diagnostics.
 
@@ -77,8 +92,10 @@ Version 0.6.0 also reviews index replacement/removal: [DROP INDEX workflow](hand
 
 Version 0.7.0 adds [staged CHECK validation review](handbook/constraints.md), including the stronger-lock retention hazard when ADD and VALIDATE share a transaction or Simple Query message.
 
-Planned: additional PostgreSQL versions, broader constraint operations and database integration tests.
+Planned: additional PostgreSQL versions, broader expression/ALTER profiles and optional catalog evidence. These are not implemented promises of complete SQL coverage.
 
-The current release is 0.12.0. It exports [SARIF reports](handbook/sarif.md) through `Review::to_sarif` / `--sarif`, and supports [baseline comparison](handbook/baselines.md) through `compare_reviews` / `--baseline=REPORT`. Baselines never suppress incomplete current analysis. Reports and comparisons can both be persisted and strictly replayed. [Savepoint-aware review](handbook/savepoints.md) restores timeout values and tracked table locks after partial rollback. [Index-backed constraint attachment](handbook/attachment.md) adds cutover-lock, catalog-eligibility, ownership and PRIMARY KEY scan preconditions. [Column nullability review](handbook/nullability.md) assesses SET/DROP NOT NULL without fabricating a no-scan catalog proof.
+The reusable API remains unchanged in 0.13.0; new statement operations and diagnostics extend the rule profile. `Review::to_sarif` / `--sarif` and `compare_reviews` / `--baseline=REPORT` cover the new operations too. Strict replay recomputes current rules: reports produced by an older release may need that release or regeneration. Baselines never suppress incomplete current analysis.
+
+Optional PostgreSQL 18 semantic checks are provided in `checks/postgres.mbtx` and a dedicated CI job. They require `psql`, standard PG connection environment variables and an isolated database named `moonddl_guard_test`. The script refuses an existing `moonddl_guard_probe` schema, owns its test objects and removes them after checks. `--check-only` compiles the script without contacting a server. See [verification instructions and actual limits](handbook/coverage.md); script compilation alone is not a successful database integration run.
 
 Apache-2.0. Third-party dependency and fixture terms are recorded in [SOURCES.md](SOURCES.md).

@@ -22,6 +22,9 @@ async fn main {
   assert_eq(mixed.exit_code(), 2)
   guard @json.parse(mixed.stdout()) is { "statements": Array(statements), "complete": False, .. } else { fail("Expected incomplete mixed migration") }
   assert_eq(statements.length(), 9)
+  assert_true(statements[0] is { "operation": String("add_column"), "coverage": String("Analyzed"), .. })
+  assert_true(statements[5] is { "operation": String("drop_column"), "coverage": String("Analyzed"), .. })
+  assert_true(statements[6] is { "operation": String("drop_column"), "coverage": String("Analyzed"), .. })
   let advanced = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/advanced.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
   assert_eq(advanced.exit_code(), 1)
   guard @json.parse(advanced.stdout()) is { "complete": True, "findings": Array(findings), .. } else { fail("Expected assessed advanced indexes") }
@@ -109,5 +112,28 @@ async fn main {
     assert_eq(findings.filter(f => f is { "code": String("PG405"), .. }).length(), if delivery == "simple-query" { 1 } else { 0 })
     assert_eq(findings.filter(f => f is { "code": String("PG305"), .. }).length(), 3)
   }
+  for (file, required) in [
+    ("specimens/foreign-key-phases.sql", ["PG415", "PG417", "PG418", "PG422"]),
+    ("specimens/column-changes.sql", ["PG501", "PG502", "PG503", "PG505", "PG506", "PG508", "PG509", "PG510", "PG512"]),
+    ("specimens/destructive.sql", ["PG601", "PG602", "PG603", "PG605", "PG606", "PG607"]),
+  ] {
+    let mut previous : Json? = None
+    for target in ["wasm", "wasm-gc", "js"] {
+      let result = @shell.Cmd("moon", ["run", "--target", target, "engine/cli", "--", file, "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+      assert_eq(result.exit_code(), 1)
+      let report = @json.parse(result.stdout())
+      guard report is { "complete": True, "findings": Array(findings), .. } else { fail("Incomplete new workflow: " + file) }
+      for code in required { assert_true(findings.any(f => f is { "code": String(id), .. } && id == code), msg=file + ": " + code) }
+      match previous { None => previous = Some(report); Some(old) => assert_eq(old, report) }
+      @fs.write_string_to_file("_build/expanded-review.json", result.stdout())
+      let replay = @shell.Cmd("moon", ["run", "--target", target, "engine/cli", "--", "_build/expanded-review.json", "--replay", "--json"]).output()
+      assert_eq(replay.exit_code(), 1)
+      assert_eq(@json.parse(replay.stdout()), report)
+    }
+  }
+  let grouped_fk = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/foreign-key-phases.sql", "--json", "--transaction=autocommit", "--delivery=simple-query"]).output()
+  assert_eq(grouped_fk.exit_code(), 1)
+  guard @json.parse(grouped_fk.stdout()) is { "findings": Array(fk_findings), .. } else { fail("Missing FK results") }
+  assert_true(fk_findings.any(f => f is { "code": String("PG421"), .. }))
   println("Migration specimens, portable reports and baseline gates passed.")
 }

@@ -36,3 +36,36 @@ jobs:
         run: moon run --deny-warn checks/sarif-schema.mbtx
       - if: runner.os != 'Windows'
         run: moon test --target native --deny-warn
+  postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: moonddl_guard_test
+        ports:
+          - 15432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d moonddl_guard_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 15432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: moonddl_guard_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hustcer/setup-moonbit@v1
+        with:
+          version: 0.10.17+d971670cd
+          core-version: 0.10.17+d971670cd
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y postgresql-client
+      - run: psql --version
+      - run: moon run --deny-warn checks/postgres.mbtx

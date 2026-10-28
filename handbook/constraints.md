@@ -2,7 +2,7 @@
 
 PG405 also covers a retained strong lock from an assessed [index attachment](attachment.md) or [column nullability change](nullability.md). Savepoint rollback restores the tracked lock set. This chapter describes CHECK-specific input; those other ALTER forms have their own bounded profiles.
 
-Supported input is a single `ALTER TABLE [ONLY] table ADD CONSTRAINT name CHECK (predicate) [NOT VALID]` action or `ALTER TABLE [ONLY] table VALIDATE CONSTRAINT name`. Names may be quoted and schema-qualified (constraint names are unqualified). Statements are bounded to 256 tokens, predicate nesting to 32; the predicate uses the same bounded scalar subset as index predicates. Foreign-key additions, unnamed checks, multiple actions, NO INHERIT, NOT ENFORCED, IF EXISTS and other ALTER clauses remain incomplete.
+Supported input is a single `ALTER TABLE [ONLY] table ADD CONSTRAINT name CHECK (predicate) [NOT VALID]` action or `ALTER TABLE [ONLY] table VALIDATE CONSTRAINT name`. Names may be quoted and schema-qualified (constraint names are unqualified). Statements are bounded to 256 tokens, predicate nesting to 32; the predicate uses the same bounded scalar subset as index predicates. Foreign-key additions have a separate [supported profile](foreign-keys.md). Unnamed checks, multiple actions, NO INHERIT, NOT ENFORCED, IF EXISTS and other ALTER clauses remain incomplete.
 
 The workflow identifies the ADD phase's ACCESS EXCLUSIVE lock (PG401), immediate scans (PG402), deferred verification of old rows (PG403), validation's SHARE UPDATE EXCLUSIVE lock and catalog/data preconditions (PG404). CHECK passes on true or null, and function/operator types and immutability are unverified (PG406); a positive-value check is not a non-null guarantee.
 

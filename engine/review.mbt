@@ -65,7 +65,7 @@ pub fn review_sql(
     return { source, transaction, delivery, statements, findings, }
   }
   let mut opened_here = false
-  let held_tables : Map[String, Bool] = Map([])
+  let held_tables : Map[String, HeldTableLock] = Map([])
   let savepoints : Array[SavepointFrame] = []
   let implicit_batch = delivery == SimpleQuery && parts.length() > 1
   let lock_budget = new_timeout("lock_timeout", transaction, implicit_batch)
@@ -117,6 +117,14 @@ pub fn review_sql(
     } else if constraint_spec(part) is Some(spec) {
       coverage = Analyzed
       operation = review_constraint(spec, held_tables, findings, part, number)
+      lock_budget.at_index(findings, part, number, subject="statement")
+      statement_budget.at_index(findings, part, number, subject="statement")
+      timeout_relationship(
+        lock_budget, statement_budget, findings, part, number,
+      )
+    } else if removal_tables(part.tokens) is Some(spec) {
+      coverage = Analyzed
+      operation = review_removal(spec, held_tables, findings, part, number)
       lock_budget.at_index(findings, part, number, subject="statement")
       statement_budget.at_index(findings, part, number, subject="statement")
       timeout_relationship(
@@ -321,7 +329,7 @@ pub fn review_sql(
         number,
         "PG002",
         Error,
-        "Statement is outside the supported B-tree index/transaction profile.",
+        "Statement or clause is outside the supported PostgreSQL migration review profile.",
         "Retain this SQL for manual review; unsupported input cannot receive a complete verdict.",
       )
     }

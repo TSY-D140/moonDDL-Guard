@@ -1,9 +1,18 @@
 ///|
+priv enum HeldTableLock {
+  AccessExclusive
+  ShareRowExclusive
+}
+
+///|
 priv enum ConstraintAction {
   AddCheck(Bool)
   Validate
   AttachIndex(Bool)
   Nullability(Bool)
+  ForeignKey(ForeignKeySpec)
+  ColumnChange(ColumnAction)
+  RemoveMember(RemovalSpec)
 }
 
 ///|
@@ -44,6 +53,23 @@ fn constraint_table_key(
 }
 
 ///|
+// Reject server-side truncation rather than treating distinct lexical names as
+// proven different lock targets. Standard PostgreSQL builds use 63 UTF-8 bytes.
+fn tracked_relation_end(tokens : Array[@syntax.Token], start : Int32) -> Int32? {
+  let end = match qualified_name_end(tokens, start) {
+    Some(end) => end
+    None => return None
+  }
+  for i in start..<end {
+    if tokens[i].token_type != @syntax.DOT &&
+      @utf8.encode(tokens[i].text).length() > 63 {
+      return None
+    }
+  }
+  Some(end)
+}
+
+///|
 fn check_predicate_supported(
   part : Segment,
   start : Int32,
@@ -77,11 +103,31 @@ fn constraint_spec(part : Segment) -> ConstraintSpec? {
     return None
   }
   let start = if word(tokens, 2, "ONLY") { 3 } else { 2 }
-  let mut i = match qualified_name_end(tokens, start) {
+  let mut i = match tracked_relation_end(tokens, start) {
     Some(end) => end
     None => return None
   }
   let table_key = constraint_table_key(tokens, start, i)
+  if removal_member(tokens, i, table_key) is Some(spec) {
+    return Some({ table_key, action: RemoveMember(spec), })
+  }
+  if column_action(part, i) is Some(action) {
+    return Some({ table_key, action: ColumnChange(action), })
+  }
+  if word(tokens, i, "ADD") {
+    let mut foreign_start = i + 1
+    if word(tokens, foreign_start, "CONSTRAINT") {
+      if foreign_start + 1 >= tokens.length() ||
+        !is_identifier(tokens[foreign_start + 1]) ||
+        tokens[foreign_start + 1].text.is_empty() {
+        return None
+      }
+      foreign_start += 2
+    }
+    if foreign_key_spec(tokens, foreign_start) is Some(spec) {
+      return Some({ table_key, action: ForeignKey(spec), })
+    }
+  }
   if nullability_action(tokens, i) is Some(tightening) {
     return Some({ table_key, action: Nullability(tightening), })
   }
@@ -148,18 +194,33 @@ fn constraint_spec(part : Segment) -> ConstraintSpec? {
 ///|
 fn review_constraint(
   spec : ConstraintSpec,
-  held_tables : Map[String, Bool],
+  held_tables : Map[String, HeldTableLock],
   output : Array[Finding],
   part : Segment,
   number : Int32,
 ) -> String {
   match spec.action {
+    RemoveMember(removal) =>
+      review_removal(removal, held_tables, output, part, number)
+    ColumnChange(action) => {
+      held_tables[spec.table_key] = AccessExclusive
+      review_column(action, output, part, number)
+    }
+    ForeignKey(foreign) =>
+      review_foreign_key(
+        foreign,
+        spec.table_key,
+        held_tables,
+        output,
+        part,
+        number,
+      )
     Nullability(tightening) => {
-      held_tables[spec.table_key] = true
+      held_tables[spec.table_key] = AccessExclusive
       review_nullability(tightening, output, part, number)
     }
     AttachIndex(primary) => {
-      held_tables[spec.table_key] = true
+      held_tables[spec.table_key] = AccessExclusive
       finding(
         output,
         part,
@@ -205,7 +266,7 @@ fn review_constraint(
       }
     }
     AddCheck(not_valid) => {
-      held_tables[spec.table_key] = true
+      held_tables[spec.table_key] = AccessExclusive
       finding(
         output,
         part,
@@ -261,7 +322,7 @@ fn review_constraint(
         "Constraint validation may scan existing rows with SHARE UPDATE EXCLUSIVE.",
         "Verify existence, enforcement, type and data; inspect inherited locks, table descendants and schema/search_path resolution. Validation is a no-op when already valid.",
       )
-      if held_tables.contains(spec.table_key) {
+      if held_tables.get(spec.table_key) is Some(AccessExclusive) {
         finding(
           output,
           part,
@@ -272,6 +333,26 @@ fn review_constraint(
           "Commit the blocking phase before validation and submit phases separately; validation does not release an earlier stronger lock.",
         )
       }
+      if held_tables.get(spec.table_key) is Some(ShareRowExclusive) {
+        finding(
+          output,
+          part,
+          number,
+          "PG421",
+          Warning,
+          "An earlier assessed foreign-key ADD may retain SHARE ROW EXCLUSIVE during validation.",
+          "Commit the ADD phase before validation; validation's weaker lock does not release either table's earlier write-blocking lock.",
+        )
+      }
+      finding(
+        output,
+        part,
+        number,
+        "PG422",
+        Advisory,
+        "If this is a foreign key, validation also requires ROW SHARE on its referenced table.",
+        "Inspect the actual constraint type and referenced table; pre-existing constraint metadata is not inferred from SQL text.",
+      )
       "validate_constraint"
     }
   }

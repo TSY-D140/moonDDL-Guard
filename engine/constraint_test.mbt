@@ -96,7 +96,7 @@ test "CHECK predicate bounds malformed and unknown clauses are preserved" {
     tail in [
       "CHECK ()", "CHECK (a > 0", "CHECK (custom(a))", "CHECK (EXISTS (SELECT 1))",
       "CHECK (a > 0) NOT ENFORCED", "CHECK (a > 0) NO INHERIT", "CHECK (a > 0), ADD COLUMN b int",
-      "FOREIGN KEY (a) REFERENCES t(a) NOT VALID", "CHECK (a::int > 0)", "CHECK (a > 0) BOGUS",
+      "FOREIGN KEY () REFERENCES t(a) NOT VALID", "CHECK (a::int > 0)", "CHECK (a > 0) BOGUS",
     ] {
     let sql = "ALTER TABLE t ADD CONSTRAINT c " + tail + ";"
     let r = check_review(sql)
