@@ -2,7 +2,7 @@
 
 Static preflight for PostgreSQL migration SQL, exposed as a reusable MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it, preserving source locations, unsupported input and catalog conditions that need human verification.
 
-The current release is **0.16.0**, with a bounded PostgreSQL **18** rule profile:
+The current release is **0.17.0**, with a bounded PostgreSQL **18** rule profile:
 
 | Workflow | Implemented review |
 | --- | --- |
@@ -14,6 +14,7 @@ The current release is **0.16.0**, with a bounded PostgreSQL **18** rule profile
 | [Renames](handbook/renames.md) | Table/column/constraint/index compatibility and lock risks, table-name lock transfer and savepoint recovery |
 | [Data migrations](handbook/data-migrations.md) | UPDATE/FROM, DELETE/USING, missing restrictions, join multiplicity, retained DDL locks, bounded SELECT CTE workflows and RETURNING |
 | [Direct key constraints](handbook/direct-keys.md) | Blocking UNIQUE/PRIMARY KEY builds, NULLS NOT DISTINCT, old-data/nullability and deferrability conditions |
+| [Generated columns](handbook/generated-columns.md) | Identity/serial/stored rewrites, virtual generation, existing generation changes and UUID-default distinctions |
 | [Execution context](handbook/execution.md), [timeouts](handbook/timeouts.md), [savepoints](handbook/savepoints.md) | Explicit/implicit transactions, lock/statement budgets, partial rollback of settings and tracked lock classes |
 | [Reporting](handbook/sarif.md), [baseline gates](handbook/baselines.md) | Deterministic text/JSON/SARIF, strict full-report/delta replay, occurrence-aware new-risk gates |
 

@@ -40,6 +40,8 @@ Data-migration analysis and the limited-SELECT-CTE profile follow PostgreSQL 18 
 
 Direct key-constraint rules follow PostgreSQL 18 ALTER TABLE and CREATE TABLE, including NULLS DISTINCT/NOT DISTINCT, primary-key requirements and deferrable/ON CONFLICT conditions. The rule, tests, fixture and live-server assertions are project-owned Apache-2.0; no upstream implementation/test code is copied.
 
+Generated/identity/serial and generation-transition rules follow PostgreSQL 18 ALTER TABLE, CREATE TABLE and UUID Functions, checked 2026-10-30. PostgreSQL 18 defaults generated storage to VIRTUAL; stored/identity additions and volatile UUID defaults have different rewrite behavior from changing existing identity/default metadata. New rule code, tests, server assertions and specimen are project-owned Apache-2.0; no upstream implementation/tests are copied.
+
 ## Upstream specimens and verification tooling
 
 Baseline comparison and its property tests are project-owned Apache-2.0 code. The end-to-end check copies the licensed Umami SQL to _build and appends a project-owned example to verify new-finding gating; the original fixture is retained unmodified.

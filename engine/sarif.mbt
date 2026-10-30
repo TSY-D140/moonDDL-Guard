@@ -137,6 +137,12 @@ fn sarif_rules() -> Array[Json] {
     ("PG510", "Type conversion and data loss"),
     ("PG511", "Type change dependencies and statistics"),
     ("PG512", "Future default is not a backfill"),
+    ("PG514", "Generated or sequence column rewrite"),
+    ("PG515", "Identity and serial sequence contract"),
+    ("PG516", "Virtual generated column conditions"),
+    ("PG517", "Existing identity behavior change"),
+    ("PG518", "Generated expression replacement"),
+    ("PG519", "Generated expression removal"),
     ("PG601", "Destructive operation strong lock"),
     ("PG602", "Table or column data removal"),
     ("PG603", "Destructive cascade"),
@@ -225,7 +231,7 @@ pub fn Review::to_sarif(
         "tool": {
           "driver": {
             "name": "MoonDDL Guard",
-            "semanticVersion": "0.16.0",
+            "semanticVersion": "0.17.0",
             "informationUri": "https://github.com/TSY-D140/moonDDL-Guard",
             "rules": Json(sarif_rules()),
           },

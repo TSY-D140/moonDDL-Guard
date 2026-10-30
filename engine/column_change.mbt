@@ -11,6 +11,8 @@ priv enum ColumnAction {
   AddColumn(DefaultKind, Bool, Bool, Bool) // default, NOT NULL, builtin type, IF NOT EXISTS
   ChangeType(Bool) // USING present; old type is intentionally unknown
   ChangeDefault(Bool) // set rather than drop
+  AddGeneratedColumn(GeneratedColumnSpec)
+  ChangeGeneration(GenerationChange)
 }
 
 ///|
@@ -163,13 +165,16 @@ fn default_kind(
   let name = tokens[start].text.to_upper()
   if [
       "NOW", "TRANSACTION_TIMESTAMP", "STATEMENT_TIMESTAMP", "CLOCK_TIMESTAMP", "RANDOM",
+      "GEN_RANDOM_UUID", "UUIDV4", "UUIDV7",
     ].contains(name) &&
     word(tokens, start, name) &&
     start + 3 == end &&
     tokens[start + 1].token_type == @syntax.L_PAREN &&
     tokens[start + 2].token_type == @syntax.R_PAREN {
     return Some(
-      if name == "CLOCK_TIMESTAMP" || name == "RANDOM" {
+      if ["CLOCK_TIMESTAMP", "RANDOM", "GEN_RANDOM_UUID", "UUIDV4", "UUIDV7"].contains(
+          name,
+        ) {
         VolatileDefault
       } else {
         StableDefault
@@ -235,11 +240,27 @@ fn column_action(part : Segment, start : Int32) -> ColumnAction? {
       return None
     }
     i += 1
+    if word(tokens, i, "SERIAL") ||
+      word(tokens, i, "BIGSERIAL") ||
+      word(tokens, i, "SMALLSERIAL") {
+      if i + 1 != column_suffix_end(tokens) {
+        return None
+      }
+      return Some(AddGeneratedColumn({ kind: SerialColumn, exists, }))
+    }
+    let integer = [
+        "SMALLINT", "INT2", "INTEGER", "INT", "INT4", "BIGINT", "INT8",
+      ]
+      .iter()
+      .any(name => word(tokens, i, name))
     let (end, builtin) = match column_type(tokens, i) {
       Some(pair) => pair
       None => return None
     }
     i = end
+    if generated_column(part, i, integer, builtin, exists) is Some(spec) {
+      return Some(AddGeneratedColumn(spec))
+    }
     let mut last = tokens.length()
     let not_null = word(tokens, last - 1, "NOT NULL") ||
       (
@@ -275,6 +296,9 @@ fn column_action(part : Segment, start : Int32) -> ColumnAction? {
     return None
   }
   i += 1
+  if generation_change(part, i) is Some(change) {
+    return Some(ChangeGeneration(change))
+  }
   if word(tokens, i, "DROP") &&
     word(tokens, i + 1, "DEFAULT") &&
     i + 2 == tokens.length() {
@@ -325,6 +349,10 @@ fn review_column(
     "Budget lock acquisition and operation duration; a metadata-only change can still wait for and retain a strong lock.",
   )
   match action {
+    AddGeneratedColumn(spec) =>
+      review_generated_column(spec, output, part, number)
+    ChangeGeneration(change) =>
+      review_generation_change(change, output, part, number)
     AddColumn(default, not_null, builtin, exists) => {
       if !builtin {
         finding(
@@ -389,7 +417,7 @@ fn review_column(
         "PG507",
         Advisory,
         "Actual type/function resolution, table kind, descendants and stored data have not been inspected.",
-        "Verify catalog preconditions and deployment behavior; unknown default expressions, arrays, identity/generated columns and combined ALTER actions remain outside this profile.",
+        "Verify catalog preconditions and deployment behavior; unknown default expressions, arrays and unassessed clauses remain outside this profile. Generation changes have a separate bounded assessment.",
       )
       if exists {
         finding(
