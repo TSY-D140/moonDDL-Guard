@@ -15,12 +15,13 @@ async fn main {
   if download.exit_code() != 0 { fail("Schema download failed: " + download.stderr()) }
   @fs.write_string_to_file("_build/lexical.sql", "/*")
   @fs.write_string_to_file("_build/empty.sql", "")
-  for i, file in ["specimens/ordinary.sql", "specimens/transaction.sql", "specimens/upstream/mixed.sql", "_build/lexical.sql", "_build/empty.sql", "specimens/savepoint-budget.sql", "specimens/attach-unique.sql", "specimens/non-null.sql", "specimens/foreign-key-phases.sql", "specimens/column-changes.sql", "specimens/destructive.sql", "specimens/rename.sql", "specimens/data-migration.sql"] {
+  let files = ["specimens/ordinary.sql", "specimens/transaction.sql", "specimens/upstream/mixed.sql", "_build/lexical.sql", "_build/empty.sql", "specimens/savepoint-budget.sql", "specimens/attach-unique.sql", "specimens/non-null.sql", "specimens/foreign-key-phases.sql", "specimens/column-changes.sql", "specimens/destructive.sql", "specimens/rename.sql", "specimens/data-migration.sql", "specimens/direct-keys.sql", "specimens/generated-columns.sql", "specimens/bootstrap.sql"]
+  for i, file in files {
     let report = @shell.Cmd("moon", ["run", "engine/cli", "--", file, "--sarif", "--transaction=autocommit", "--delivery=statements"]).output()
     let out = "_build/schema-case-\{i}.sarif"
     @fs.write_string_to_file(out, report.stdout())
     let validated = @shell.Cmd(python, ["-m", "jsonschema", "--instance", out, schema]).output()
     if validated.exit_code() != 0 { fail("Invalid SARIF for " + file + ": " + validated.stderr()) }
   }
-  println("Thirteen generated SARIF reports passed the OASIS 2.1.0 schema.")
+  println(files.length().to_string() + " generated SARIF reports passed the OASIS 2.1.0 schema.")
 }

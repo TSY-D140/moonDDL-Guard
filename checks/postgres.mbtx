@@ -191,6 +191,28 @@ async fn main {
         #|  IF to_regclass('history_view') IS NOT NULL THEN RAISE EXCEPTION 'Dependent view survived'; END IF;
         #|END $$;
       )),
+      ("bootstrap FK lock and repeatable seed conflict semantics", (
+        #|CREATE TABLE seeded(id int PRIMARY KEY, label text NOT NULL DEFAULT 'pending', parent_id int REFERENCES parent(id));
+        #|DO $$ BEGIN
+        #|  IF NOT EXISTS (SELECT 1 FROM pg_locks WHERE pid=pg_backend_pid() AND relation='parent'::regclass AND mode='ShareRowExclusiveLock' AND granted) THEN
+        #|    RAISE EXCEPTION 'New FK did not lock referenced parent';
+        #|  END IF;
+        #|END $$;
+        #|INSERT INTO seeded(id,label) VALUES(1,'pending'),(2,'paid') ON CONFLICT(id) DO NOTHING;
+        #|INSERT INTO seeded(id,label) VALUES(2,'ignored') ON CONFLICT(id) DO NOTHING;
+        #|DO $$ BEGIN
+        #|  IF (SELECT label FROM seeded WHERE id=2) <> 'paid' THEN RAISE EXCEPTION 'DO NOTHING replaced existing data'; END IF;
+        #|END $$;
+        #|INSERT INTO seeded(id,label) VALUES(2,'settled') ON CONFLICT(id) DO UPDATE SET label=excluded.label;
+        #|DO $$ BEGIN
+        #|  IF (SELECT label FROM seeded WHERE id=2) <> 'settled' THEN RAISE EXCEPTION 'Upsert did not update'; END IF;
+        #|  BEGIN
+        #|    INSERT INTO seeded(id) VALUES(1),(1) ON CONFLICT(id) DO UPDATE SET label='duplicate';
+        #|    RAISE EXCEPTION 'Repeated conflict unexpectedly succeeded';
+        #|  EXCEPTION WHEN cardinality_violation THEN NULL;
+        #|  END;
+        #|END $$;
+      )),
       ("TRUNCATE and owned sequence recovery through savepoint rollback", (
         #|SAVEPOINT before_truncate;
         #|TRUNCATE events RESTART IDENTITY;

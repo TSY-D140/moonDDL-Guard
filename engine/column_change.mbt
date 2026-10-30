@@ -261,15 +261,26 @@ fn column_action(part : Segment, start : Int32) -> ColumnAction? {
     if generated_column(part, i, integer, builtin, exists) is Some(spec) {
       return Some(AddGeneratedColumn(spec))
     }
+    let leading_nonnull = word(tokens, i, "NOT NULL") ||
+      (word(tokens, i, "NOT") && word(tokens, i + 1, "NULL"))
+    if leading_nonnull {
+      i += if word(tokens, i, "NOT NULL") { 1 } else { 2 }
+    }
     let mut last = tokens.length()
-    let not_null = word(tokens, last - 1, "NOT NULL") ||
+    let trailing_nonnull = last > i &&
       (
-        last >= 2 &&
-        word(tokens, last - 2, "NOT") &&
-        word(tokens, last - 1, "NULL")
+        word(tokens, last - 1, "NOT NULL") ||
+        (
+          last >= 2 &&
+          word(tokens, last - 2, "NOT") &&
+          word(tokens, last - 1, "NULL")
+        )
       )
-    if not_null {
+    if trailing_nonnull && last > i {
       last -= if word(tokens, last - 1, "NOT NULL") { 1 } else { 2 }
+    }
+    if leading_nonnull && trailing_nonnull && last >= i {
+      return None
     }
     let default = if i == last {
       NoDefault
@@ -282,7 +293,9 @@ fn column_action(part : Segment, start : Int32) -> ColumnAction? {
         None => return None
       }
     }
-    return Some(AddColumn(default, not_null, builtin, exists))
+    return Some(
+      AddColumn(default, leading_nonnull || trailing_nonnull, builtin, exists),
+    )
   }
   if !word(tokens, start, "ALTER") {
     return None

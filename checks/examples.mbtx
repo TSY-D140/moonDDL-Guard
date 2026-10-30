@@ -125,6 +125,7 @@ async fn main {
     ("specimens/data-migration.sql", ["PG801", "PG803", "PG804", "PG805", "PG807", "PG811"]),
     ("specimens/direct-keys.sql", ["PG425", "PG426"]),
     ("specimens/generated-columns.sql", ["PG514", "PG515", "PG516", "PG517", "PG518", "PG519", "PG503"]),
+    ("specimens/bootstrap.sql", ["PG911", "PG912", "PG914", "PG821", "PG822", "PG807"]),
   ] {
     let mut previous : Json? = None
     for target in ["wasm", "wasm-gc", "js"] {

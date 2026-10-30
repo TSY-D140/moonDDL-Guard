@@ -1,5 +1,7 @@
 # Core-risk coverage and reproduction
 
+The [bootstrap profile](bootstrap.md) adds CREATE TABLE with bounded ordinary/generated definitions and FK referenced-table lock tracking, plus VALUES/DEFAULT seed INSERT and simple conflict workflows. See `engine/create_table_test.mbt`, `engine/seed_insert_test.mbt`, `specimens/bootstrap.sql` and server assertions in `checks/postgres.mbtx`. Unsupported creation/query/storage/conflict options remain incomplete, with original source retained.
+
 The 0.13.0 bounded PostgreSQL 18 profile covers all five risk categories requested in the October 28 review. This table documents implemented behavior, not complete PostgreSQL syntax support or a deployment-safety certificate.
 
 | Review concern | Implementation and diagnostic evidence | Boundary/regression evidence | Runnable workflow |

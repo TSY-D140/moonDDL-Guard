@@ -85,6 +85,9 @@ fn dml_scalar(
   returning~ : Bool = false,
   assignment~ : Bool = false,
 ) -> Bool {
+  if assignment && expr.kind == @syntax.Var && expr.text("this") == "DEFAULT" {
+    return has_only_keys(expr, ["this"])
+  }
   if assignment &&
     expr.kind == @syntax.Column &&
     expr.name() == "DEFAULT" &&

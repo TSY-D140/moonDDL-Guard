@@ -123,3 +123,9 @@ An additional check in an isolated `_build/serial-check` directory exited while 
 ## Identity, serial and generated-column transitions (0.17.0)
 
 103 groups passed independently on Wasm/Wasm-GC/JavaScript, with strict all-target checks, formatting, unchanged public interfaces and portable CLI/replay examples. Tests distinguish new-column rewrites from existing identity/default metadata changes, stored from virtual generation (including the PostgreSQL 18 default), sequence contracts, UUID defaults, unsupported expressions/options, savepoint restoration and baseline/SARIF round trips. The expanded PostgreSQL harness compiles; actual server rewrite/value/sequence results remain to be confirmed on the new revision's CI. No Windows-native execution claim is made.
+
+[Run 41054484065](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/41054484065), revision `722d9b67025e4be55e4c93a71d27b3dcb7992fb2`, passed all four jobs. PostgreSQL 18 executed the new direct-key and generation cases; Linux/macOS executed native tests and all three operating systems executed the portable targets. This supersedes those two milestones' pending server results.
+
+## Table bootstrap and seed workflows (0.18.0)
+
+109 groups passed on Wasm/Wasm-GC/JavaScript, with strict all-target compilation, unchanged public interfaces, formatting and portable CLI/replay examples. Tests validate new table versus old-table rewrite semantics, inline/table constraints, FK referenced locks and savepoint restoration, 128-definition and 100-row limits, seed arity, DEFAULT, conflict targets/assignments, malformed/unknown clauses, report round trips and deterministic exports. The PostgreSQL harness adds actual FK-lock and DO NOTHING/UPDATE/duplicate-conflict assertions; it compiles locally, but its new server case requires this revision's CI. SARIF validation now includes direct keys, generation and bootstrap (16 specimens).
