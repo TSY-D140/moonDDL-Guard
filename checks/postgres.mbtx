@@ -44,6 +44,22 @@ async fn main {
   sql(setup)
   let failure = try {
     for (name, body) in [
+      ("rename identity, retained lock and savepoint restoration", (
+        #|SAVEPOINT before_rename;
+        #|ALTER TABLE orders RENAME COLUMN legacy TO external_reference;
+        #|ALTER TABLE orders RENAME CONSTRAINT orders_pkey TO purchases_pkey;
+        #|ALTER TABLE orders RENAME TO purchases;
+        #|DO $$ BEGIN
+        #|  IF to_regclass('orders') IS NOT NULL OR to_regclass('purchases') IS NULL THEN RAISE EXCEPTION 'Table identity not renamed'; END IF;
+        #|  IF NOT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid='purchases'::regclass AND attname='external_reference' AND NOT attisdropped) THEN RAISE EXCEPTION 'Column not renamed'; END IF;
+        #|  IF to_regclass('purchases_pkey') IS NULL THEN RAISE EXCEPTION 'Constraint index not renamed'; END IF;
+        #|  IF NOT EXISTS (SELECT 1 FROM pg_locks WHERE pid=pg_backend_pid() AND relation='purchases'::regclass AND mode='AccessExclusiveLock' AND granted) THEN RAISE EXCEPTION 'Rename lock not retained'; END IF;
+        #|END $$;
+        #|ROLLBACK TO before_rename;
+        #|DO $$ BEGIN
+        #|  IF to_regclass('orders') IS NULL OR to_regclass('purchases') IS NOT NULL OR to_regclass('orders_pkey') IS NULL THEN RAISE EXCEPTION 'Rename rollback failed'; END IF;
+        #|END $$;
+      )),
       ("foreign-key scans, both lock targets and staged validation", (
         #|DO $$ BEGIN
         #|  BEGIN

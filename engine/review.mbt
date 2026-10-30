@@ -114,6 +114,14 @@ pub fn review_sql(
         operation = (if setting.scoped { "set_local_" } else { "set_" }) +
           setting.parameter
       }
+    } else if rename_spec(part.tokens) is Some(spec) {
+      coverage = Analyzed
+      operation = review_rename(spec, held_tables, findings, part, number)
+      lock_budget.at_index(findings, part, number, subject="statement")
+      statement_budget.at_index(findings, part, number, subject="statement")
+      timeout_relationship(
+        lock_budget, statement_budget, findings, part, number,
+      )
     } else if constraint_spec(part) is Some(spec) {
       coverage = Analyzed
       operation = review_constraint(spec, held_tables, findings, part, number)

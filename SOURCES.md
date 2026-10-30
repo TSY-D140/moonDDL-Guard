@@ -34,6 +34,8 @@ https://github.com/kath61105/moon-schema-plan compares schema models and generat
 
 The research covered Mooncakes, GitHub, awesome-moonbit and moonbit-community. It cannot establish ecosystem uniqueness or exclude unpublished projects.
 
+Rename review follows PostgreSQL 18 ALTER TABLE/ALTER INDEX and the published Squawk renaming-table/renaming-column rules and Strong Migrations rename-cutover guidance, rechecked 2026-10-30. No source/tests were copied. Rename implementation, boundary tests, rollback verification and specimen are project-owned Apache-2.0. Index names are not silently treated as owning-table identities.
+
 ## Upstream specimens and verification tooling
 
 Baseline comparison and its property tests are project-owned Apache-2.0 code. The end-to-end check copies the licensed Umami SQL to _build and appends a project-owned example to verify new-finding gating; the original fixture is retained unmodified.

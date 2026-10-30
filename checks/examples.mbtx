@@ -116,6 +116,7 @@ async fn main {
     ("specimens/foreign-key-phases.sql", ["PG415", "PG417", "PG418", "PG422"]),
     ("specimens/column-changes.sql", ["PG501", "PG502", "PG503", "PG505", "PG506", "PG508", "PG509", "PG510", "PG512"]),
     ("specimens/destructive.sql", ["PG601", "PG602", "PG603", "PG605", "PG606", "PG607"]),
+    ("specimens/rename.sql", ["PG701", "PG702", "PG703", "PG704", "PG405"]),
   ] {
     let mut previous : Json? = None
     for target in ["wasm", "wasm-gc", "js"] {

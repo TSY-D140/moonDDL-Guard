@@ -99,3 +99,9 @@ New rule code, tests, semantic harness and illustrative fixtures are project-own
 ### PostgreSQL CI bootstrap correction
 
 The authorized push of `a55a46f7d568ba7a03a384af9b8e85e1494f1208` synchronized remote main and GitHub associated both author and committer with TSY-D140. [Run 40717449664](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/40717449664) started its PostgreSQL 18.6 service successfully, but the new standalone job lacked `moon update`: its fresh registry could not resolve `moonbitlang/async`, so no SQL checks ran. The job now initializes the registry explicitly, matching the portable job. This fixes CI dependency bootstrap; actual semantic checks still need a successful rerun.
+
+[Run 40718044897](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/40718044897), revision `6ead8c283e05609c80a13822bc11f028745dffe6`, subsequently passed all four jobs: Windows, Ubuntu, macOS and actual PostgreSQL 18.6 semantic checks. Linux/macOS native tests ran successfully. This closes the historical server-verification gap above; Windows-native remains unverified.
+
+## Rename workflows (0.14.0, 2026-10-30)
+
+88 groups passed on Wasm/Wasm-GC/JavaScript. The tests cover table/column/constraint/index syntax, malformed input retention, schema/quote-sensitive name transfer, savepoint rollback/release of renamed lock identities, timeouts, report/delta replay and SARIF. Portable end-to-end examples passed, including the new rename specimen. Generated public interfaces are unchanged. The PostgreSQL script compiles with `--check-only`; its new server case tests name/index propagation, actual retained lock and rollback, with results to be read from the next relevant CI run. An all-target dependency check emitted a non-source failure once; strict serial all-target verification is repeated rather than changing dependency sources.
