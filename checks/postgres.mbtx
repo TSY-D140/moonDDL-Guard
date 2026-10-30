@@ -70,6 +70,26 @@ async fn main {
         #|  IF (SELECT count(*) FROM orders) <> 1 OR NOT EXISTS (SELECT 1 FROM orders WHERE id=1) THEN RAISE EXCEPTION 'DELETE USING affected wrong rows'; END IF;
         #|END $$;
       )),
+      ("direct uniqueness null semantics and primary-key requirements", (
+        #|DO $$ BEGIN
+        #|  BEGIN
+        #|    ALTER TABLE orders ADD CONSTRAINT legacy_unique UNIQUE (legacy);
+        #|    RAISE EXCEPTION 'Duplicate key incorrectly accepted';
+        #|  EXCEPTION WHEN unique_violation THEN NULL; END;
+        #|END $$;
+        #|ALTER TABLE orders ADD CONSTRAINT amount_unique UNIQUE(amount);
+        #|DO $$ BEGIN
+        #|  IF NOT EXISTS (SELECT 1 FROM pg_locks WHERE pid=pg_backend_pid() AND relation='orders'::regclass AND mode='AccessExclusiveLock' AND granted) THEN RAISE EXCEPTION 'Unique build lock missing'; END IF;
+        #|END $$;
+        #|INSERT INTO history VALUES (NULL),(NULL),(1);
+        #|ALTER TABLE history ADD CONSTRAINT nullable_unique UNIQUE(id);
+        #|DO $$ BEGIN
+        #|  BEGIN ALTER TABLE history ADD CONSTRAINT nulls_equal UNIQUE NULLS NOT DISTINCT(id); RAISE EXCEPTION 'Duplicate nulls accepted'; EXCEPTION WHEN unique_violation THEN NULL; END;
+        #|  BEGIN ALTER TABLE history ADD PRIMARY KEY(id); RAISE EXCEPTION 'Null primary key accepted'; EXCEPTION WHEN not_null_violation THEN NULL; END;
+        #|END $$;
+        #|DELETE FROM history WHERE id IS NULL;
+        #|ALTER TABLE history ADD PRIMARY KEY(id);
+      )),
       ("rename identity, retained lock and savepoint restoration", (
         #|SAVEPOINT before_rename;
         #|ALTER TABLE orders RENAME COLUMN legacy TO external_reference;

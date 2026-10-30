@@ -13,6 +13,7 @@ priv enum ConstraintAction {
   ForeignKey(ForeignKeySpec)
   ColumnChange(ColumnAction)
   RemoveMember(RemovalSpec)
+  DirectKey(KeyConstraintSpec)
 }
 
 ///|
@@ -131,6 +132,9 @@ fn constraint_spec(part : Segment) -> ConstraintSpec? {
   if nullability_action(tokens, i) is Some(tightening) {
     return Some({ table_key, action: Nullability(tightening), })
   }
+  if key_constraint_spec(tokens, i) is Some(spec) {
+    return Some({ table_key, action: DirectKey(spec), })
+  }
   if word(tokens, i, "VALIDATE") &&
     word(tokens, i + 1, "CONSTRAINT") &&
     i + 3 == tokens.length() &&
@@ -200,6 +204,10 @@ fn review_constraint(
   number : Int32,
 ) -> String {
   match spec.action {
+    DirectKey(key) => {
+      held_tables[spec.table_key] = AccessExclusive
+      review_key_constraint(key, output, part, number)
+    }
     RemoveMember(removal) =>
       review_removal(removal, held_tables, output, part, number)
     ColumnChange(action) => {

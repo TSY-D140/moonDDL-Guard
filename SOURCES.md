@@ -38,6 +38,8 @@ Rename review follows PostgreSQL 18 ALTER TABLE/ALTER INDEX and the published Sq
 
 Data-migration analysis and the limited-SELECT-CTE profile follow PostgreSQL 18 UPDATE/DELETE/explicit-locking documentation, including UPDATE FROM multiplicity and the documented CTE batching workflow. Strong Migrations' backfill guidance informed the transaction/batch review but explicitly does not implement dangerous-backfill detection. No upstream implementation/tests are copied. New profile code/tests, a matching disposable schema for the existing MIT Umami migration, batch SQL and semantic assertions are project-owned Apache-2.0. The original Umami SQL/license remain unchanged.
 
+Direct key-constraint rules follow PostgreSQL 18 ALTER TABLE and CREATE TABLE, including NULLS DISTINCT/NOT DISTINCT, primary-key requirements and deferrable/ON CONFLICT conditions. The rule, tests, fixture and live-server assertions are project-owned Apache-2.0; no upstream implementation/test code is copied.
+
 ## Upstream specimens and verification tooling
 
 Baseline comparison and its property tests are project-owned Apache-2.0 code. The end-to-end check copies the licensed Umami SQL to _build and appends a project-owned example to verify new-finding gating; the original fixture is retained unmodified.

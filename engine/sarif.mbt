@@ -122,6 +122,9 @@ fn sarif_rules() -> Array[Json] {
     ("PG420", "Foreign key action and check timing"),
     ("PG421", "Retained foreign key addition lock"),
     ("PG422", "Foreign key validation reference lock"),
+    ("PG425", "Direct unique constraint blocking build"),
+    ("PG426", "Key uniqueness and null semantics"),
+    ("PG427", "Deferrable uniqueness contract"),
     ("PG501", "Column change strong lock"),
     ("PG502", "Nonvolatile default rewrite distinction"),
     ("PG503", "Volatile default rewrite"),
@@ -222,7 +225,7 @@ pub fn Review::to_sarif(
         "tool": {
           "driver": {
             "name": "MoonDDL Guard",
-            "semanticVersion": "0.15.0",
+            "semanticVersion": "0.16.0",
             "informationUri": "https://github.com/TSY-D140/moonDDL-Guard",
             "rules": Json(sarif_rules()),
           },

@@ -123,6 +123,7 @@ async fn main {
     ("specimens/destructive.sql", ["PG601", "PG602", "PG603", "PG605", "PG606", "PG607"]),
     ("specimens/rename.sql", ["PG701", "PG702", "PG703", "PG704", "PG405"]),
     ("specimens/data-migration.sql", ["PG801", "PG803", "PG804", "PG805", "PG807", "PG811"]),
+    ("specimens/direct-keys.sql", ["PG425", "PG426"]),
   ] {
     let mut previous : Json? = None
     for target in ["wasm", "wasm-gc", "js"] {
