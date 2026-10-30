@@ -57,7 +57,7 @@ test "rename malformed clauses and unsupported object kinds remain retained" {
     sql in [
       "ALTER TABLE t RENAME TO", "ALTER TABLE t RENAME COLUMN a TO", "ALTER TABLE t RENAME TO public.x",
       "ALTER TABLE t RENAME COLUMN a TO b, DROP COLUMN c", "ALTER TABLE t RENAME COLUMN \"\" TO b",
-      "ALTER TABLE ONLY t RENAME TO x", "ALTER INDEX x RENAME COLUMN a TO b", "ALTER TYPE t RENAME TO u",
+      "ALTER TABLE ONLY t RENAME TO x", "ALTER INDEX x RENAME COLUMN a TO b", "ALTER TYPE t RENAME TO public.u",
     ] {
     let r = rename_review(sql)
     assert_false(r.is_complete(), msg=sql)

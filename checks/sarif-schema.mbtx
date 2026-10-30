@@ -16,6 +16,7 @@ async fn main {
   @fs.write_string_to_file("_build/lexical.sql", "/*")
   @fs.write_string_to_file("_build/empty.sql", "")
   let files = ["specimens/ordinary.sql", "specimens/transaction.sql", "specimens/upstream/mixed.sql", "_build/lexical.sql", "_build/empty.sql", "specimens/savepoint-budget.sql", "specimens/attach-unique.sql", "specimens/non-null.sql", "specimens/foreign-key-phases.sql", "specimens/column-changes.sql", "specimens/destructive.sql", "specimens/rename.sql", "specimens/data-migration.sql", "specimens/direct-keys.sql", "specimens/generated-columns.sql", "specimens/bootstrap.sql"]
+  files.push("specimens/enum-evolution.sql")
   for i, file in files {
     let report = @shell.Cmd("moon", ["run", "engine/cli", "--", file, "--sarif", "--transaction=autocommit", "--delivery=statements"]).output()
     let out = "_build/schema-case-\{i}.sarif"

@@ -32,6 +32,7 @@ async fn main {
     #|CREATE SCHEMA moonddl_guard_probe;
     #|SET search_path=moonddl_guard_probe,pg_catalog;
     #|CREATE TABLE parent(id integer PRIMARY KEY);
+    #|CREATE TYPE delivery_status AS ENUM ('pending','paid');
     #|CREATE TABLE child(id integer PRIMARY KEY, parent_id integer);
     #|CREATE TABLE orders(id integer PRIMARY KEY, amount integer, legacy text);
     #|CREATE TABLE history(id integer);
@@ -191,6 +192,21 @@ async fn main {
         #|  IF to_regclass('history_view') IS NOT NULL THEN RAISE EXCEPTION 'Dependent view survived'; END IF;
         #|END $$;
       )),
+      ("existing enum transaction visibility and textual rename", (
+        #|ALTER TYPE delivery_status ADD VALUE 'queued' BEFORE 'paid';
+        #|DO $$ BEGIN
+        #|  BEGIN
+        #|    PERFORM 'queued'::delivery_status;
+        #|    RAISE EXCEPTION 'Uncommitted existing-type enum value was usable';
+        #|  EXCEPTION WHEN unsafe_new_enum_value_usage THEN NULL;
+        #|  END;
+        #|END $$;
+        #|ALTER TYPE delivery_status RENAME VALUE 'pending' TO 'awaiting_payment';
+        #|DO $$ BEGIN
+        #|  IF ('awaiting_payment'::delivery_status)::text <> 'awaiting_payment' THEN RAISE EXCEPTION 'Label rename failed'; END IF;
+        #|  IF NOT EXISTS (SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid JOIN pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='moonddl_guard_probe' AND t.typname='delivery_status' AND e.enumlabel='queued' AND e.enumsortorder>1 AND e.enumsortorder<2) THEN RAISE EXCEPTION 'BEFORE ordering failed'; END IF;
+        #|END $$;
+      )),
       ("bootstrap FK lock and repeatable seed conflict semantics", (
         #|CREATE TABLE seeded(id int PRIMARY KEY, label text NOT NULL DEFAULT 'pending', parent_id int REFERENCES parent(id));
         #|DO $$ BEGIN
@@ -231,6 +247,9 @@ async fn main {
       println("Checking " + name)
       sql("BEGIN; SET LOCAL search_path=moonddl_guard_probe,pg_catalog; SET LOCAL lock_timeout='2s'; SET LOCAL statement_timeout='20s'; " + body + " ROLLBACK;")
     }
+    println("Checking enum value use after separate committed extension")
+    sql("ALTER TYPE moonddl_guard_probe.delivery_status ADD VALUE 'settled';")
+    sql("DO $$ BEGIN PERFORM 'settled'::moonddl_guard_probe.delivery_status; END $$;")
     None
   } catch { error => Some("\{Repr(error)}") }
   // Setup succeeded, so this schema belongs to this run. Failed case connections

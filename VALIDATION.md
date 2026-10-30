@@ -129,3 +129,7 @@ An additional check in an isolated `_build/serial-check` directory exited while 
 ## Table bootstrap and seed workflows (0.18.0)
 
 109 groups passed on Wasm/Wasm-GC/JavaScript, with strict all-target compilation, unchanged public interfaces, formatting and portable CLI/replay examples. Tests validate new table versus old-table rewrite semantics, inline/table constraints, FK referenced locks and savepoint restoration, 128-definition and 100-row limits, seed arity, DEFAULT, conflict targets/assignments, malformed/unknown clauses, report round trips and deterministic exports. The PostgreSQL harness adds actual FK-lock and DO NOTHING/UPDATE/duplicate-conflict assertions; it compiles locally, but its new server case requires this revision's CI. SARIF validation now includes direct keys, generation and bootstrap (16 specimens).
+
+## Enum and type evolution (0.19.0)
+
+112 groups passed on Wasm/Wasm-GC/JavaScript. Prefix truncation, 63-byte UTF-8 label and 128-label bounds, active/implicit/unknown transaction visibility, malformed input retention, recovery, report/delta replay and deterministic SARIF are covered. Formatting, interface generation, strict all-target compilation and portable examples pass. The server harness compiles with new use-before-commit/rename/order/committed-use assertions; actual execution requires the corresponding CI revision. SARIF coverage includes the enum workflow (17 specimens).

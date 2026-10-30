@@ -169,6 +169,13 @@ fn sarif_rules() -> Array[Json] {
     ("PG912", "Existing table definition unchecked"),
     ("PG913", "Table persistence and session scope"),
     ("PG914", "Referenced table lock during creation"),
+    ("PG921", "Type catalog preconditions"),
+    ("PG922", "Enum lifecycle contract"),
+    ("PG923", "Enum value commit visibility"),
+    ("PG924", "Enum reader and writer compatibility"),
+    ("PG925", "Renamed enum text compatibility"),
+    ("PG926", "Enum comparison order"),
+    ("PG927", "Type name and schema cutover"),
   ].map(pair => {
     let (code, label) = pair
     {
@@ -237,7 +244,7 @@ pub fn Review::to_sarif(
         "tool": {
           "driver": {
             "name": "MoonDDL Guard",
-            "semanticVersion": "0.18.0",
+            "semanticVersion": "0.19.0",
             "informationUri": "https://github.com/TSY-D140/moonDDL-Guard",
             "rules": Json(sarif_rules()),
           },

@@ -28,6 +28,8 @@ Timeout behavior follows PostgreSQL 18 [SET](https://www.postgresql.org/docs/18/
 
 ## Ecosystem boundary
 
+Enum/type evolution follows PostgreSQL 18 CREATE TYPE and ALTER TYPE (https://www.postgresql.org/docs/18/sql-createtype.html and https://www.postgresql.org/docs/18/sql-altertype.html), rechecked 2026-10-30. The profile distinguishes ADD VALUE's transaction permission from use-before-commit visibility; no symbolic type catalog or runtime resolution is inferred. Implementation, boundary/property tests, specimen and server assertions are project-owned Apache-2.0 without copied upstream code/tests.
+
 New-table and seed-data review follows PostgreSQL 18 CREATE TABLE and INSERT (https://www.postgresql.org/docs/18/sql-createtable.html and https://www.postgresql.org/docs/18/sql-insert.html), checked 2026-10-30. Bounds, token/active-AST validation, FK lock tracking, conflict/retry diagnostics, examples and tests are project-owned Apache-2.0. No upstream implementation/test is copied; this does not introduce schema generation or SQL execution.
 
 CHECK staging and lock-retention rules follow PostgreSQL 18 [ALTER TABLE](https://www.postgresql.org/docs/18/sql-altertable.html) and [CHECK constraints](https://www.postgresql.org/docs/18/ddl-constraints.html#DDL-CONSTRAINTS-CHECK-CONSTRAINTS). The specimen/tests are project-owned Apache-2.0 material. Rechecked schema-plan and migrate on 2026-10-25: schema diff/generation and migration execution remain separate boundaries from reviewing existing SQL. Searches included `MoonBit SQL migration review DROP INDEX NOT VALID SARIF` and `site:mooncakes.io sarif`; incomplete indexing and unpublished projects remain uncertainties, so no ecosystem-uniqueness claim is made.

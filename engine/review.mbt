@@ -114,6 +114,16 @@ pub fn review_sql(
         operation = (if setting.scoped { "set_local_" } else { "set_" }) +
           setting.parameter
       }
+    } else if enum_evolution(part.tokens) is Some(spec) {
+      coverage = Analyzed
+      operation = review_enum_evolution(
+        spec, state, implicit_batch, findings, part, number,
+      )
+      lock_budget.at_index(findings, part, number, subject="statement")
+      statement_budget.at_index(findings, part, number, subject="statement")
+      timeout_relationship(
+        lock_budget, statement_budget, findings, part, number,
+      )
     } else if create_table_spec(part) is Some(spec) {
       coverage = Analyzed
       operation = review_create_table(spec, held_tables, findings, part, number)
