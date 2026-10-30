@@ -21,7 +21,7 @@ The current release is **0.20.0**, with a bounded PostgreSQL **18** rule profile
 | [Execution context](handbook/execution.md), [timeouts](handbook/timeouts.md), [savepoints](handbook/savepoints.md) | Explicit/implicit transactions, lock/statement budgets, partial rollback of settings and tracked lock classes |
 | [Reporting](handbook/sarif.md), [baseline gates](handbook/baselines.md) | Deterministic text/JSON/SARIF, strict full-report/delta replay, occurrence-aware new-risk gates |
 
-Every unsupported statement or clause is retained and prevents a complete verdict. No SQL is rewritten or executed. The [coverage and reproducibility matrix](handbook/coverage.md) maps the implemented workflows to tests and commands.
+Every unsupported statement or clause is retained and prevents a complete verdict. No SQL is rewritten or executed. The [coverage and reproducibility matrix](handbook/coverage.md) maps implemented workflows to tests and commands; the [mature-tool comparison](handbook/rule-coverage.md) lists both implemented risk families and remaining gaps.
 
 ## Run
 
