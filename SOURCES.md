@@ -28,6 +28,8 @@ Timeout behavior follows PostgreSQL 18 [SET](https://www.postgresql.org/docs/18/
 
 ## Ecosystem boundary
 
+Object-retirement review follows the PostgreSQL 18 DROP documentation linked in handbook/object-removal.md and upstream REL_18_STABLE trigger.c/policy.c locking behavior (PostgreSQL License), checked 2026-10-30. No source/test code is copied. Profile implementation, semantic assertions, tests and fixture are Apache-2.0. DROP POLICY's inert CASCADE/RESTRICT and default-deny RLS behavior are intentionally distinct from generic recursive dependency removal.
+
 Enum/type evolution follows PostgreSQL 18 CREATE TYPE and ALTER TYPE (https://www.postgresql.org/docs/18/sql-createtype.html and https://www.postgresql.org/docs/18/sql-altertype.html), rechecked 2026-10-30. The profile distinguishes ADD VALUE's transaction permission from use-before-commit visibility; no symbolic type catalog or runtime resolution is inferred. Implementation, boundary/property tests, specimen and server assertions are project-owned Apache-2.0 without copied upstream code/tests.
 
 New-table and seed-data review follows PostgreSQL 18 CREATE TABLE and INSERT (https://www.postgresql.org/docs/18/sql-createtable.html and https://www.postgresql.org/docs/18/sql-insert.html), checked 2026-10-30. Bounds, token/active-AST validation, FK lock tracking, conflict/retry diagnostics, examples and tests are project-owned Apache-2.0. No upstream implementation/test is copied; this does not introduce schema generation or SQL execution.

@@ -1,6 +1,6 @@
 name = "TSY-D140/moonddl_guard"
 
-version = "0.19.0"
+version = "0.20.0"
 
 source = "engine"
 

@@ -150,6 +150,14 @@ fn sarif_rules() -> Array[Json] {
     ("PG605", "Constraint protection and index removal"),
     ("PG606", "Truncate sequence restart"),
     ("PG607", "Truncate trigger and snapshot semantics"),
+    ("PG631", "Database object contract removal"),
+    ("PG632", "Recursive dependent object loss"),
+    ("PG633", "Object removal catalog preconditions"),
+    ("PG634", "Trigger or policy owning-table lock"),
+    ("PG635", "RLS policy removal semantics"),
+    ("PG636", "Trigger side-effect removal"),
+    ("PG637", "Sequence state and default loss"),
+    ("PG638", "Stored and contained object loss"),
     ("PG701", "Rename access-blocking lock"),
     ("PG702", "Rename application compatibility"),
     ("PG703", "Rename catalog preconditions"),
@@ -244,7 +252,7 @@ pub fn Review::to_sarif(
         "tool": {
           "driver": {
             "name": "MoonDDL Guard",
-            "semanticVersion": "0.19.0",
+            "semanticVersion": "0.20.0",
             "informationUri": "https://github.com/TSY-D140/moonDDL-Guard",
             "rules": Json(sarif_rules()),
           },

@@ -133,3 +133,7 @@ An additional check in an isolated `_build/serial-check` directory exited while 
 ## Enum and type evolution (0.19.0)
 
 112 groups passed on Wasm/Wasm-GC/JavaScript. Prefix truncation, 63-byte UTF-8 label and 128-label bounds, active/implicit/unknown transaction visibility, malformed input retention, recovery, report/delta replay and deterministic SARIF are covered. Formatting, interface generation, strict all-target compilation and portable examples pass. The server harness compiles with new use-before-commit/rename/order/committed-use assertions; actual execution requires the corresponding CI revision. SARIF coverage includes the enum workflow (17 specimens).
+
+## Dependent-object retirement (0.20.0)
+
+116 groups passed on Wasm/Wasm-GC/JavaScript, with strict all-target compilation, formatting, unchanged interfaces and portable CLI/replay examples. Tests cover bounded routine overload signatures, object lists, inert policy CASCADE, trigger/policy retained locks through rollback, prefix truncation, malformed/unknown input retention and report/delta/SARIF properties. All 18 SARIF specimens pass the official schema. The PostgreSQL harness compiles and adds assertions for dependent column/default deletion, exact overload removal, trigger/policy locks on tables created in a prior committed setup, and default-deny behavior using the predefined non-bypass `pg_read_all_data` role. These new server assertions await this revision's CI; local Windows-native remains unverified.

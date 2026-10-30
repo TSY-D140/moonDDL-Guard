@@ -1,5 +1,7 @@
 # Core-risk coverage and reproduction
 
+The [object-retirement profile](object-removal.md) adds routine signatures, views/materialized views, sequences, types/domains, schemas/extensions, triggers and policies. Source: `engine/object_removal.mbt`; regression/properties: `engine/object_removal_test.mbt`; workflow: `specimens/retire-objects.sql`; server assertions cover overload identity, dependent column/default loss and trigger/policy behavior. Policy CASCADE deliberately receives no generic recursive-loss finding.
+
 The [enum/type profile](enums.md) adds bounded enum definition/extension/value renaming and type/schema cutover review, including commit visibility rather than an incorrect blanket transaction prohibition. Tests: `engine/enum_evolution_test.mbt`; fixture: `specimens/enum-evolution.sql`; actual commit/rollback semantics: `checks/postgres.mbtx`.
 
 The [bootstrap profile](bootstrap.md) adds CREATE TABLE with bounded ordinary/generated definitions and FK referenced-table lock tracking, plus VALUES/DEFAULT seed INSERT and simple conflict workflows. See `engine/create_table_test.mbt`, `engine/seed_insert_test.mbt`, `specimens/bootstrap.sql` and server assertions in `checks/postgres.mbtx`. Unsupported creation/query/storage/conflict options remain incomplete, with original source retained.

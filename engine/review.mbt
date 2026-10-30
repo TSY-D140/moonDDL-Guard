@@ -168,6 +168,16 @@ pub fn review_sql(
       timeout_relationship(
         lock_budget, statement_budget, findings, part, number,
       )
+    } else if object_removal(part.tokens) is Some(spec) {
+      coverage = Analyzed
+      operation = review_object_removal(
+        spec, held_tables, findings, part, number,
+      )
+      lock_budget.at_index(findings, part, number, subject="statement")
+      statement_budget.at_index(findings, part, number, subject="statement")
+      timeout_relationship(
+        lock_budget, statement_budget, findings, part, number,
+      )
     } else if removal_tables(part.tokens) is Some(spec) {
       coverage = Analyzed
       operation = review_removal(spec, held_tables, findings, part, number)
