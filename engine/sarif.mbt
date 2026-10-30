@@ -145,6 +145,15 @@ fn sarif_rules() -> Array[Json] {
     ("PG702", "Rename application compatibility"),
     ("PG703", "Rename catalog preconditions"),
     ("PG704", "Index rename lock and ownership"),
+    ("PG801", "Data change lock and resource budget"),
+    ("PG802", "Unrestricted data change"),
+    ("PG803", "DDL lock retained during data change"),
+    ("PG804", "Long data-change transaction"),
+    ("PG805", "Join multiplicity and target scope"),
+    ("PG806", "Data change runtime preconditions"),
+    ("PG807", "Returning resource and data scope"),
+    ("PG810", "Duplicate column assignments"),
+    ("PG811", "Limited CTE backfill preconditions"),
   ].map(pair => {
     let (code, label) = pair
     {
@@ -213,7 +222,7 @@ pub fn Review::to_sarif(
         "tool": {
           "driver": {
             "name": "MoonDDL Guard",
-            "semanticVersion": "0.14.0",
+            "semanticVersion": "0.15.0",
             "informationUri": "https://github.com/TSY-D140/moonDDL-Guard",
             "rules": Json(sarif_rules()),
           },

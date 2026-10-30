@@ -19,9 +19,11 @@ async fn main {
   assert_eq(replay.exit_code(), 1)
   assert_eq(@json.parse(replay.stdout()), original)
   let mixed = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/mixed.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
-  assert_eq(mixed.exit_code(), 2)
-  guard @json.parse(mixed.stdout()) is { "statements": Array(statements), "complete": False, .. } else { fail("Expected incomplete mixed migration") }
+  assert_eq(mixed.exit_code(), 1)
+  guard @json.parse(mixed.stdout()) is { "statements": Array(statements), "complete": True, .. } else { fail("Expected all real mixed-migration statements assessed") }
   assert_eq(statements.length(), 9)
+  assert_true(statements[1] is { "operation": String("update_rows"), .. })
+  assert_true(statements[4] is { "operation": String("rename_column"), .. })
   assert_true(statements[0] is { "operation": String("add_column"), "coverage": String("Analyzed"), .. })
   assert_true(statements[5] is { "operation": String("drop_column"), "coverage": String("Analyzed"), .. })
   assert_true(statements[6] is { "operation": String("drop_column"), "coverage": String("Analyzed"), .. })
@@ -92,7 +94,10 @@ async fn main {
   for extra in ["--sarif", "--transaction=active"] {
     assert_eq(@shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--baseline=_build/umami-report.json", "--transaction=autocommit", "--delivery=statements", extra]).output().exit_code(), 2)
   }
-  @fs.write_string_to_file("_build/incomplete-report.json", mixed.stdout())
+  @fs.write_string_to_file("_build/unassessed.sql", "SELECT 1;")
+  let unassessed = @shell.Cmd("moon", ["run", "engine/cli", "--", "_build/unassessed.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
+  assert_eq(unassessed.exit_code(), 2)
+  @fs.write_string_to_file("_build/incomplete-report.json", unassessed.stdout())
   assert_eq(@shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--baseline=_build/incomplete-report.json", "--transaction=autocommit", "--delivery=statements"]).output().exit_code(), 2)
   let point = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/savepoint-budget.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
   assert_eq(point.exit_code(), 1)
@@ -117,6 +122,7 @@ async fn main {
     ("specimens/column-changes.sql", ["PG501", "PG502", "PG503", "PG505", "PG506", "PG508", "PG509", "PG510", "PG512"]),
     ("specimens/destructive.sql", ["PG601", "PG602", "PG603", "PG605", "PG606", "PG607"]),
     ("specimens/rename.sql", ["PG701", "PG702", "PG703", "PG704", "PG405"]),
+    ("specimens/data-migration.sql", ["PG801", "PG803", "PG804", "PG805", "PG807", "PG811"]),
   ] {
     let mut previous : Json? = None
     for target in ["wasm", "wasm-gc", "js"] {

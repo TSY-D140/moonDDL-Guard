@@ -114,6 +114,16 @@ pub fn review_sql(
         operation = (if setting.scoped { "set_local_" } else { "set_" }) +
           setting.parameter
       }
+    } else if data_migration_spec(part) is Some(spec) {
+      coverage = if spec.duplicate_assignment { Invalid } else { Analyzed }
+      operation = review_data_migration(
+        spec, state, implicit_batch, held_tables, findings, part, number,
+      )
+      lock_budget.at_index(findings, part, number, subject="statement")
+      statement_budget.at_index(findings, part, number, subject="statement")
+      timeout_relationship(
+        lock_budget, statement_budget, findings, part, number,
+      )
     } else if rename_spec(part.tokens) is Some(spec) {
       coverage = Analyzed
       operation = review_rename(spec, held_tables, findings, part, number)

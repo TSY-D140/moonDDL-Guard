@@ -2,7 +2,7 @@
 
 Static preflight for PostgreSQL migration SQL, exposed as a reusable MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it, preserving source locations, unsupported input and catalog conditions that need human verification.
 
-The current release is **0.14.0**, with a bounded PostgreSQL **18** rule profile:
+The current release is **0.15.0**, with a bounded PostgreSQL **18** rule profile:
 
 | Workflow | Implemented review |
 | --- | --- |
@@ -12,6 +12,7 @@ The current release is **0.14.0**, with a bounded PostgreSQL **18** rule profile
 | [Column changes and rewrites](handbook/column-changes.md) | Type/USING conversion risks; constant, stable and volatile ADD defaults; unknown domains; future-default versus backfill distinction |
 | [Destructive DDL](handbook/destructive.md) | DROP TABLE/COLUMN/CONSTRAINT, dependency CASCADE, owned-index loss, TRUNCATE data/identity/trigger effects |
 | [Renames](handbook/renames.md) | Table/column/constraint/index compatibility and lock risks, table-name lock transfer and savepoint recovery |
+| [Data migrations](handbook/data-migrations.md) | UPDATE/FROM, DELETE/USING, missing restrictions, join multiplicity, retained DDL locks, bounded SELECT CTE workflows and RETURNING |
 | [Execution context](handbook/execution.md), [timeouts](handbook/timeouts.md), [savepoints](handbook/savepoints.md) | Explicit/implicit transactions, lock/statement budgets, partial rollback of settings and tracked lock classes |
 | [Reporting](handbook/sarif.md), [baseline gates](handbook/baselines.md) | Deterministic text/JSON/SARIF, strict full-report/delta replay, occurrence-aware new-risk gates |
 
@@ -83,7 +84,7 @@ moon run engine/cli -- review.json --replay --json
 
 Both commands return 1 for the Umami specimen's ordinary-index risks. `decode_report` and `--replay` recompute the current rule profile from the retained SQL/context and require the whole report to match. Unknown or missing fields, duplicate JSON keys (including escaped duplicates), changed diagnostics and unsupported versions are rejected. This is deterministic replay, not a signature or proof of authorship. Use the producing release when replaying historical reports whose rules differ.
 
-The [Umami specimens](specimens/upstream/README.md) are real, unmodified, commit-pinned SQL with their MIT license. The 17-index migration yields 17 PG101 findings. A second mixed migration now also diagnoses its VARCHAR addition and two dropped columns, while UPDATE/RENAME remain incomplete. The executable `.mbtx` check verifies these CLI behaviors and persisted-report round trips without a database. New order-service examples are project-owned illustrative SQL, clearly identified as such.
+The [Umami specimens](specimens/upstream/README.md) are real, unmodified, commit-pinned SQL with their MIT license. The 17-index migration yields 17 PG101 findings. The second mixed migration now has all nine statements assessed, including ADD COLUMN, UPDATE FROM, RENAME COLUMN, DROP COLUMN/INDEX and CREATE INDEX. The executable `.mbtx` check verifies these CLI behaviors and persisted-report round trips without a database; the PostgreSQL harness also executes the mixed SQL on a matching disposable schema. New order-service examples are project-owned illustrative SQL, clearly identified as such.
 
 Limits: 262144 UTF-16 source code units, 512 executable statements, 256 tokens per assessed index/table-change statement, 32 nested expression parentheses, 32 index key/payload columns or foreign-key columns, 32 DROP/TRUNCATE targets, and 8388608 UTF-16 code units for report decoding. Tracked relation/schema names are limited to 63 UTF-8 bytes per identifier: server-side truncation must not create an untracked lock alias. Larger/unsupported input receives an explicit incomplete/error result; SQL is never truncated or rewritten.
 

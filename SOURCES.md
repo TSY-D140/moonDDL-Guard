@@ -36,6 +36,8 @@ The research covered Mooncakes, GitHub, awesome-moonbit and moonbit-community. I
 
 Rename review follows PostgreSQL 18 ALTER TABLE/ALTER INDEX and the published Squawk renaming-table/renaming-column rules and Strong Migrations rename-cutover guidance, rechecked 2026-10-30. No source/tests were copied. Rename implementation, boundary tests, rollback verification and specimen are project-owned Apache-2.0. Index names are not silently treated as owning-table identities.
 
+Data-migration analysis and the limited-SELECT-CTE profile follow PostgreSQL 18 UPDATE/DELETE/explicit-locking documentation, including UPDATE FROM multiplicity and the documented CTE batching workflow. Strong Migrations' backfill guidance informed the transaction/batch review but explicitly does not implement dangerous-backfill detection. No upstream implementation/tests are copied. New profile code/tests, a matching disposable schema for the existing MIT Umami migration, batch SQL and semantic assertions are project-owned Apache-2.0. The original Umami SQL/license remain unchanged.
+
 ## Upstream specimens and verification tooling
 
 Baseline comparison and its property tests are project-owned Apache-2.0 code. The end-to-end check copies the licensed Umami SQL to _build and appends a project-owned example to verify new-finding gating; the original fixture is retained unmodified.
