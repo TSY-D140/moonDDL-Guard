@@ -14,7 +14,7 @@
 
 **5、核心功能与交付：** 0.21.0 已实现外键新增与验证、列类型及 USING 转换审查、默认值与表重写风险区分、DROP TABLE/COLUMN/CONSTRAINT 和 TRUNCATE 审查；已补齐表/列/约束/索引 RENAME、UPDATE/DELETE 与批量回填，增加直接主键/唯一约束、生成列、建表与种子数据、枚举及对象删除审查；同时支持索引、CHECK、非空和索引转约束、事务/保存点/超时分析，以及 JSON/SARIF、严格回放和基线比较。库、CLI、真实样本、测试和 CI 均已交付。
 
-验证：当前 120 组测试在本地 Wasm、Wasm-GC、JavaScript 上通过，新增生成列 NOT NULL、JSON 错误回归及独立模块消费验证。上一版本 119 组测试已通过 Windows、Ubuntu、macOS CI、Linux/macOS 原生运行和真实 PostgreSQL 18 集成检查；18 份 SARIF 输出通过 schema 校验。新增双会话锁超时与恢复测试以本次远端 CI 为准；Windows 原生运行尚未验证。Mooncakes 尚未发布。[验证记录](https://github.com/TSY-D140/moonDDL-Guard/actions)
+验证：120 组测试在 Windows、Ubuntu、macOS CI 的 Wasm、Wasm-GC、JavaScript 上通过，Linux/macOS 原生运行通过；真实 PostgreSQL 18 集成包含虚拟生成列非空校验、双会话锁超时与恢复，18 份 SARIF 输出通过 schema 校验。另有独立模块消费及发布包构建验证。Windows 原生运行尚未验证；Mooncakes 按作者决定暂不发布。[验证记录](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/41197961189)
 
 后续规划：扩展 PostgreSQL 版本、表达式和 ALTER 语法覆盖，增加可选数据库元信息证据；这些能力尚未实现。
 

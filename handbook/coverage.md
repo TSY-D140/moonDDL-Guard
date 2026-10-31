@@ -6,7 +6,7 @@ The [enum/type profile](enums.md) adds bounded enum definition/extension/value r
 
 The [bootstrap profile](bootstrap.md) adds CREATE TABLE with bounded ordinary/generated definitions and FK referenced-table lock tracking, plus VALUES/DEFAULT seed INSERT and simple conflict workflows. See `engine/create_table_test.mbt`, `engine/seed_insert_test.mbt`, `specimens/bootstrap.sql` and server assertions in `checks/postgres.mbtx`. Unsupported creation/query/storage/conflict options remain incomplete, with original source retained.
 
-The 0.20.0 bounded PostgreSQL 18 profile includes the five categories requested on October 28 and rename/data-migration gaps identified on October 30. This table documents implemented behavior, not complete PostgreSQL syntax support or a deployment-safety certificate. Read the [mature-tool comparison and remaining gaps](rule-coverage.md) alongside it.
+The 0.21.0 bounded PostgreSQL 18 profile includes the five categories requested on October 28 and rename/data-migration gaps identified on October 30, plus generated-column non-null validation. This table documents implemented behavior, not complete PostgreSQL syntax support or a deployment-safety certificate. Read the [mature-tool comparison and remaining gaps](rule-coverage.md) alongside it.
 
 | Review concern | Implementation and diagnostic evidence | Boundary/regression evidence | Runnable workflow |
 | --- | --- | --- | --- |
@@ -17,7 +17,7 @@ The 0.20.0 bounded PostgreSQL 18 profile includes the five categories requested 
 | Destructive DDL | `destructive.mbt`, PG601–607: DROP TABLE/COLUMN/CONSTRAINT, CASCADE, TRUNCATE, owned indexes, identity/trigger/snapshot conditions | `destructive_test.mbt`: conflicting/malformed clauses, target limits, savepoint release/rollback, deterministic JSON/SARIF/delta | `specimens/destructive.sql`; real Umami column drops |
 | Renames | `rename.mbt`, PG701–704: table/column/constraint/index cutover, distinct locks and name transfer | `rename_test.mbt`: quote/schema distinctions, rollback/release and invalid clauses | `specimens/rename.sql`; exact real Umami rename and server lock/rollback assertions |
 | UPDATE/DELETE | `data_migration.mbt`, `batch_cte.mbt`, PG801–811: duration/WAL, unrestricted writes, joins, duplicate assignments and batching | `data_migration_test.mbt`, `batch_cte_test.mbt`: bounds, active AST whitelist, recovery, replay and retained locks | `specimens/data-migration.sql`; exact real Umami UPDATE FROM; server CTE/DELETE assertions |
-| Direct keys / generation | `key_constraint.mbt`, `generated_column.mbt`, PG425–427/514–519 | Dedicated grammar/property tests and server rewrite/value/sequence assertions | `specimens/direct-keys.sql`, `specimens/generated-columns.sql` |
+| Direct keys / generation | `key_constraint.mbt`, `generated_column.mbt`, PG425–427/514–520 | Dedicated grammar/property tests, generated NOT NULL replay regression and server rewrite/value/sequence/non-null assertions | `specimens/direct-keys.sql`, `specimens/generated-columns.sql` |
 | Tables / seeds / enums / other objects | PG821–822/911–914/921–927/631–638 and dedicated profiles linked above | Dedicated grammar/bound/property tests, `rollout_properties_test.mbt` and PostgreSQL cases | `specimens/bootstrap.sql`, `enum-evolution.sql`, `retire-objects.sql` |
 
 All files above are under `engine/` unless otherwise qualified. Public entry points are the existing `review_sql`, report/export and comparison methods in `engine/pkg.generated.mbti`. New operations do not expose third-party ASTs or add a migration executor. Tracked table/schema identities now reject identifiers beyond 63 UTF-8 bytes, including formerly accepted ALTER names, instead of risking server-truncation aliases. Exact input grammars and diagnostic meanings are in [foreign keys](foreign-keys.md), [columns](column-changes.md) and [destructive changes](destructive.md).
@@ -41,6 +41,8 @@ moon test --target wasm --deny-warn
 moon test --target wasm-gc --deny-warn
 moon test --target js --deny-warn
 moon run --deny-warn checks/examples.mbtx
+moon run --deny-warn checks/consumer.mbtx
+moon package
 moon run --deny-warn checks/postgres.mbtx -- --check-only
 ```
 
