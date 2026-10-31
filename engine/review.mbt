@@ -379,15 +379,7 @@ pub fn review_sql(
       }
     }
     if coverage == Unsupported {
-      finding(
-        findings,
-        part,
-        number,
-        "PG002",
-        Error,
-        "Statement or clause is outside the supported PostgreSQL migration review profile.",
-        "Retain this SQL for manual review; unsupported input cannot receive a complete verdict.",
-      )
+      unsupported_finding(findings, part, number)
     }
     if coverage != Analyzed {
       savepoints.clear()

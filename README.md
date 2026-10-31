@@ -2,7 +2,7 @@
 
 Static preflight for PostgreSQL migration SQL, exposed as a reusable MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it, preserving source locations, unsupported input and catalog conditions that need human verification.
 
-The current release is **0.22.0**, with a bounded PostgreSQL **18** rule profile:
+The current release is **0.23.0**, with a bounded PostgreSQL **18** rule profile:
 
 With `--json`, CLI input/option/replay/baseline errors return exit 2 and one JSON object: `{"format":"moonddl.error.v1","exit_code":2,"message":"..."}`. Assessed SQL (including incomplete SQL) keeps the existing report/delta format and its exit semantics. Consumers should inspect `format` before decoding a report. Plain-text invocations retain their existing diagnostics.
 
@@ -26,6 +26,8 @@ An [independent consumer module](integrations/consumer/main.mbt) exercises only 
 | [Reporting](handbook/sarif.md), [baseline gates](handbook/baselines.md) | Deterministic text/JSON/SARIF, strict full-report/delta replay, occurrence-aware new-risk gates |
 
 Every unsupported statement or clause is retained and prevents a complete verdict. No SQL is rewritten or executed. The [coverage and reproducibility matrix](handbook/coverage.md) maps implemented workflows to tests and commands; the [mature-tool comparison](handbook/rule-coverage.md) lists both implemented risk families and remaining gaps.
+
+[Incomplete-coverage explanations](handbook/unsupported.md) identify confirmed unassessed routines, procedural blocks, privilege changes, query inserts, array/collation constructs and compound limits at their source regions. Unknown cases retain a generic explanation; no unsupported input is promoted to a complete verdict.
 
 The [real-migration corpus](specimens/corpus/README.md) adds 24 pinned files from Umami, Supabase Storage and Cal.com (26 real files in total with the earlier specimens). Run `moon run --deny-warn checks/corpus.mbtx` for source/hash preservation, strict replay, two contexts and portable regression checks. The [observed coverage and syntax decision](handbook/corpus.md) now report 13 complete files and 11 incomplete ones, up from 9 complete files before multi-ADD support; broader SQL support is not inferred from a passing corpus regression.
 
