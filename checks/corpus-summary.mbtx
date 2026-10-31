@@ -1,0 +1,38 @@
+----
+import {
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/json",
+}
+----
+
+fn main raise {
+  guard @json.parse(@fs.read_file_to_string("_build/corpus/results.json")) is {"results":Array(results),..} else {fail("Run corpus verification first")}
+  println("| Case | Complete | Analyzed | Unsupported | Invalid |")
+  println("| --- | --- | --- | --- | --- |")
+  let mut total = 0
+  let mut assessed = 0
+  let mut missing = 0
+  let mut invalid_total = 0
+  let mut full = 0
+  for row in results {
+    guard row is {"id":String(id),"context":String(context),"complete":complete,"analyzed":Number(a,..),"unsupported":Number(u,..),"invalid":Number(v,..),..} else {fail("Invalid result")}
+    if context != "autocommit-statements" {continue}
+    total += 1
+    assessed += a.to_int()
+    missing += u.to_int()
+    invalid_total += v.to_int()
+    if complete == Json(true) {full += 1}
+    println("| " + id + " | " + complete.stringify() + " | " + a.to_int().to_string() + " | " + u.to_int().to_string() + " | " + v.to_int().to_string() + " |")
+  }
+  println("Totals: \{total} files, \{full} complete, \{assessed} analyzed, \{missing} unsupported, \{invalid_total} invalid statements.")
+  for row in results {
+    guard row is {"id":String(id),"context":String("autocommit-statements"),..} else {continue}
+    guard @json.parse(@fs.read_file_to_string("_build/corpus/" + id + "-autocommit-statements.json")) is {"statements":Array(statements),..} else {fail("Missing full report")}
+    for statement in statements {
+      guard statement is {"coverage":String(coverage),"sql":String(sql),"number":Number(number,..),..} else {fail("Invalid statement")}
+      if coverage == "Analyzed" {continue}
+      let preview = sql.replace_all(old="\n",new=" ").replace_all(old="\r",new=" ")
+      println(id + " #" + number.to_int().to_string() + " " + coverage + ": " + preview[:preview.length().min(240)].to_owned())
+    }
+  }
+}

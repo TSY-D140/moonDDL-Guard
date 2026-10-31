@@ -1,0 +1,63 @@
+----
+import {
+ "moonbitlang/async@0.22.5",
+ "moonbitlang/async@0.22.5/shell",
+ "moonbitlang/x@0.5.5/fs",
+ "moonbitlang/core/json",
+ "moonbitlang/core/env",
+}
+----
+async fn get(url : String) -> String {
+ let r = @shell.Cmd("curl", ["-fLsS", "--retry", "2", "--max-time", "40", url]).output(max_output_bytes=12000000)
+ assert_eq(r.exit_code(), 0, msg=r.stderr())
+ r.stdout()
+}
+async fn download(url : String, path : String, blob : String) -> Unit {
+ let r = @shell.Cmd("curl", ["-fLsS", "--retry", "2", "--max-time", "40", "--output", path, url]).output()
+ assert_eq(r.exit_code(), 0, msg=r.stderr())
+ let hash = @shell.Cmd("git", ["hash-object", "--no-filters", path]).output()
+ assert_eq(hash.stdout().trim(), blob)
+}
+async fn main {
+ if @env.args().contains("--check-only") {println("Corpus importer compiled; no downloads performed."); return}
+ let root = "specimens/corpus"
+ if !@fs.path_exists(root) {@fs.create_dir(root)}
+ let projects : Array[Json] = []
+ let cases : Array[Json] = []
+ for (id, repo, sha, parent, child, license) in [
+ ("umami", "umami-software/umami", "559e3c607c23d2c72d9bd4f6481bda428255323c", "prisma", "migrations", "MIT"),
+ ("storage", "supabase/storage", "9d15cdc93c0b1afc37708914f5e45f865b231d48", "migrations", "tenant", "Apache-2.0"),
+ ("calcom", "calcom/cal.com", "a5ee96f77edd644439e7de8c3255ccb2eb2c5941", "packages/prisma", "migrations", "MIT")
+ ] {
+  let dir = root + "/" + id
+  if !@fs.path_exists(dir) {@fs.create_dir(dir)}
+  let prefix = parent + "/" + child + "/"
+  guard @json.parse(get("https://api.github.com/repos/" + repo + "/contents/" + parent + "?ref=" + sha)) is Array(entries) else {fail("directory")}
+  let mut subtree = ""
+  for entry in entries {
+   if entry is {"name":String(name),"sha":String(blob),..} && name == child {subtree = blob}
+   if entry is {"name":String(name),..} && name.has_prefix("LICENSE") {fail("Review nested license: " + parent + "/" + name)}
+  }
+  assert_true(!subtree.is_empty())
+  guard @json.parse(get("https://api.github.com/repos/" + repo + "/git/trees/" + subtree + "?recursive=1")) is {"tree": Array(tree), "truncated": False, ..} else {fail("tree")}
+  for item in tree {if item is {"path":String(path),..} && path.contains("LICENSE") {fail("Review migration-local license: " + path)}}
+  let paths = tree.filter_map(item => match item { {"path": String(path), "sha": String(blob), "type": String("blob"), ..} if path.has_suffix(".sql") => Some((prefix + path, blob)); _ => None })
+  paths.sort_by_key(pair => pair.0)
+  assert_true(paths.length() >= 8, msg="Sampling requires eight distinct files")
+  guard @json.parse(get("https://api.github.com/repos/" + repo + "/contents/LICENSE?ref=" + sha)) is {"sha":String(license_blob),..} else {fail("license")}
+  let base = "https://raw.githubusercontent.com/" + repo + "/" + sha + "/"
+  let license_file = dir + "/LICENSE"
+  download(base + "LICENSE", license_file, license_blob)
+  projects.push({"id":id,"repository":repo,"commit":sha,"prefix":prefix,"eligible_files":paths.length(),"license":license,"license_file":license_file,"license_blob":license_blob})
+  for i in 0..<8 {
+   let position = i * (paths.length()-1) / 7
+   let (path, blob) = paths[position]
+   let case_id = id + "-" + i.to_string()
+   let file = dir + "/" + i.to_string() + ".sql"
+   download(base + path, file, blob)
+   cases.push({"id":case_id,"project":id,"position":position,"file":file,"path":path,"blob":blob,"url":"https://github.com/" + repo + "/blob/" + sha + "/" + path})
+   println(case_id + " " + path)
+  }
+ }
+ @fs.write_string_to_file(root + "/manifest.json", Json({"format":Json("moonddl.corpus.v1"),"selection":Json("Eight evenly spaced paths per project, sorted lexicographically within the pinned migration directory; index floor(i*(n-1)/7), i=0..7. No filtering by support or result."),"projects":Json(projects),"cases":Json(cases)}).stringify(indent=2) + "\n")
+}

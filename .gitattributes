@@ -3,3 +3,6 @@
 *.mbt text eol=lf
 *.mbti text eol=lf
 *.mbtx text eol=lf
+# Preserve upstream fixture bytes and whitespace for pinned Git blob verification.
+specimens/corpus/*/*.sql -text !eol whitespace=-blank-at-eol,-blank-at-eof
+specimens/corpus/*/LICENSE -text !eol

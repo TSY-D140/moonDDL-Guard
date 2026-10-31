@@ -1,0 +1,89 @@
+----
+import {
+  "moonbitlang/async@0.22.5",
+  "moonbitlang/async@0.22.5/shell",
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+----
+
+async fn blob_check(file : String, expected : String) -> Unit {
+  let result = @shell.Cmd("git", ["hash-object", "--no-filters", file]).output()
+  assert_eq(result.exit_code(), 0, msg=result.stderr())
+  assert_eq(result.stdout().trim(), expected, msg="Upstream bytes changed: " + file)
+}
+
+async fn main {
+  if @env.args().contains("--check-only") {println("Corpus harness compiled; no fixtures reviewed."); return}
+  let record = @env.args().contains("--record")
+  let root = "specimens/corpus/"
+  guard @json.parse(@fs.read_file_to_string(root + "manifest.json")) is {
+    "format": String("moonddl.corpus.v1"), "projects": Array(projects), "cases": Array(cases), ..
+  } else { fail("Invalid corpus manifest") }
+  for project in projects {
+    guard project is {"license_file":String(file),"license_blob":String(blob),..} else {fail("Missing license provenance")}
+    blob_check(file, blob)
+  }
+  if !@fs.path_exists("_build") { @fs.create_dir("_build") }
+  if !@fs.path_exists("_build/corpus") { @fs.create_dir("_build/corpus") }
+  let results : Array[Json] = []
+  for item in cases {
+    guard item is { "id": String(id), "file": String(file), "blob": String(blob), .. } else {fail("Invalid corpus case")}
+    blob_check(file, blob)
+    let sql = @fs.read_file_to_string(file)
+    for context in ["unknown", "autocommit-statements"] {
+      let mut canonical : String? = None
+      let mut summary : Json = Json::null()
+      for target in ["wasm", "wasm-gc", "js"] {
+        // Unknown execution context is checked independently; portable
+        // equivalence is checked for the explicit comparison context.
+        if context == "unknown" && target != "wasm" { continue }
+        let args = ["run", "--target", target, "engine/cli", "--", file, "--json"]
+        if context != "unknown" { args.append(["--transaction=autocommit", "--delivery=statements"]) }
+        let result = @shell.Cmd("moon", args).output()
+        let report = @json.parse(result.stdout())
+        guard report is { "source": String(source), "statements": Array(statements), "findings": Array(findings), "complete": complete, .. } else {fail("Expected a report: " + id)}
+        assert_eq(source, sql, msg="Original SQL was changed")
+        let mut analyzed = 0
+        let mut unsupported = 0
+        let mut invalid = 0
+        let operations : Array[Json] = []
+        for statement in statements {
+          guard statement is {"sql":String(text),"operation":String(operation),"coverage":String(coverage),"location":{"start":Number(start,..),"end":Number(end,..),..},..} else {fail("Statement shape")}
+          assert_eq(sql[start.to_int() : end.to_int()].to_owned(), text, msg="Source span changed")
+          match coverage {"Analyzed" => analyzed += 1; "Unsupported" => unsupported += 1; "Invalid" => invalid += 1; _ => fail("Unknown coverage")}
+          operations.push(Json([Json(coverage), Json(operation)]))
+        }
+        if complete == Json(true) {assert_eq(unsupported + invalid, 0)}
+        if unsupported + invalid > 0 { assert_eq(complete, Json(false)) }
+        if complete == Json(false) { assert_eq(result.exit_code(), 2) }
+        let diagnostics = findings.map(f => match f {
+          {"code": String(code), "severity": String(severity), "statement": statement, "location": location, ..} => Json([Json(code), Json(severity), statement, location])
+          _ => fail("Missing finding identity, severity or location")
+        })
+        summary = {"id":id,"context":context,"exit_code":result.exit_code(),"complete":complete,"analyzed":analyzed,"unsupported":unsupported,"invalid":invalid,"operations":operations,"diagnostics":diagnostics}
+        let encoded = report.stringify()
+        match canonical { None => canonical = Some(encoded); Some(previous) => assert_eq(encoded, previous, msg="Backend report drift: " + id) }
+        if target == "wasm" {
+          let artifact = "_build/corpus/" + id + "-" + context + ".json"
+          @fs.write_string_to_file(artifact, encoded)
+          let replay = @shell.Cmd("moon", ["run", "--target", "wasm", "engine/cli", "--", artifact, "--replay", "--json"]).output()
+          assert_eq(replay.exit_code(), result.exit_code())
+          assert_eq(@json.parse(replay.stdout()), report, msg="Corpus replay rejected: " + id)
+        }
+      }
+      results.push(summary)
+      println(id + " " + context + ": coverage/replay verified")
+    }
+  }
+  let actual = Json({"format":Json("moonddl.corpus-results.v1"),"results":Json(results)})
+  @fs.write_string_to_file("_build/corpus/results.json", actual.stringify(indent=2) + "\n")
+  if record {
+    @fs.write_string_to_file(root + "expected.json", actual.stringify(indent=2) + "\n")
+    println("Recorded candidate corpus baseline; review its diff before committing.")
+  } else {
+    assert_eq(actual, @json.parse(@fs.read_file_to_string(root + "expected.json")), msg="Corpus behavior changed; inspect reports before explicitly recording a new baseline")
+    println("Pinned migration corpus passed: " + cases.length().to_string() + " files, two contexts, portable equivalence and strict replay.")
+  }
+}

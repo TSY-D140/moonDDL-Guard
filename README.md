@@ -27,6 +27,8 @@ An [independent consumer module](integrations/consumer/main.mbt) exercises only 
 
 Every unsupported statement or clause is retained and prevents a complete verdict. No SQL is rewritten or executed. The [coverage and reproducibility matrix](handbook/coverage.md) maps implemented workflows to tests and commands; the [mature-tool comparison](handbook/rule-coverage.md) lists both implemented risk families and remaining gaps.
 
+The [real-migration corpus](specimens/corpus/README.md) adds 24 pinned files from Umami, Supabase Storage and Cal.com (26 real files in total with the earlier specimens). Run `moon run --deny-warn checks/corpus.mbtx` for source/hash preservation, strict replay, two contexts and portable regression checks. The [observed coverage and next syntax decision](handbook/corpus.md) report 9 complete files and 15 incomplete ones; broader SQL support is not inferred from a passing corpus regression.
+
 ## Run
 
 The verified toolchain is stable MoonBit `0.10.17+d971670cd` (moon `0.1.20261023`); CI pins its compiler and core. From the repository root:

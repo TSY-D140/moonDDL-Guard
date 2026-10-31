@@ -1,0 +1,254 @@
+{
+  "format": "moonddl.corpus.v1",
+  "selection": "Eight evenly spaced paths per project, sorted lexicographically within the pinned migration directory; index floor(i*(n-1)/7), i=0..7. No filtering by support or result.",
+  "projects": [
+    {
+      "id": "umami",
+      "repository": "umami-software/umami",
+      "commit": "559e3c607c23d2c72d9bd4f6481bda428255323c",
+      "prefix": "prisma/migrations/",
+      "eligible_files": 26,
+      "license": "MIT",
+      "license_file": "specimens/corpus/umami/LICENSE",
+      "license_blob": "eff41369347b0c5e88a96bd00c9266343b758e7a"
+    },
+    {
+      "id": "storage",
+      "repository": "supabase/storage",
+      "commit": "9d15cdc93c0b1afc37708914f5e45f865b231d48",
+      "prefix": "migrations/tenant/",
+      "eligible_files": 79,
+      "license": "Apache-2.0",
+      "license_file": "specimens/corpus/storage/LICENSE",
+      "license_blob": "818afbcc49245d1ccf62fe5d56c0a207ac0593a6"
+    },
+    {
+      "id": "calcom",
+      "repository": "calcom/cal.com",
+      "commit": "a5ee96f77edd644439e7de8c3255ccb2eb2c5941",
+      "prefix": "packages/prisma/migrations/",
+      "eligible_files": 595,
+      "license": "MIT",
+      "license_file": "specimens/corpus/calcom/LICENSE",
+      "license_blob": "98b51fbaac9145f1919fd2a79532acdb04a8f24b"
+    }
+  ],
+  "cases": [
+    {
+      "id": "umami-0",
+      "project": "umami",
+      "position": 0,
+      "file": "specimens/corpus/umami/0.sql",
+      "path": "prisma/migrations/01_init/migration.sql",
+      "blob": "13074327f18ec705939bcc872a0303bdd977123c",
+      "url": "https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/migrations/01_init/migration.sql"
+    },
+    {
+      "id": "umami-1",
+      "project": "umami",
+      "position": 3,
+      "file": "specimens/corpus/umami/1.sql",
+      "path": "prisma/migrations/04_team_redesign/migration.sql",
+      "blob": "91726316b14ffb2f56ad441a02561e601d30219f",
+      "url": "https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/migrations/04_team_redesign/migration.sql"
+    },
+    {
+      "id": "umami-2",
+      "project": "umami",
+      "position": 7,
+      "file": "specimens/corpus/umami/2.sql",
+      "path": "prisma/migrations/08_add_utm_clid/migration.sql",
+      "blob": "7c2d115897f27eaef099a39271646c2469513320",
+      "url": "https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/migrations/08_add_utm_clid/migration.sql"
+    },
+    {
+      "id": "umami-3",
+      "project": "umami",
+      "position": 10,
+      "file": "specimens/corpus/umami/3.sql",
+      "path": "prisma/migrations/11_add_segment/migration.sql",
+      "blob": "1ae66ecb96e895df78c7b13ac5e6aa46ecebedbf",
+      "url": "https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/migrations/11_add_segment/migration.sql"
+    },
+    {
+      "id": "umami-4",
+      "project": "umami",
+      "position": 14,
+      "file": "specimens/corpus/umami/4.sql",
+      "path": "prisma/migrations/15_add_share/migration.sql",
+      "blob": "89aece1ee2fc1e61beba6a17a2dd472742fba3c2",
+      "url": "https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/migrations/15_add_share/migration.sql"
+    },
+    {
+      "id": "umami-5",
+      "project": "umami",
+      "position": 17,
+      "file": "specimens/corpus/umami/5.sql",
+      "path": "prisma/migrations/18_add_performance/migration.sql",
+      "blob": "a329fac1a0584e94c3d790f57569047298ca45d6",
+      "url": "https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/migrations/18_add_performance/migration.sql"
+    },
+    {
+      "id": "umami-6",
+      "project": "umami",
+      "position": 21,
+      "file": "specimens/corpus/umami/6.sql",
+      "path": "prisma/migrations/22_add_2fa/migration.sql",
+      "blob": "1bffd9d16e7818200796063ca919067f22d6e2d9",
+      "url": "https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/migrations/22_add_2fa/migration.sql"
+    },
+    {
+      "id": "umami-7",
+      "project": "umami",
+      "position": 25,
+      "file": "specimens/corpus/umami/7.sql",
+      "path": "prisma/migrations/26_add_api_key/migration.sql",
+      "blob": "31085ac62b6144c3cd05c9a11863053114712e41",
+      "url": "https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/prisma/migrations/26_add_api_key/migration.sql"
+    },
+    {
+      "id": "storage-0",
+      "project": "storage",
+      "position": 0,
+      "file": "specimens/corpus/storage/0.sql",
+      "path": "migrations/tenant/0001-initialmigration.sql",
+      "blob": "6bb32b4a8190a761bfcd15280914407c78d45bb0",
+      "url": "https://github.com/supabase/storage/blob/9d15cdc93c0b1afc37708914f5e45f865b231d48/migrations/tenant/0001-initialmigration.sql"
+    },
+    {
+      "id": "storage-1",
+      "project": "storage",
+      "position": 11,
+      "file": "specimens/corpus/storage/1.sql",
+      "path": "migrations/tenant/0012-add-automatic-avif-detection-flag.sql",
+      "blob": "d04abd59c733cb1f63b837fd6b3dfa31166efda6",
+      "url": "https://github.com/supabase/storage/blob/9d15cdc93c0b1afc37708914f5e45f865b231d48/migrations/tenant/0012-add-automatic-avif-detection-flag.sql"
+    },
+    {
+      "id": "storage-2",
+      "project": "storage",
+      "position": 22,
+      "file": "specimens/corpus/storage/2.sql",
+      "path": "migrations/tenant/0023-optimize-search-function.sql",
+      "blob": "7721d46fa9f82ca99b105b9aa39d8f66a100cc06",
+      "url": "https://github.com/supabase/storage/blob/9d15cdc93c0b1afc37708914f5e45f865b231d48/migrations/tenant/0023-optimize-search-function.sql"
+    },
+    {
+      "id": "storage-3",
+      "project": "storage",
+      "position": 33,
+      "file": "specimens/corpus/storage/3.sql",
+      "path": "migrations/tenant/0034-optimize-search-function-v1.sql",
+      "blob": "9c5e3486c6e6f1467268dcc220ba5b3ed9abb39a",
+      "url": "https://github.com/supabase/storage/blob/9d15cdc93c0b1afc37708914f5e45f865b231d48/migrations/tenant/0034-optimize-search-function-v1.sql"
+    },
+    {
+      "id": "storage-4",
+      "project": "storage",
+      "position": 44,
+      "file": "specimens/corpus/storage/4.sql",
+      "path": "migrations/tenant/0045-vector-buckets.sql",
+      "blob": "23152dfd0721ead898a25526c3bd96d46adc9981",
+      "url": "https://github.com/supabase/storage/blob/9d15cdc93c0b1afc37708914f5e45f865b231d48/migrations/tenant/0045-vector-buckets.sql"
+    },
+    {
+      "id": "storage-5",
+      "project": "storage",
+      "position": 55,
+      "file": "specimens/corpus/storage/5.sql",
+      "path": "migrations/tenant/0056-fix-optimized-search-function.sql",
+      "blob": "2af963cce0e29d5471655d0fbeb48f9f1cafedcb",
+      "url": "https://github.com/supabase/storage/blob/9d15cdc93c0b1afc37708914f5e45f865b231d48/migrations/tenant/0056-fix-optimized-search-function.sql"
+    },
+    {
+      "id": "storage-6",
+      "project": "storage",
+      "position": 66,
+      "file": "specimens/corpus/storage/6.sql",
+      "path": "migrations/tenant/0067-objects-null-version-index.sql",
+      "blob": "0105a83304bc342385f3f2ca1a3265be82b7d7cc",
+      "url": "https://github.com/supabase/storage/blob/9d15cdc93c0b1afc37708914f5e45f865b231d48/migrations/tenant/0067-objects-null-version-index.sql"
+    },
+    {
+      "id": "storage-7",
+      "project": "storage",
+      "position": 78,
+      "file": "specimens/corpus/storage/7.sql",
+      "path": "migrations/tenant/0079-lifecycle-writer-coordination.sql",
+      "blob": "ed4364a9163354a40c4eddb775440bd93d947fc8",
+      "url": "https://github.com/supabase/storage/blob/9d15cdc93c0b1afc37708914f5e45f865b231d48/migrations/tenant/0079-lifecycle-writer-coordination.sql"
+    },
+    {
+      "id": "calcom-0",
+      "project": "calcom",
+      "position": 0,
+      "file": "specimens/corpus/calcom/0.sql",
+      "path": "packages/prisma/migrations/20210605225044_init/migration.sql",
+      "blob": "af13be70a7370e37b3e65f44721babfde2ce1aa9",
+      "url": "https://github.com/calcom/cal.com/blob/a5ee96f77edd644439e7de8c3255ccb2eb2c5941/packages/prisma/migrations/20210605225044_init/migration.sql"
+    },
+    {
+      "id": "calcom-1",
+      "project": "calcom",
+      "position": 84,
+      "file": "specimens/corpus/calcom/1.sql",
+      "path": "packages/prisma/migrations/20220413173832_add_seats_to_event_type_model/migration.sql",
+      "blob": "301021d04cca1fa0e159eef87553042811615d58",
+      "url": "https://github.com/calcom/cal.com/blob/a5ee96f77edd644439e7de8c3255ccb2eb2c5941/packages/prisma/migrations/20220413173832_add_seats_to_event_type_model/migration.sql"
+    },
+    {
+      "id": "calcom-2",
+      "project": "calcom",
+      "position": 169,
+      "file": "specimens/corpus/calcom/2.sql",
+      "path": "packages/prisma/migrations/20230329000000_add_insights_feature_flag/migration.sql",
+      "blob": "da81554c85c8551092b656f511d3c11585b17f96",
+      "url": "https://github.com/calcom/cal.com/blob/a5ee96f77edd644439e7de8c3255ccb2eb2c5941/packages/prisma/migrations/20230329000000_add_insights_feature_flag/migration.sql"
+    },
+    {
+      "id": "calcom-3",
+      "project": "calcom",
+      "position": 254,
+      "file": "specimens/corpus/calcom/3.sql",
+      "path": "packages/prisma/migrations/20240226125946_add_idempotency_key/migration.sql",
+      "blob": "e6138ef333b9d4adafd444ff471e476db3285a93",
+      "url": "https://github.com/calcom/cal.com/blob/a5ee96f77edd644439e7de8c3255ccb2eb2c5941/packages/prisma/migrations/20240226125946_add_idempotency_key/migration.sql"
+    },
+    {
+      "id": "calcom-4",
+      "project": "calcom",
+      "position": 339,
+      "file": "specimens/corpus/calcom/4.sql",
+      "path": "packages/prisma/migrations/202410181114246_add_membership_indices/migration.sql",
+      "blob": "b1598731aac57d004cb4ee577dfab75e34dfa736",
+      "url": "https://github.com/calcom/cal.com/blob/a5ee96f77edd644439e7de8c3255ccb2eb2c5941/packages/prisma/migrations/202410181114246_add_membership_indices/migration.sql"
+    },
+    {
+      "id": "calcom-5",
+      "project": "calcom",
+      "position": 424,
+      "file": "specimens/corpus/calcom/5.sql",
+      "path": "packages/prisma/migrations/20250508131736_add_workflow_smtp_feature_flag/migration.sql",
+      "blob": "06a355b2bd4667e90f1977943f17ac524813ff77",
+      "url": "https://github.com/calcom/cal.com/blob/a5ee96f77edd644439e7de8c3255ccb2eb2c5941/packages/prisma/migrations/20250508131736_add_workflow_smtp_feature_flag/migration.sql"
+    },
+    {
+      "id": "calcom-6",
+      "project": "calcom",
+      "position": 509,
+      "file": "specimens/corpus/calcom/6.sql",
+      "path": "packages/prisma/migrations/20251007090722_modify_onboarding_table_orgs/migration.sql",
+      "blob": "a48fbd08f9180df15bd7c3fd847addfc14a9c12a",
+      "url": "https://github.com/calcom/cal.com/blob/a5ee96f77edd644439e7de8c3255ccb2eb2c5941/packages/prisma/migrations/20251007090722_modify_onboarding_table_orgs/migration.sql"
+    },
+    {
+      "id": "calcom-7",
+      "project": "calcom",
+      "position": 594,
+      "file": "specimens/corpus/calcom/7.sql",
+      "path": "packages/prisma/migrations/20260430000000_drop_instant_meeting_webhook_trigger/migration.sql",
+      "blob": "6897fe0ed31614e71e8e0ce8bc71074d1da254a2",
+      "url": "https://github.com/calcom/cal.com/blob/a5ee96f77edd644439e7de8c3255ccb2eb2c5941/packages/prisma/migrations/20260430000000_drop_instant_meeting_webhook_trigger/migration.sql"
+    }
+  ]
+}
