@@ -353,16 +353,19 @@ fn review_column(
   output : Array[Finding],
   part : Segment,
   number : Int32,
+  lock~ : Bool = true,
 ) -> String {
-  finding(
-    output,
-    part,
-    number,
-    "PG501",
-    Warning,
-    "This column change takes ACCESS EXCLUSIVE until transaction end.",
-    "Budget lock acquisition and operation duration; a metadata-only change can still wait for and retain a strong lock.",
-  )
+  if lock {
+    finding(
+      output,
+      part,
+      number,
+      "PG501",
+      Warning,
+      "This column change takes ACCESS EXCLUSIVE until transaction end.",
+      "Budget lock acquisition and operation duration; a metadata-only change can still wait for and retain a strong lock.",
+    )
+  }
   match action {
     AddGeneratedColumn(spec) =>
       review_generated_column(spec, output, part, number)

@@ -53,7 +53,7 @@ test "column types accept bounded typemods and reject unknown trailing syntax" {
       "a numeric(0,2)", "a numeric(1001)", "a numeric(10,1001)", "a timestamp(7)",
       "a int(2)", "a varchar(0)", "a int[]", "a int GENERATED ALWAYS AS IDENTITY (CYCLE)",
       "a int DEFAULT custom()", "a int DEFAULT (SELECT 1)", "a int DEFAULT 1 + 2",
-      "a text COLLATE \"C\"", "a int DEFAULT 0, ADD COLUMN b int", "\"\" int", "a int DEFAULT",
+      "a text COLLATE \"C\"", "a int DEFAULT 0, DROP COLUMN b", "\"\" int", "a int DEFAULT",
     ] {
     let sql = "ALTER TABLE t ADD COLUMN " + tail + ";"
     let r = column_review(sql)

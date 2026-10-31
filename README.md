@@ -2,7 +2,7 @@
 
 Static preflight for PostgreSQL migration SQL, exposed as a reusable MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it, preserving source locations, unsupported input and catalog conditions that need human verification.
 
-The current release is **0.21.0**, with a bounded PostgreSQL **18** rule profile:
+The current release is **0.22.0**, with a bounded PostgreSQL **18** rule profile:
 
 With `--json`, CLI input/option/replay/baseline errors return exit 2 and one JSON object: `{"format":"moonddl.error.v1","exit_code":2,"message":"..."}`. Assessed SQL (including incomplete SQL) keeps the existing report/delta format and its exit semantics. Consumers should inspect `format` before decoding a report. Plain-text invocations retain their existing diagnostics.
 
@@ -13,7 +13,7 @@ An [independent consumer module](integrations/consumer/main.mbt) exercises only 
 | [Indexes](handbook/indexes.md), [replacement/removal](handbook/removal.md) | Named B-tree CREATE/DROP, concurrent transaction restrictions, expression/partial/covering indexes and catalog preconditions |
 | [Foreign keys](handbook/foreign-keys.md) | Immediate versus NOT VALID rollout, locks on both tables, referential actions and retained write-blocking locks during validation |
 | [CHECK](handbook/constraints.md), [NOT NULL](handbook/nullability.md), [index attachment](handbook/attachment.md) | Scans, strong-lock retention, existing-index ownership/eligibility and integrity conditions |
-| [Column changes and rewrites](handbook/column-changes.md) | Type/USING conversion risks; constant, stable and volatile ADD defaults; unknown domains; future-default versus backfill distinction |
+| [Column changes and rewrites](handbook/column-changes.md), [combined additions](handbook/combined-additions.md) | Type/USING conversion risks; bounded multi-ADD statements with shared locks/rewrite cost; constant, stable and volatile defaults; unknown domains and future-default/backfill distinction |
 | [Destructive DDL](handbook/destructive.md) | DROP TABLE/COLUMN/CONSTRAINT, dependency CASCADE, owned-index loss, TRUNCATE data/identity/trigger effects |
 | [Renames](handbook/renames.md) | Table/column/constraint/index compatibility and lock risks, table-name lock transfer and savepoint recovery |
 | [Data migrations](handbook/data-migrations.md) | UPDATE/FROM, DELETE/USING, missing restrictions, join multiplicity, retained DDL locks, bounded SELECT CTE workflows and RETURNING |
@@ -27,7 +27,7 @@ An [independent consumer module](integrations/consumer/main.mbt) exercises only 
 
 Every unsupported statement or clause is retained and prevents a complete verdict. No SQL is rewritten or executed. The [coverage and reproducibility matrix](handbook/coverage.md) maps implemented workflows to tests and commands; the [mature-tool comparison](handbook/rule-coverage.md) lists both implemented risk families and remaining gaps.
 
-The [real-migration corpus](specimens/corpus/README.md) adds 24 pinned files from Umami, Supabase Storage and Cal.com (26 real files in total with the earlier specimens). Run `moon run --deny-warn checks/corpus.mbtx` for source/hash preservation, strict replay, two contexts and portable regression checks. The [observed coverage and next syntax decision](handbook/corpus.md) report 9 complete files and 15 incomplete ones; broader SQL support is not inferred from a passing corpus regression.
+The [real-migration corpus](specimens/corpus/README.md) adds 24 pinned files from Umami, Supabase Storage and Cal.com (26 real files in total with the earlier specimens). Run `moon run --deny-warn checks/corpus.mbtx` for source/hash preservation, strict replay, two contexts and portable regression checks. The [observed coverage and syntax decision](handbook/corpus.md) now report 13 complete files and 11 incomplete ones, up from 9 complete files before multi-ADD support; broader SQL support is not inferred from a passing corpus regression.
 
 ## Run
 

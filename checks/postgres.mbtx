@@ -54,9 +54,54 @@ async fn main {
     #|INSERT INTO events DEFAULT VALUES;
     #|INSERT INTO events DEFAULT VALUES;
   let real_migration = @fs.read_file_to_string("specimens/upstream/mixed.sql")
+  let real_combined = @fs.read_file_to_string("specimens/corpus/umami/1.sql") + "\n" +
+    @fs.read_file_to_string("specimens/corpus/umami/2.sql") + "\n" +
+    @fs.read_file_to_string("specimens/corpus/umami/5.sql") + "\n" +
+    @fs.read_file_to_string("specimens/corpus/calcom/6.sql")
   sql(setup)
   let failure = try {
     for (name, body) in [
+      ("four exact upstream combined-add migrations on matching disposable tables", (
+        #|CREATE TABLE team(id int);
+        #|CREATE TABLE "user"(id int);
+        #|CREATE TABLE website(id int, user_id uuid);
+        #|CREATE TABLE team_website(id int);
+        #|CREATE TABLE "OrganizationOnboarding"(id int);
+        #|INSERT INTO website VALUES(1,'00000000-0000-0000-0000-000000000001');
+        #|INSERT INTO "OrganizationOnboarding" VALUES(1);
+        #|CREATE TEMP TABLE combined_before ON COMMIT DROP AS SELECT pg_relation_filenode('website_event'::regclass) AS node;
+      ) + "\n" + real_combined + (
+        #|DO $$ BEGIN
+        #|  IF pg_relation_filenode('website_event'::regclass) <> (SELECT node FROM combined_before) THEN RAISE EXCEPTION 'Nullable combined adds rewrote upstream table'; END IF;
+        #|  IF NOT EXISTS(SELECT 1 FROM pg_attribute WHERE attrelid='website_event'::regclass AND attname='utm_term' AND NOT attisdropped) OR NOT EXISTS(SELECT 1 FROM pg_attribute WHERE attrelid='website_event'::regclass AND attname='cls' AND NOT attisdropped) THEN RAISE EXCEPTION 'Upstream column additions missing'; END IF;
+        #|  IF NOT EXISTS(SELECT 1 FROM website WHERE created_by=user_id AND team_id IS NULL) OR to_regclass('team_website') IS NOT NULL THEN RAISE EXCEPTION 'Real team redesign data/drop effects failed'; END IF;
+        #|  IF NOT EXISTS(SELECT 1 FROM "OrganizationOnboarding" WHERE "bannerUrl" IS NULL AND "brandColor" IS NULL) THEN RAISE EXCEPTION 'Real onboarding additions failed'; END IF;
+        #|  IF NOT EXISTS(SELECT 1 FROM pg_locks WHERE pid=pg_backend_pid() AND relation='website_event'::regclass AND mode='AccessExclusiveLock' AND granted) THEN RAISE EXCEPTION 'Upstream combined-add lock not retained'; END IF;
+        #|END $$;
+      )),
+      ("combined default rewrite skip and atomic failure semantics", (
+        #|DO $$ DECLARE original oid := pg_relation_filenode('orders'::regclass); BEGIN
+        #|  ALTER TABLE orders ADD fast int DEFAULT 7, ADD label text DEFAULT 'a,b';
+        #|  IF pg_relation_filenode('orders'::regclass) <> original OR (SELECT count(*) FROM orders WHERE fast=7 AND label='a,b') <> 2 THEN RAISE EXCEPTION 'Fast combined defaults changed rewrite/value semantics'; END IF;
+        #|END $$;
+        #|SAVEPOINT before_volatile;
+        #|DO $$ DECLARE original oid := pg_relation_filenode('orders'::regclass); BEGIN
+        #|  ALTER TABLE orders ADD stamped timestamptz DEFAULT clock_timestamp(), ADD required int DEFAULT 9 NOT NULL;
+        #|  IF pg_relation_filenode('orders'::regclass) = original OR (SELECT count(*) FROM orders WHERE stamped IS NOT NULL AND required=9) <> 2 THEN RAISE EXCEPTION 'Volatile combined rewrite/old-row values failed'; END IF;
+        #|  IF (SELECT count(*) FROM pg_locks WHERE pid=pg_backend_pid() AND relation='orders'::regclass AND mode='AccessExclusiveLock' AND granted) <> 1 THEN RAISE EXCEPTION 'Expected one granted relation lock entry'; END IF;
+        #|END $$;
+        #|ROLLBACK TO before_volatile;
+        #|ALTER TABLE orders ADD IF NOT EXISTS fast text DEFAULT 'ignored', ADD fresh int DEFAULT 3;
+        #|DO $$ BEGIN
+        #|  IF EXISTS(SELECT 1 FROM pg_attribute WHERE attrelid='orders'::regclass AND attname='required' AND NOT attisdropped) OR (SELECT count(*) FROM orders WHERE fast=7 AND fresh=3) <> 2 THEN RAISE EXCEPTION 'Rollback or IF NOT EXISTS skip changed existing values'; END IF;
+        #|  BEGIN
+        #|    ALTER TABLE orders ADD rolled_back int, ADD cannot_be_null int NOT NULL;
+        #|    RAISE EXCEPTION 'Expected combined non-null failure';
+        #|  EXCEPTION WHEN not_null_violation THEN NULL;
+        #|  END;
+        #|  IF EXISTS(SELECT 1 FROM pg_attribute WHERE attrelid='orders'::regclass AND attname='rolled_back' AND NOT attisdropped) THEN RAISE EXCEPTION 'Failed statement partially added a column'; END IF;
+        #|END $$;
+      )),
       ("complete real Umami schema/data/rename/removal workflow", real_migration + (
         #|DO $$ BEGIN
         #|  IF (SELECT hostname FROM website_event WHERE id=1) <> 'a.example' OR (SELECT hostname FROM website_event WHERE id=2) <> 'b.example' THEN RAISE EXCEPTION 'Real UPDATE FROM failed'; END IF;
@@ -303,7 +348,7 @@ async fn main {
       let holder = group.spawn(async fn() {
         // An explicit release signal keeps the lock until the contender has
         // failed; a fixed sleep could expire first on a slow CI runner.
-        sql("BEGIN; SET application_name='moonddl_guard_holder'; SET statement_timeout='20s'; LOCK TABLE moonddl_guard_probe.orders IN ACCESS EXCLUSIVE MODE; DO $$ BEGIN FOR i IN 1..300 LOOP IF EXISTS(SELECT 1 FROM moonddl_guard_probe.contention_release) THEN RETURN; END IF; PERFORM pg_sleep(0.05); END LOOP; RAISE EXCEPTION 'Contender did not release holder'; END $$; COMMIT;")
+        sql("BEGIN; SET application_name='moonddl_guard_holder'; SET statement_timeout='20s'; ALTER TABLE moonddl_guard_probe.orders ADD holder_a int, ADD holder_b int; DO $$ BEGIN FOR i IN 1..300 LOOP IF EXISTS(SELECT 1 FROM moonddl_guard_probe.contention_release) THEN RETURN; END IF; PERFORM pg_sleep(0.05); END LOOP; RAISE EXCEPTION 'Contender did not release holder'; END $$; COMMIT;")
       })
       let mut ready = false
       for _ in 0..<60 {

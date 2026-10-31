@@ -1,0 +1,22 @@
+# Multiple ADD COLUMN actions in one statement
+
+Version 0.22.0 reviews two to 32 ordinary ADD COLUMN actions on one table. The existing `review_sql` entry point and report/comparison signatures are unchanged; `Statement.operation` gains `add_columns`. Supported actions reuse the single-column bounded type/default/NOT NULL/IF NOT EXISTS profile. Optional COLUMN and ALTER TABLE ONLY are accepted.
+
+```sh
+moon run engine/cli -- specimens/corpus/umami/2.sql --json --transaction=autocommit --delivery=statements
+moon run engine/cli -- specimens/combined-additions.sql --json --transaction=autocommit --delivery=statements
+```
+
+Both return exit 1 for assessed risks. The first is the exact licensed upstream eleven-column addition, not a rewritten migration. The second illustrates a live-table rollout containing both fast and volatile defaults, a backfill and savepoint rollback. Neither CLI invocation executes SQL.
+
+All actions are validated before producing findings or changing tracked locks. Commas inside typemods, supported parenthesized defaults, quoted identifiers and string literals do not split actions. Empty/trailing actions, repeated canonical column names, unbalanced/excessively nested expressions, overlong names, mixed action kinds and unknown clauses make the **whole statement** incomplete, with its original SQL retained. There is no successful-prefix verdict. Compound identifier names are limited to 63 UTF-8 bytes, nesting to 32 and the enclosing ALTER profile to 256 tokens, in addition to the 32-action limit.
+
+This bounded compound form excludes serial/identity/generated columns, table/column constraints other than the supported NOT NULL, references, arrays, unknown expressions, DROP/ALTER/RENAME and arbitrary combined ALTER. Their independently supported single-action workflows are unchanged. IF NOT EXISTS applies per addition; it does not verify the existing definition. Schema-qualified/custom types keep the existing unresolved-domain/rewrite warning instead of a no-rewrite guarantee.
+
+PG501 reports the statement's ACCESS EXCLUSIVE lock once. It is retained through the real transaction or Simple Query scope and participates in existing rename/savepoint/backfill tracking. Per-column PG502–508 findings point to the original action ranges and share the enclosing statement number. Timeout diagnostics remain at statement scope. PG521 explains shared cost: an applicable volatile built-in default requires rewriting, unresolved types prevent a no-rewrite conclusion, and validation is distinct from rewriting. PostgreSQL can combine work; per-column findings are not a count of physical passes. Fast defaults on other columns do not cancel an applicable rewrite. Runtime errors and conditional no-ops are not simulated.
+
+Tests cover action/nesting/name bounds, numeric commas, quoted string commas, Unicode/CRLF positions, malformed suffixes, unsupported mixed clauses, duplicates, deterministic prefix/report/delta replay, new-risk gates and savepoint lock restoration. Real-corpus coverage improves from nine to thirteen complete files: Umami 1/2/5 and Cal.com 6 now assess six formerly unsupported statements. The other forty case/context baseline observations remain unchanged. Supported-input statements still need catalog/data checks; complete coverage is not a deployment approval.
+
+The PostgreSQL 18 harness executes those four exact upstream files on a matching disposable schema, then checks created columns, data changes and retained locks. It also checks fast-default filenode preservation, volatile-default rewriting and old-row values, IF NOT EXISTS skip behavior, atomic rollback after NOT NULL failure, and another session timing out behind the actual combined ALTER before succeeding after commit. The fixture is a minimal matching schema, not an upstream deployment or performance benchmark. See [actual verification status](../VALIDATION.md); script compilation does not establish server success.
+
+Behavioral reference: PostgreSQL 18 [ALTER TABLE](https://www.postgresql.org/docs/18/sql-altertable.html), including strictest subcommand locks and combined scans/rewrites. Implementation, new tests and illustrative SQL are project-owned Apache-2.0. Upstream files/notices remain unmodified under their recorded licenses. Strict replay recomputes current rules; regenerate earlier reports/baselines whose formerly unsupported compound statements now have findings, rather than silently accepting stale verdicts.

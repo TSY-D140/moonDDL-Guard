@@ -1360,23 +1360,23 @@
     {
       "id": "umami-1",
       "context": "unknown",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 4,
-      "unsupported": 3,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 7,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ],
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ],
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ],
         [
           "Analyzed",
@@ -1397,8 +1397,8 @@
       ],
       "diagnostics": [
         [
-          "PG002",
-          "Error",
+          "PG501",
+          "Warning",
           1,
           {
             "start": 152,
@@ -1408,8 +1408,63 @@
           }
         ],
         [
-          "PG002",
-          "Error",
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 171,
+            "end": 213,
+            "line": 8,
+            "column": 20
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 171,
+            "end": 213,
+            "line": 8,
+            "column": 20
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 215,
+            "end": 254,
+            "line": 9,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 215,
+            "end": 254,
+            "line": 9,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
+          1,
+          {
+            "start": 152,
+            "end": 255,
+            "line": 8,
+            "column": 1
+          }
+        ],
+        [
+          "PG501",
+          "Warning",
           2,
           {
             "start": 271,
@@ -1419,8 +1474,118 @@
           }
         ],
         [
-          "PG002",
-          "Error",
+          "PG502",
+          "Advisory",
+          2,
+          {
+            "start": 290,
+            "end": 332,
+            "line": 12,
+            "column": 20
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          2,
+          {
+            "start": 290,
+            "end": 332,
+            "line": 12,
+            "column": 20
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          2,
+          {
+            "start": 334,
+            "end": 373,
+            "line": 13,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          2,
+          {
+            "start": 334,
+            "end": 373,
+            "line": 13,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
+          2,
+          {
+            "start": 271,
+            "end": 374,
+            "line": 12,
+            "column": 1
+          }
+        ],
+        [
+          "PG501",
+          "Warning",
+          3,
+          {
+            "start": 390,
+            "end": 476,
+            "line": 16,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          3,
+          {
+            "start": 412,
+            "end": 444,
+            "line": 16,
+            "column": 23
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          3,
+          {
+            "start": 412,
+            "end": 444,
+            "line": 16,
+            "column": 23
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          3,
+          {
+            "start": 446,
+            "end": 475,
+            "line": 17,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          3,
+          {
+            "start": 446,
+            "end": 475,
+            "line": 17,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
           3,
           {
             "start": 390,
@@ -1431,6 +1596,17 @@
         ],
         [
           "PG801",
+          "Warning",
+          4,
+          {
+            "start": 493,
+            "end": 557,
+            "line": 20,
+            "column": 1
+          }
+        ],
+        [
+          "PG803",
           "Warning",
           4,
           {
@@ -1522,23 +1698,23 @@
     {
       "id": "umami-1",
       "context": "autocommit-statements",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 4,
-      "unsupported": 3,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 7,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ],
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ],
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ],
         [
           "Analyzed",
@@ -1559,8 +1735,8 @@
       ],
       "diagnostics": [
         [
-          "PG002",
-          "Error",
+          "PG501",
+          "Warning",
           1,
           {
             "start": 152,
@@ -1570,8 +1746,63 @@
           }
         ],
         [
-          "PG002",
-          "Error",
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 171,
+            "end": 213,
+            "line": 8,
+            "column": 20
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 171,
+            "end": 213,
+            "line": 8,
+            "column": 20
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 215,
+            "end": 254,
+            "line": 9,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 215,
+            "end": 254,
+            "line": 9,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
+          1,
+          {
+            "start": 152,
+            "end": 255,
+            "line": 8,
+            "column": 1
+          }
+        ],
+        [
+          "PG501",
+          "Warning",
           2,
           {
             "start": 271,
@@ -1581,8 +1812,118 @@
           }
         ],
         [
-          "PG002",
-          "Error",
+          "PG502",
+          "Advisory",
+          2,
+          {
+            "start": 290,
+            "end": 332,
+            "line": 12,
+            "column": 20
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          2,
+          {
+            "start": 290,
+            "end": 332,
+            "line": 12,
+            "column": 20
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          2,
+          {
+            "start": 334,
+            "end": 373,
+            "line": 13,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          2,
+          {
+            "start": 334,
+            "end": 373,
+            "line": 13,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
+          2,
+          {
+            "start": 271,
+            "end": 374,
+            "line": 12,
+            "column": 1
+          }
+        ],
+        [
+          "PG501",
+          "Warning",
+          3,
+          {
+            "start": 390,
+            "end": 476,
+            "line": 16,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          3,
+          {
+            "start": 412,
+            "end": 444,
+            "line": 16,
+            "column": 23
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          3,
+          {
+            "start": 412,
+            "end": 444,
+            "line": 16,
+            "column": 23
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          3,
+          {
+            "start": 446,
+            "end": 475,
+            "line": 17,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          3,
+          {
+            "start": 446,
+            "end": 475,
+            "line": 17,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
           3,
           {
             "start": 390,
@@ -1593,17 +1934,6 @@
         ],
         [
           "PG801",
-          "Warning",
-          4,
-          {
-            "start": 493,
-            "end": 557,
-            "line": 20,
-            "column": 1
-          }
-        ],
-        [
-          "PG804",
           "Warning",
           4,
           {
@@ -1684,21 +2014,274 @@
     {
       "id": "umami-2",
       "context": "unknown",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 0,
-      "unsupported": 1,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 1,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ]
       ],
       "diagnostics": [
         [
-          "PG002",
-          "Error",
+          "PG501",
+          "Warning",
+          1,
+          {
+            "start": 14,
+            "end": 484,
+            "line": 2,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 43,
+            "end": 79,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 43,
+            "end": 79,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 81,
+            "end": 116,
+            "line": 4,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 81,
+            "end": 116,
+            "line": 4,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 118,
+            "end": 157,
+            "line": 5,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 118,
+            "end": 157,
+            "line": 5,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 159,
+            "end": 196,
+            "line": 6,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 159,
+            "end": 196,
+            "line": 6,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 198,
+            "end": 234,
+            "line": 7,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 198,
+            "end": 234,
+            "line": 7,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 236,
+            "end": 272,
+            "line": 8,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 236,
+            "end": 272,
+            "line": 8,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 274,
+            "end": 316,
+            "line": 9,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 274,
+            "end": 316,
+            "line": 9,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 318,
+            "end": 359,
+            "line": 10,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 318,
+            "end": 359,
+            "line": 10,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 361,
+            "end": 401,
+            "line": 11,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 361,
+            "end": 401,
+            "line": 11,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 403,
+            "end": 443,
+            "line": 12,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 403,
+            "end": 443,
+            "line": 12,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 445,
+            "end": 483,
+            "line": 13,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 445,
+            "end": 483,
+            "line": 13,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
           1,
           {
             "start": 14,
@@ -1712,21 +2295,274 @@
     {
       "id": "umami-2",
       "context": "autocommit-statements",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 0,
-      "unsupported": 1,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 1,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ]
       ],
       "diagnostics": [
         [
-          "PG002",
-          "Error",
+          "PG501",
+          "Warning",
+          1,
+          {
+            "start": 14,
+            "end": 484,
+            "line": 2,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 43,
+            "end": 79,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 43,
+            "end": 79,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 81,
+            "end": 116,
+            "line": 4,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 81,
+            "end": 116,
+            "line": 4,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 118,
+            "end": 157,
+            "line": 5,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 118,
+            "end": 157,
+            "line": 5,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 159,
+            "end": 196,
+            "line": 6,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 159,
+            "end": 196,
+            "line": 6,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 198,
+            "end": 234,
+            "line": 7,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 198,
+            "end": 234,
+            "line": 7,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 236,
+            "end": 272,
+            "line": 8,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 236,
+            "end": 272,
+            "line": 8,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 274,
+            "end": 316,
+            "line": 9,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 274,
+            "end": 316,
+            "line": 9,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 318,
+            "end": 359,
+            "line": 10,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 318,
+            "end": 359,
+            "line": 10,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 361,
+            "end": 401,
+            "line": 11,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 361,
+            "end": 401,
+            "line": 11,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 403,
+            "end": 443,
+            "line": 12,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 403,
+            "end": 443,
+            "line": 12,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 445,
+            "end": 483,
+            "line": 13,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 445,
+            "end": 483,
+            "line": 13,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
           1,
           {
             "start": 14,
@@ -2224,21 +3060,142 @@
     {
       "id": "umami-5",
       "context": "unknown",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 0,
-      "unsupported": 1,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 1,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ]
       ],
       "diagnostics": [
         [
-          "PG002",
-          "Error",
+          "PG501",
+          "Warning",
+          1,
+          {
+            "start": 14,
+            "end": 222,
+            "line": 2,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 42,
+            "end": 76,
+            "line": 2,
+            "column": 29
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 42,
+            "end": 76,
+            "line": 2,
+            "column": 29
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 78,
+            "end": 112,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 78,
+            "end": 112,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 114,
+            "end": 148,
+            "line": 4,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 114,
+            "end": 148,
+            "line": 4,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 150,
+            "end": 184,
+            "line": 5,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 150,
+            "end": 184,
+            "line": 5,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 186,
+            "end": 221,
+            "line": 6,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 186,
+            "end": 221,
+            "line": 6,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
           1,
           {
             "start": 14,
@@ -2252,21 +3209,142 @@
     {
       "id": "umami-5",
       "context": "autocommit-statements",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 0,
-      "unsupported": 1,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 1,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ]
       ],
       "diagnostics": [
         [
-          "PG002",
-          "Error",
+          "PG501",
+          "Warning",
+          1,
+          {
+            "start": 14,
+            "end": 222,
+            "line": 2,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 42,
+            "end": 76,
+            "line": 2,
+            "column": 29
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 42,
+            "end": 76,
+            "line": 2,
+            "column": 29
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 78,
+            "end": 112,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 78,
+            "end": 112,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 114,
+            "end": 148,
+            "line": 4,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 114,
+            "end": 148,
+            "line": 4,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 150,
+            "end": 184,
+            "line": 5,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 150,
+            "end": 184,
+            "line": 5,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 186,
+            "end": 221,
+            "line": 6,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 186,
+            "end": 221,
+            "line": 6,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
           1,
           {
             "start": 14,
@@ -5094,21 +6172,76 @@
     {
       "id": "calcom-6",
       "context": "unknown",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 0,
-      "unsupported": 1,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 1,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ]
       ],
       "diagnostics": [
         [
-          "PG002",
-          "Error",
+          "PG501",
+          "Warning",
+          1,
+          {
+            "start": 14,
+            "end": 117,
+            "line": 2,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 51,
+            "end": 82,
+            "line": 2,
+            "column": 38
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 51,
+            "end": 82,
+            "line": 2,
+            "column": 38
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 84,
+            "end": 116,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 84,
+            "end": 116,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
           1,
           {
             "start": 14,
@@ -5122,21 +6255,76 @@
     {
       "id": "calcom-6",
       "context": "autocommit-statements",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 0,
-      "unsupported": 1,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 1,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "add_columns"
         ]
       ],
       "diagnostics": [
         [
-          "PG002",
-          "Error",
+          "PG501",
+          "Warning",
+          1,
+          {
+            "start": 14,
+            "end": 117,
+            "line": 2,
+            "column": 1
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 51,
+            "end": 82,
+            "line": 2,
+            "column": 38
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 51,
+            "end": 82,
+            "line": 2,
+            "column": 38
+          }
+        ],
+        [
+          "PG502",
+          "Advisory",
+          1,
+          {
+            "start": 84,
+            "end": 116,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG507",
+          "Advisory",
+          1,
+          {
+            "start": 84,
+            "end": 116,
+            "line": 3,
+            "column": 1
+          }
+        ],
+        [
+          "PG521",
+          "Advisory",
           1,
           {
             "start": 14,

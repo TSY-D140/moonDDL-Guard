@@ -147,6 +147,7 @@ async fn main {
     ("specimens/data-migration.sql", ["PG801", "PG803", "PG804", "PG805", "PG807", "PG811"]),
     ("specimens/direct-keys.sql", ["PG425", "PG426"]),
     ("specimens/generated-columns.sql", ["PG514", "PG515", "PG516", "PG517", "PG518", "PG519", "PG520", "PG503"]),
+    ("specimens/combined-additions.sql", ["PG501", "PG502", "PG503", "PG506", "PG521", "PG803"]),
     ("specimens/bootstrap.sql", ["PG911", "PG912", "PG914", "PG821", "PG822", "PG807"]),
     ("specimens/enum-evolution.sql", ["PG923", "PG924", "PG925", "PG926"]),
     ("specimens/retire-objects.sql", ["PG631", "PG632", "PG634", "PG635", "PG636", "PG637", "PG638"]),

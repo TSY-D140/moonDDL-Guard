@@ -144,6 +144,7 @@ fn sarif_rules() -> Array[Json] {
     ("PG518", "Generated expression replacement"),
     ("PG519", "Generated expression removal"),
     ("PG520", "Generated column non-null validation"),
+    ("PG521", "Combined column addition costs"),
     ("PG601", "Destructive operation strong lock"),
     ("PG602", "Table or column data removal"),
     ("PG603", "Destructive cascade"),
@@ -253,7 +254,7 @@ pub fn Review::to_sarif(
         "tool": {
           "driver": {
             "name": "MoonDDL Guard",
-            "semanticVersion": "0.21.0",
+            "semanticVersion": "0.22.0",
             "informationUri": "https://github.com/TSY-D140/moonDDL-Guard",
             "rules": Json(sarif_rules()),
           },

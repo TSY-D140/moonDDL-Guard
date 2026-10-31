@@ -12,6 +12,7 @@ priv enum ConstraintAction {
   Nullability(Bool)
   ForeignKey(ForeignKeySpec)
   ColumnChange(ColumnAction)
+  AddColumns(Array[ColumnAddition])
   RemoveMember(RemovalSpec)
   DirectKey(KeyConstraintSpec)
 }
@@ -115,6 +116,9 @@ fn constraint_spec(part : Segment) -> ConstraintSpec? {
   if column_action(part, i) is Some(action) {
     return Some({ table_key, action: ColumnChange(action), })
   }
+  if combined_additions(part, i) is Some(additions) {
+    return Some({ table_key, action: AddColumns(additions), })
+  }
   if word(tokens, i, "ADD") {
     let mut foreign_start = i + 1
     if word(tokens, foreign_start, "CONSTRAINT") {
@@ -204,6 +208,10 @@ fn review_constraint(
   number : Int32,
 ) -> String {
   match spec.action {
+    AddColumns(additions) => {
+      held_tables[spec.table_key] = AccessExclusive
+      review_additions(additions, output, part, number)
+    }
     DirectKey(key) => {
       held_tables[spec.table_key] = AccessExclusive
       review_key_constraint(key, output, part, number)

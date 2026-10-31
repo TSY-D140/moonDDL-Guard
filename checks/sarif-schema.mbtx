@@ -18,6 +18,7 @@ async fn main {
   let files = ["specimens/ordinary.sql", "specimens/transaction.sql", "specimens/upstream/mixed.sql", "_build/lexical.sql", "_build/empty.sql", "specimens/savepoint-budget.sql", "specimens/attach-unique.sql", "specimens/non-null.sql", "specimens/foreign-key-phases.sql", "specimens/column-changes.sql", "specimens/destructive.sql", "specimens/rename.sql", "specimens/data-migration.sql", "specimens/direct-keys.sql", "specimens/generated-columns.sql", "specimens/bootstrap.sql"]
   files.push("specimens/enum-evolution.sql")
   files.push("specimens/retire-objects.sql")
+  files.push("specimens/combined-additions.sql")
   for i, file in files {
     let report = @shell.Cmd("moon", ["run", "engine/cli", "--", file, "--sarif", "--transaction=autocommit", "--delivery=statements"]).output()
     let out = "_build/schema-case-\{i}.sarif"
