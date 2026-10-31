@@ -1,0 +1,15 @@
+----
+import {
+  "moonbitlang/async@0.22.5",
+  "moonbitlang/async@0.22.5/shell",
+}
+----
+
+async fn main {
+  for target in ["wasm", "wasm-gc", "js"] {
+    let result = @shell.Cmd("moon", ["-C", "integrations/consumer", "run", "--target", target, "--deny-warn", "."]).output()
+    assert_eq(result.exit_code(), 0, msg=result.stderr())
+    assert_true(result.stdout().contains("Independent consumer:"))
+    println("Independent public API consumer passed: " + target)
+  }
+}

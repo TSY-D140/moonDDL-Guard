@@ -9,6 +9,7 @@ priv enum GeneratedKind {
 priv struct GeneratedColumnSpec {
   kind : GeneratedKind
   exists : Bool
+  not_null : Bool
 }
 
 ///|
@@ -72,7 +73,7 @@ fn generated_column(
     if !integer || i + 1 != last {
       return None
     }
-    return Some({ kind: IdentityColumn(always), exists, })
+    return Some({ kind: IdentityColumn(always), exists, not_null: true, })
   }
   if !always {
     return None
@@ -92,7 +93,11 @@ fn generated_column(
   if i != last || (!stored && !builtin) {
     return None
   }
-  Some({ kind: ComputedColumn(stored), exists, })
+  Some({
+    kind: ComputedColumn(stored),
+    exists,
+    not_null: last != tokens.length(),
+  })
 }
 
 ///|
@@ -168,6 +173,17 @@ fn review_generated_column(
   part : Segment,
   number : Int32,
 ) -> String {
+  if spec.not_null && spec.kind is ComputedColumn(_) {
+    finding(
+      output,
+      part,
+      number,
+      "PG520",
+      Warning,
+      "A generated column with NOT NULL must validate existing generated results; a virtual column can require an old-row scan without a table rewrite.",
+      "Check null-producing inputs and expression failures on existing rows; budget the scan under ACCESS EXCLUSIVE. Virtual storage alone does not make this metadata-only.",
+    )
+  }
   let operation = match spec.kind {
     ComputedColumn(stored) => {
       finding(

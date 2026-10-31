@@ -1,5 +1,5 @@
 _build/
-/.mooncakes/
+.mooncakes/
 /target/
 *.exe
 *.obj

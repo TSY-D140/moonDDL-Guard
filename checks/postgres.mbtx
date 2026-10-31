@@ -78,6 +78,13 @@ async fn main {
         #|END $$;
       )),
       ("identity stored virtual generation and expression removal", (
+        #|DO $$ BEGIN
+        #|  BEGIN
+        #|    ALTER TABLE orders ADD bad_virtual int GENERATED ALWAYS AS (NULL::int) VIRTUAL NOT NULL;
+        #|    RAISE EXCEPTION 'Virtual NOT NULL did not validate existing rows';
+        #|  EXCEPTION WHEN not_null_violation THEN NULL;
+        #|  END;
+        #|END $$;
         #|DO $$ DECLARE original oid := pg_relation_filenode('orders'::regclass); BEGIN
         #|  ALTER TABLE orders ADD COLUMN sequence_id bigint GENERATED ALWAYS AS IDENTITY;
         #|  IF pg_relation_filenode('orders'::regclass)=original OR (SELECT count(*) FROM orders WHERE sequence_id IS NOT NULL)<>2 THEN RAISE EXCEPTION 'New identity did not rewrite/assign'; END IF;
@@ -290,6 +297,27 @@ async fn main {
       println("Checking " + name)
       sql("BEGIN; SET LOCAL search_path=moonddl_guard_probe,pg_catalog; SET LOCAL lock_timeout='2s'; SET LOCAL statement_timeout='20s'; " + body + " ROLLBACK;")
     }
+    println("Checking two-session contention timeout and recovery")
+    sql("CREATE TABLE moonddl_guard_probe.contention_release(released bool);")
+    @async.with_task_group(async fn(group) {
+      let holder = group.spawn(async fn() {
+        // An explicit release signal keeps the lock until the contender has
+        // failed; a fixed sleep could expire first on a slow CI runner.
+        sql("BEGIN; SET application_name='moonddl_guard_holder'; SET statement_timeout='20s'; LOCK TABLE moonddl_guard_probe.orders IN ACCESS EXCLUSIVE MODE; DO $$ BEGIN FOR i IN 1..300 LOOP IF EXISTS(SELECT 1 FROM moonddl_guard_probe.contention_release) THEN RETURN; END IF; PERFORM pg_sleep(0.05); END LOOP; RAISE EXCEPTION 'Contender did not release holder'; END $$; COMMIT;")
+      })
+      let mut ready = false
+      for _ in 0..<60 {
+        let probe = @shell.Cmd("psql", ["-XAt", "-c", "SELECT count(*) FROM pg_locks l JOIN pg_stat_activity a USING(pid) WHERE a.application_name='moonddl_guard_holder' AND l.relation='moonddl_guard_probe.orders'::regclass AND l.mode='AccessExclusiveLock' AND l.granted"]).output(timeout_ms=5000)
+        if probe.exit_code() == 0 && probe.stdout().trim() == "1" { ready = true; break }
+        @async.sleep(50)
+      }
+      assert_true(ready, msg="Holder never acquired lock")
+      let blocked = @shell.Cmd("psql", ["-X", "-v", "ON_ERROR_STOP=1", "-c", "SET lock_timeout='200ms'; UPDATE moonddl_guard_probe.orders SET amount=amount WHERE id=1;"]).output(timeout_ms=5000)
+      assert_true(blocked.exit_code() != 0 && blocked.stderr().contains("lock timeout"), msg=blocked.stderr())
+      sql("INSERT INTO moonddl_guard_probe.contention_release VALUES(true);")
+      holder.wait()
+      sql("SET lock_timeout='2s'; UPDATE moonddl_guard_probe.orders SET amount=amount WHERE id=1;")
+    })
     println("Checking enum value use after separate committed extension")
     sql("ALTER TYPE moonddl_guard_probe.delivery_status ADD VALUE 'settled';")
     sql("DO $$ BEGIN PERFORM 'settled'::moonddl_guard_probe.delivery_status; END $$;")

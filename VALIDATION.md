@@ -143,3 +143,13 @@ An additional check in an isolated `_build/serial-check` directory exited while 
 ## Cross-workflow regression evidence and mature-tool comparison
 
 119 groups passed on Wasm/Wasm-GC/JavaScript with formatting, interface generation, strict all-target checks and all portable examples. The added regression groups replay every bootstrap/seed prefix, retain exact Unicode/CRLF source spans, and compose strong locks, new-table FKs, renames, savepoint rollback and unknown-input recovery without state leaking between review calls. The comparison in `handbook/rule-coverage.md` maps mature-tool risk families to code/tests and explicitly enumerates unsupported families; it makes no full-parity or contest-acceptance claim. This tests/documentation update must also pass its own remote CI.
+
+[Run 41058110080](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/41058110080), revision `d8832fe4387df666f7bb25319d39496448c0a7f7`, passed all four jobs, including actual PostgreSQL 18 and Linux/macOS native execution, with 119 test groups and 18 SARIF specimens.
+
+## Acceptance remediation (0.21.0)
+
+120 groups pass locally on Wasm/Wasm-GC/JavaScript, along with formatting, interface generation and strict all-target compilation. Explicit generated-column NOT NULL now survives parsing and emits PG520 for old-row validation independently of stored rewrites. The regression distinguishes stored/explicit virtual/implicit virtual/nullable forms and strict report replay. The public library interface remains unchanged.
+
+CLI `--json` errors use `moonddl.error.v1`; portable end-to-end checks exercise missing files, unknown/conflicting options, invalid replay, context overrides and missing/invalid baselines. Existing assessed/incomplete reports keep their format and exit semantics. An independent module consumes public review/replay/comparison APIs through an official local workspace on all three portable backends. Packaging is added to CI; this is not evidence of Mooncakes publication.
+
+The PostgreSQL harness compiles locally and adds old-row virtual NOT NULL rejection plus actual two-session lock contention/timeout/recovery. An explicit release signal holds the first session's lock until the second session times out, avoiding a fixed-sleep race. These new server assertions and this revision's native execution require the corresponding remote CI result; local Windows-native remains unverified. Registry publication is blocked by missing login for the intended owner; no credentials are copied from the unrelated global account.

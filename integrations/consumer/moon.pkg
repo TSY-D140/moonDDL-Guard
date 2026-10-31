@@ -1,0 +1,5 @@
+import {
+  "TSY-D140/moonddl_guard" @guard,
+}
+
+pkgtype(kind: "executable")

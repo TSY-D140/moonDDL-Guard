@@ -8,6 +8,28 @@ import {
 ----
 
 async fn main {
+  for target in ["wasm", "wasm-gc", "js"] {
+    for options in [
+      ["--replay"],
+      ["--baseline=_build/absent-baseline.json"],
+      ["--baseline=specimens/ordinary.sql"],
+      ["--replay", "--transaction=active"],
+      ["--artifact=ordinary.sql"],
+    ] {
+      let args = ["run", "--target", target, "engine/cli", "--", "specimens/ordinary.sql", "--json"]
+      args.append(options)
+      let failure = @shell.Cmd("moon", args).output()
+      assert_eq(failure.exit_code(), 2)
+      assert_true(@json.parse(failure.stdout()) is { "format": String("moonddl.error.v1"), "exit_code": Number(2, ..), "message": String(_), .. })
+    }
+    for options in [["--json"], ["--unknown", "--json"], ["--sarif", "--json"]] {
+      let args = ["run", "--target", target, "engine/cli", "--", "_build/absent-acceptance-input.sql"]
+      args.append(options)
+      let failure = @shell.Cmd("moon", args).output()
+      assert_eq(failure.exit_code(), 2)
+      assert_true(@json.parse(failure.stdout()) is { "format": String("moonddl.error.v1"), "exit_code": Number(2, ..), "message": String(_), .. })
+    }
+  }
   let index = @shell.Cmd("moon", ["run", "engine/cli", "--", "specimens/upstream/indexes.sql", "--json", "--transaction=autocommit", "--delivery=statements"]).output()
   assert_eq(index.exit_code(), 1)
   let original = @json.parse(index.stdout())
@@ -124,7 +146,7 @@ async fn main {
     ("specimens/rename.sql", ["PG701", "PG702", "PG703", "PG704", "PG405"]),
     ("specimens/data-migration.sql", ["PG801", "PG803", "PG804", "PG805", "PG807", "PG811"]),
     ("specimens/direct-keys.sql", ["PG425", "PG426"]),
-    ("specimens/generated-columns.sql", ["PG514", "PG515", "PG516", "PG517", "PG518", "PG519", "PG503"]),
+    ("specimens/generated-columns.sql", ["PG514", "PG515", "PG516", "PG517", "PG518", "PG519", "PG520", "PG503"]),
     ("specimens/bootstrap.sql", ["PG911", "PG912", "PG914", "PG821", "PG822", "PG807"]),
     ("specimens/enum-evolution.sql", ["PG923", "PG924", "PG925", "PG926"]),
     ("specimens/retire-objects.sql", ["PG631", "PG632", "PG634", "PG635", "PG636", "PG637", "PG638"]),

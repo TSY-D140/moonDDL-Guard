@@ -2,7 +2,11 @@
 
 Static preflight for PostgreSQL migration SQL, exposed as a reusable MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it, preserving source locations, unsupported input and catalog conditions that need human verification.
 
-The current release is **0.20.0**, with a bounded PostgreSQL **18** rule profile:
+The current release is **0.21.0**, with a bounded PostgreSQL **18** rule profile:
+
+With `--json`, CLI input/option/replay/baseline errors return exit 2 and one JSON object: `{"format":"moonddl.error.v1","exit_code":2,"message":"..."}`. Assessed SQL (including incomplete SQL) keeps the existing report/delta format and its exit semantics. Consumers should inspect `format` before decoding a report. Plain-text invocations retain their existing diagnostics.
+
+An [independent consumer module](integrations/consumer/main.mbt) exercises only the public library API, strict replay and a new-risk gate across Wasm/Wasm-GC/JavaScript: `moon run --deny-warn checks/consumer.mbtx`. See [adoption and publication status](handbook/adoption.md).
 
 | Workflow | Implemented review |
 | --- | --- |

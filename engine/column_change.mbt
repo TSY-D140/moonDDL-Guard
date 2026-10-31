@@ -246,7 +246,9 @@ fn column_action(part : Segment, start : Int32) -> ColumnAction? {
       if i + 1 != column_suffix_end(tokens) {
         return None
       }
-      return Some(AddGeneratedColumn({ kind: SerialColumn, exists, }))
+      return Some(
+        AddGeneratedColumn({ kind: SerialColumn, exists, not_null: true, }),
+      )
     }
     let integer = [
         "SMALLINT", "INT2", "INTEGER", "INT", "INT4", "BIGINT", "INT8",

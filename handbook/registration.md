@@ -1,20 +1,25 @@
-# MoonDDL Guard 项目说明
+# MoonDDL Guard 项目申报书
+
 **1、项目名称：** MoonDDL Guard——基于 MoonBit 的 PostgreSQL 数据库迁移静态预检工具。
 
-**2、项目简介：** 面向数据库开发者和应用维护团队，在迁移 SQL 执行前审查锁、事务、扫描、表重写、数据丢失及未验证前提，输出带源码位置和处理建议的诊断，减少上线前反复人工审查。
+**2、项目简介：** 面向数据库开发者和应用维护团队，在执行迁移 SQL 前审查锁、事务、扫描、表重写及数据丢失风险，输出带源码位置、原因和处理建议的诊断，减少上线前反复人工审查的成本。
 
-**3、项目方向与通用性：** 数据库开发工具与工程质量保障。提供可嵌入 MoonBit 库及文件 CLI，可接入不同迁移工具与 CI；当前规则以 PostgreSQL 18 的明确语法子集为边界，不执行 SQL、不生成 schema 迁移，与规划器和执行器互补。
+**3、项目方向与通用性：** 数据库开发工具与工程质量保障。提供可复用 MoonBit 库和文件 CLI，可接入不同迁移工具与 CI；直接分析已有 SQL 及真实执行上下文，与 schema 规划器、迁移执行器互补。当前支持 PostgreSQL 18 的明确语法子集，未知语句或子句保留原文并报告不完整。
 
-**4、完整预期使用场景：**
+**4、完整的预期使用场景：**
 
-- 外键分阶段上线：开发者提交订单与客户关联 SQL，声明实际事务及发送方式；工具审查引用双方的锁、NOT VALID 与后续验证、级联动作；团队分离提交、核实历史数据与引用条件后交给原有 runner 部署。
-- 列变更上线：团队新增订单状态、时间戳或修改金额类型；工具区分常量/稳定/易变默认值，提示潜在重写、USING 转换与非空校验；团队核实旧类型与样本数据，调整回填和切换步骤，再次预检。
-- 旧结构清理：维护者删除旧列、约束、表或清空临时表；工具提示数据与保护条件丢失、索引归属、CASCADE 与序列重置风险；团队核查依赖和恢复来源，将完整报告作为 CI 基线，仅允许经过审查的变化进入部署。
+- 外键分阶段上线：开发者提交订单与客户关联 SQL，声明事务和发送方式；工具审查双方的锁、NOT VALID、后续验证和级联动作；团队分离提交，核实历史数据及引用条件后，通过原有迁移工具部署。
+- 列变更上线：团队新增状态或时间戳列、修改金额类型；工具区分常量、稳定和易变默认值，提示重写条件、USING 转换及非空校验风险；开发者核实旧类型和样本数据，调整回填与切换步骤，再次预检。
+- 旧结构清理与 CI 门禁：维护者提交删列、删约束、删表或清空临时表的 SQL；工具提示数据丢失、索引归属和 CASCADE 影响；团队核查依赖与恢复来源，保存完整报告作为基线，在 CI 中审查新增风险后再部署。
 
-**5、核心功能：** 0.13.0 已实现索引创建/删除、外键新增与验证、CHECK/非空/索引转约束、列类型及默认值变更、重写风险区分、破坏性 DDL；支持事务/保存点与超时分析、JSON/SARIF、严格报告回放及基线门禁。未知语句或子句保留原文并阻止完整结论。后续扩展 PostgreSQL 版本、表达式与可选元信息证据；不宣称完整 SQL 覆盖。
+**5、核心功能与交付：** 0.21.0 已实现外键新增与验证、列类型及 USING 转换审查、默认值与表重写风险区分、DROP TABLE/COLUMN/CONSTRAINT 和 TRUNCATE 审查；已补齐表/列/约束/索引 RENAME、UPDATE/DELETE 与批量回填，增加直接主键/唯一约束、生成列、建表与种子数据、枚举及对象删除审查；同时支持索引、CHECK、非空和索引转约束、事务/保存点/超时分析，以及 JSON/SARIF、严格回放和基线比较。库、CLI、真实样本、测试和 CI 均已交付。
 
-**6、项目性质：** 独立开发的应用项目，非整项目移植。领域审查逻辑与工作流在本仓库实现，复用开源解析基础设施，不宣称生态唯一性。
+验证：当前 120 组测试在本地 Wasm、Wasm-GC、JavaScript 上通过，新增生成列 NOT NULL、JSON 错误回归及独立模块消费验证。上一版本 119 组测试已通过 Windows、Ubuntu、macOS CI、Linux/macOS 原生运行和真实 PostgreSQL 18 集成检查；18 份 SARIF 输出通过 schema 校验。新增双会话锁超时与恢复测试以本次远端 CI 为准；Windows 原生运行尚未验证。Mooncakes 尚未发布。[验证记录](https://github.com/TSY-D140/moonDDL-Guard/actions)
 
-**7、参考来源与许可证：** 复用 [sqlglot.mbt](https://github.com/bobzhang/sqlglot.mbt)（MIT）进行分词与解析；需求研究参考 Squawk、Strong Migrations，规则依据 PostgreSQL 官方文档。项目采用 Apache-2.0；依赖、真实 Umami 样本及许可证见 [SOURCES.md](../SOURCES.md)。
+后续规划：扩展 PostgreSQL 版本、表达式和 ALTER 语法覆盖，增加可选数据库元信息证据；这些能力尚未实现。
 
-**8、GitHub 仓库：** https://github.com/TSY-D140/moonDDL-Guard 。已有不少于 12 个实质提交，补充工作按完整能力组织，不使用空提交、重复提交或无意义拆分；复审证据见 [覆盖与复现矩阵](coverage.md)，实际验证状态见 [VALIDATION.md](../VALIDATION.md)。
+**6、项目性质：** 独立开发的应用项目，非整项目移植。领域审查逻辑和工作流在本仓库实现，复用开源解析基础设施，不宣称生态唯一性。
+
+**7、参考来源与许可证：** 复用 [sqlglot.mbt](https://github.com/bobzhang/sqlglot.mbt)（MIT）进行分词和解析；需求研究参考 Squawk、Strong Migrations，规则依据 PostgreSQL 官方文档。项目采用 Apache-2.0，依赖与真实 Umami 样本的来源、许可证见 [SOURCES.md](https://github.com/TSY-D140/moonDDL-Guard/blob/main/SOURCES.md)。
+
+**8、GitHub 仓库与有效提交：** [TSY-D140/moonDDL-Guard](https://github.com/TSY-D140/moonDDL-Guard)，已有不少于 22 个实质提交，覆盖核心规则、工作流和 CI 修复，未通过空提交、重复提交或无意义拆分凑数。[提交历史](https://github.com/TSY-D140/moonDDL-Guard/commits/main)｜[功能与复现证据](https://github.com/TSY-D140/moonDDL-Guard/blob/main/handbook/coverage.md)
