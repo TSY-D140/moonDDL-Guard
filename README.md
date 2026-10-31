@@ -2,7 +2,9 @@
 
 Static preflight for PostgreSQL migration SQL, exposed as a reusable MoonBit library and a file CLI. It reviews existing SQL before your migration runner executes it, preserving source locations, unsupported input and catalog conditions that need human verification.
 
-The current release is **0.23.0**, with a bounded PostgreSQL **18** rule profile:
+[Directory review](handbook/directories.md) adds exhaustive SQL inventory, explicit order and per-file commit boundaries, path-associated reports, strict replay and append-aware baseline gates. Run the real example with `moon run engine/cli -- specimens/upstream --directory --order=specimens/upstream/order.json --boundaries=per-file --transaction=autocommit --delivery=statements --json` (exit 1 for retained risks). Shared transactions across files are outside this mode.
+
+The current release is **0.24.0**, with a bounded PostgreSQL **18** rule profile:
 
 With `--json`, CLI input/option/replay/baseline errors return exit 2 and one JSON object: `{"format":"moonddl.error.v1","exit_code":2,"message":"..."}`. Assessed SQL (including incomplete SQL) keeps the existing report/delta format and its exit semantics. Consumers should inspect `format` before decoding a report. Plain-text invocations retain their existing diagnostics.
 

@@ -1,0 +1,4 @@
+{
+  "format": "moonddl.order.v1",
+  "files": ["indexes.sql", "mixed.sql"]
+}

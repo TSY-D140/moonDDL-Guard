@@ -15,12 +15,26 @@ fn cli_error(json : Bool, message : String) -> Unit {
 fn main {
   let args = process_args()
   let mut json = args.contains("--json")
+  if args.contains("--directory") {
+    let code = directory_main(args) catch {
+      error => {
+        cli_error(json, "Directory review rejected: \{Repr(error)}")
+        @sys.exit(2)
+        return
+      }
+    }
+    @sys.exit(code)
+    return
+  }
   if args.length() == 2 && args[1] == "--help" {
     println(
       "Usage: moon run engine/cli -- FILE [--json|--sarif] [--artifact=REPO_PATH] [--baseline=REPORT] [--replay] [--transaction=autocommit|active|unknown] [--delivery=statements|simple-query|unknown]",
     )
     println(
       "Defaults: unknown transaction and delivery. PostgreSQL 18 rules. Exit 0: no blocking finding; 1: risk; 2: incomplete/input error.",
+    )
+    println(
+      "Directory: DIR --directory --order=PLAN.json|lexicographic --boundaries=per-file [--json] [--baseline=BATCH]. Replay: BATCH --directory --replay [--json].",
     )
     return
   }

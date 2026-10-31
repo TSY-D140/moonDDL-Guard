@@ -7,3 +7,5 @@ Unmodified SQL and MIT license from `umami-software/umami`, commit `559e3c607c23
 - `umami.LICENSE`: https://github.com/umami-software/umami/blob/559e3c607c23d2c72d9bd4f6481bda428255323c/LICENSE
 
 The 17 ordinary index statements demonstrate real migration preflight. All nine mixed-migration statements are now assessed: VARCHAR addition, UPDATE FROM, index removal, column rename/removal and index creation. The optional PostgreSQL harness executes this unmodified mixed SQL on a matching disposable test schema and checks its effects. This is not a claim that the sample runs on arbitrary databases, or that the full upstream deployment/schema has been verified.
+
+`order.json` is a project-owned Apache-2.0 static-review plan for these selected files, ordered by their original migration positions (03 before 09). Intermediate upstream migrations are absent, so this is not a complete deployable history or a declaration of the upstream runner's transaction context. See `handbook/directories.md` for the explicit directory-review assumptions and command.

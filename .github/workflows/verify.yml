@@ -20,7 +20,7 @@ jobs:
           node-version: 22
       - run: moon update
       - run: moon fmt --check
-      - run: moon fmt --check checks/corpus.mbtx checks/corpus-fetch.mbtx checks/corpus-summary.mbtx
+      - run: moon fmt --check checks/corpus.mbtx checks/corpus-fetch.mbtx checks/corpus-summary.mbtx checks/directory.mbtx
       - run: moon info
       - run: git diff --exit-code -- engine
       - run: moon check --target all --deny-warn
@@ -32,6 +32,7 @@ jobs:
       - run: moon run --target wasm-gc engine/cli -- --help
       - run: moon run --deny-warn checks/examples.mbtx
       - run: moon run --deny-warn checks/consumer.mbtx
+      - run: moon run --deny-warn checks/directory.mbtx
       - run: moon run --deny-warn checks/corpus.mbtx
       - uses: actions/upload-artifact@v4
         if: always()
@@ -46,6 +47,8 @@ jobs:
         run: moon run --deny-warn checks/sarif-schema.mbtx
       - if: runner.os != 'Windows'
         run: moon test --target native --deny-warn
+      - if: runner.os != 'Windows'
+        run: moon run --deny-warn checks/directory.mbtx -- --native
   postgres:
     runs-on: ubuntu-latest
     timeout-minutes: 15

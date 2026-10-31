@@ -1,0 +1,92 @@
+----
+import {
+  "moonbitlang/async@0.22.5",
+  "moonbitlang/async@0.22.5/shell",
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+----
+
+async fn cli(target : String, args : Array[String]) -> (Int, String) {
+  let command = ["run","--target",target,"engine/cli","--"]
+  command.append(args)
+  let r = @shell.Cmd("moon",command).output()
+  (r.exit_code(),r.stdout())
+}
+
+async fn main {
+  let root = "_build/directory-check"
+  for dir in ["_build",root,root + "/nested"] {if !@fs.path_exists(dir) {@fs.create_dir(dir)}}
+  for file in ["003-add.sql","004-invalid.sql"] {if @fs.path_exists(root + "/" + file) {@fs.remove_file(root + "/" + file)}}
+  @fs.write_bytes_to_file(root + "/001-indexes.sql",@fs.read_file_to_bytes("specimens/upstream/indexes.sql"))
+  @fs.write_bytes_to_file(root + "/nested/002-mixed.sql",@fs.read_file_to_bytes("specimens/upstream/mixed.sql"))
+  let plan = "_build/directory-order.json"
+  let baseline = "_build/directory-baseline.json"
+  let order = ["nested/002-mixed.sql","001-indexes.sql"]
+  @fs.write_string_to_file(plan,Json({"format":Json("moonddl.order.v1"),"files":Json(order)}).stringify())
+  let targets = if @env.args().contains("--native") {["native"]} else {["wasm","wasm-gc","js"]}
+  let deep_root = "_build/directory-deep"
+  if !@fs.path_exists(deep_root) { @fs.create_dir(deep_root) }
+  let mut deep_path = deep_root
+  for _ in 0..<17 {
+    deep_path += "/a"
+    if !@fs.path_exists(deep_path) { @fs.create_dir(deep_path) }
+  }
+  let mut canonical : Json? = None
+  for target in targets {
+    for bad_root in [root + "/missing", deep_root] {
+      let (bad_code,bad_text) = cli(target,[bad_root,"--directory","--json","--order=lexicographic","--boundaries=per-file"])
+      assert_eq(bad_code,2)
+      assert_true(@json.parse(bad_text) is {"format":String("moonddl.error.v1"),..})
+    }
+    let args = [root,"--directory","--json","--order=" + plan,"--boundaries=per-file","--transaction=autocommit","--delivery=statements"]
+    let (code,text) = cli(target,args)
+    assert_eq(code,1)
+    let report = @json.parse(text)
+    guard report is {"format":String("moonddl.batch.v1"),"files":Array(files),"complete":True,..} else {fail("Expected a complete ordered real-fixture batch")}
+    assert_eq(files.length(),2)
+    assert_true(files[0] is {"path":String("nested/002-mixed.sql"),..})
+    assert_true(files[1] is {"path":String("001-indexes.sql"),..})
+    match canonical {None => canonical = Some(report);Some(old) => assert_eq(report,old)}
+    @fs.write_string_to_file(baseline,text)
+    let (replay_code,replay) = cli(target,[baseline,"--directory","--replay","--json"])
+    assert_eq(replay_code,code)
+    assert_eq(@json.parse(replay),report)
+    let gate_args = args.copy()
+    gate_args.push("--baseline=" + baseline)
+    let (gate_code,gate) = cli(target,gate_args)
+    assert_eq(gate_code,0)
+    assert_true(@json.parse(gate) is {"format":String("moonddl.batch-delta.v1"),"exit_code":Number(0,..),..})
+    for options in [[],["--boundaries=per-file"],["--order=lexicographic"],["--order=lexicographic","--boundaries=shared"],["--order=lexicographic","--boundaries=per-file","--sarif"]] {
+      let errors = [root,"--directory","--json"]
+      errors.append(options)
+      let (error_code,error_text) = cli(target,errors)
+      assert_eq(error_code,2)
+      assert_true(@json.parse(error_text) is {"format":String("moonddl.error.v1"),"message":String(_),..})
+    }
+    @fs.write_bytes_to_file(root + "/003-add.sql",@fs.read_file_to_bytes("specimens/corpus/umami/2.sql"))
+    let (stale,_) = cli(target,args)
+    assert_eq(stale,2)
+    let appended = order.copy()
+    appended.push("003-add.sql")
+    @fs.write_string_to_file(plan,Json({"format":Json("moonddl.order.v1"),"files":Json(appended)}).stringify())
+    let (new_code,new_text) = cli(target,gate_args)
+    assert_eq(new_code,1)
+    guard @json.parse(new_text) is {"files":Array(changes),..} else {fail("Expected appended-file gate")}
+    assert_true(changes[2] is {"path":String("003-add.sql"),"kind":String("added"),..})
+    @fs.write_bytes_to_file(root + "/004-invalid.sql",Bytes::from_array([255]))
+    let (bad_utf8,error_text) = cli(target,[root,"--directory","--json","--order=lexicographic","--boundaries=per-file"])
+    assert_eq(bad_utf8,2)
+    assert_true(error_text.contains("UTF-8"))
+    @fs.remove_file(root + "/004-invalid.sql")
+    @fs.write_bytes_to_file(root + "/004-invalid.sql",@fs.read_file_to_bytes("specimens/corpus/storage/0.sql"))
+    let (incomplete,incomplete_text) = cli(target,[root,"--directory","--json","--order=lexicographic","--boundaries=per-file"])
+    assert_eq(incomplete,2)
+    assert_true(@json.parse(incomplete_text) is {"format":String("moonddl.batch.v1"),"complete":False,"files":Array(files),..} && files.length() == 4)
+    @fs.remove_file(root + "/004-invalid.sql")
+    @fs.remove_file(root + "/003-add.sql")
+    @fs.write_string_to_file(plan,Json({"format":Json("moonddl.order.v1"),"files":Json(order)}).stringify())
+    println("Directory inventory/order/replay/baseline and UTF-8 recovery passed: " + target)
+  }
+}

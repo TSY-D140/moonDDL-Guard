@@ -7,11 +7,13 @@ moon run --deny-warn checks/consumer.mbtx
 moon package
 ```
 
-`integrations/consumer` is a separate module importing `TSY-D140/moonddl_guard@0.23.0`. Its parent `moon.work` resolves that dependency to this checkout. It checks that adding NOT NULL to a virtual generated column creates PG520, round-trips a full report, and fails the new-risk gate. The script runs the same consumer on all three portable backends. This proves source-level public API adoption; it does not prove registry installation.
+`integrations/consumer` is a separate module importing `TSY-D140/moonddl_guard@0.24.0`. Its parent `moon.work` resolves that dependency to this checkout. It checks that adding NOT NULL to a virtual generated column creates PG520, round-trips a full report, and fails the new-risk gate. The script runs the same consumer on all three portable backends. This proves source-level public API adoption; it does not prove registry installation.
 
 Workspace configuration follows the official [local module dependency guide](https://tour.moonbitlang.com/basics/module-and-package/index.html). The consumer source and harness are project-owned Apache-2.0, not copied upstream tests.
 
-`moon package` builds `_build/publish/TSY-D140-moonddl_guard-0.23.0.zip` after checking the module; CI runs packaging on Windows, Ubuntu and macOS. This is a local release artifact, not a published Mooncakes release. Do not commit generated archives or credentials.
+The independent consumer also exercises the batch API: ordered `MigrationInput` values, `review_isolated_files`, strict batch/delta replay, unchanged baseline gating and exact file-order decoding. These are library calls with no filesystem dependency or SQL execution; directory loading is a separate CLI layer documented in [directory review](directories.md).
+
+`moon package` builds `_build/publish/TSY-D140-moonddl_guard-0.24.0.zip` after checking the module; CI runs packaging on Windows, Ubuntu and macOS. This is a local release artifact, not a published Mooncakes release. Do not commit generated archives or credentials.
 
 Mooncakes publication is deferred by the owner. No registry installation or publication success is claimed. When publication resumes, log in with the intended owner's `moon login`, verify `moon whoami` and namespace permissions, run `moon publish --dry-run`, then `moon publish`. Verify the registry entry and run this consumer in a fresh module outside `integrations/moon.work` using the published dependency before claiming registry adoption. The unrelated global login is not used.
 

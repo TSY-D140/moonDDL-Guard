@@ -7,15 +7,30 @@ import {
 }
 
 // Values
+pub fn compare_batches(BatchReview, BatchReview) -> BatchDelta raise ComparisonError
+
 pub fn compare_reviews(Review, Review) -> ReviewDelta raise ComparisonError
+
+pub fn decode_batch(String) -> BatchReview raise ReportError
+
+pub fn decode_batch_delta(String) -> BatchDelta raise ReportError
 
 pub fn decode_delta(String) -> ReviewDelta raise ReportError
 
+pub fn decode_file_order(String) -> Array[String] raise ReportError
+
 pub fn decode_report(String) -> Review raise ReportError
+
+pub fn review_isolated_files(Array[MigrationInput], transaction~ : Transaction, delivery~ : Delivery) -> BatchReview raise BatchError
 
 pub fn review_sql(String, transaction~ : Transaction, delivery~ : Delivery) -> Review
 
 // Errors
+pub(all) suberror BatchError {
+  InvalidBatch(String)
+} derive(@debug.Debug)
+pub fn BatchError::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror ComparisonError {
   IncompatibleBaseline(String)
 } derive(@debug.Debug)
@@ -32,6 +47,22 @@ pub(all) suberror ReportError {
 pub fn ReportError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+pub struct BatchDelta {
+  // private fields
+}
+pub fn BatchDelta::exit_code(Self) -> Int32
+pub fn BatchDelta::to_json(Self) -> Json
+pub fn BatchDelta::to_text(Self) -> String
+
+pub struct BatchReview {
+  // private fields
+}
+pub fn BatchReview::exit_code(Self) -> Int32
+pub fn BatchReview::files(Self) -> Array[FileReview]
+pub fn BatchReview::is_complete(Self) -> Bool
+pub fn BatchReview::to_json(Self) -> Json
+pub fn BatchReview::to_text(Self) -> String
+
 pub(all) enum Coverage {
   Analyzed
   Unsupported
@@ -53,6 +84,14 @@ pub fn Delivery::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeE
 pub fn Delivery::not_equal(Self, Self) -> Bool
 pub fn Delivery::to_json(Self) -> Json
 pub fn Delivery::to_repr(Self) -> @debug.Repr
+
+pub struct FileReview {
+  path : String
+  review : Review
+} derive(Eq, @debug.Debug)
+pub fn FileReview::equal(Self, Self) -> Bool
+pub fn FileReview::not_equal(Self, Self) -> Bool
+pub fn FileReview::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Finding {
   code : String
@@ -79,6 +118,14 @@ pub fn Location::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeE
 pub fn Location::not_equal(Self, Self) -> Bool
 pub fn Location::to_json(Self) -> Json
 pub fn Location::to_repr(Self) -> @debug.Repr
+
+pub(all) struct MigrationInput {
+  path : String
+  sql : String
+} derive(Eq, @debug.Debug)
+pub fn MigrationInput::equal(Self, Self) -> Bool
+pub fn MigrationInput::not_equal(Self, Self) -> Bool
+pub fn MigrationInput::to_repr(Self) -> @debug.Repr
 
 pub struct Review {
   source : String
