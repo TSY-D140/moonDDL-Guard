@@ -3,7 +3,6 @@ import {
   "moonbitlang/core/env",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/x/fs",
-  "moonbitlang/x/sys",
 }
 
 pkgtype(kind: "executable")
@@ -12,5 +11,7 @@ options(
   targets: {
     "args_js.mbt": [ "js" ],
     "args_host.mbt": [ "wasm", "wasm-gc", "native" ],
+    "exit_wasm.mbt": [ "wasm", "wasm-gc" ],
+    "exit_native.mbt": [ "native" ],
   },
 )

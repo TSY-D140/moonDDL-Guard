@@ -12,6 +12,9 @@ async fn cli(target : String, args : Array[String]) -> (Int, String) {
   let command = ["run","--target",target,"engine/cli","--"]
   command.append(args)
   let r = @shell.Cmd("moon",command).output()
+  if args.contains("--json") {
+    ignore(@json.parse(r.stdout()) catch {_ => fail("Incomplete/non-JSON CLI output for " + target + " " + Repr(args).to_string() + "; exit=" + r.exit_code().to_string() + "; UTF-16 units=" + r.stdout().length().to_string() + "; stderr=" + r.stderr())})
+  }
   (r.exit_code(),r.stdout())
 }
 
@@ -43,6 +46,8 @@ async fn main {
     let args = [root,"--directory","--json","--order=" + plan,"--boundaries=per-file","--transaction=autocommit","--delivery=statements"]
     let (code,text) = cli(target,args)
     assert_eq(code,1)
+    // Keep this report larger than a small Unix pipe buffer: JS must drain it.
+    assert_true(text.length() > 16384)
     let report = @json.parse(text)
     guard report is {"format":String("moonddl.batch.v1"),"files":Array(files),"complete":True,..} else {fail("Expected a complete ordered real-fixture batch")}
     assert_eq(files.length(),2)

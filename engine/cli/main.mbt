@@ -19,11 +19,11 @@ fn main {
     let code = directory_main(args) catch {
       error => {
         cli_error(json, "Directory review rejected: \{Repr(error)}")
-        @sys.exit(2)
+        finish_cli(2)
         return
       }
     }
-    @sys.exit(code)
+    finish_cli(code)
     return
   }
   if args.length() == 2 && args[1] == "--help" {
@@ -40,7 +40,7 @@ fn main {
   }
   if args.length() < 2 {
     cli_error(json, "Missing SQL file. Run with --help for usage.")
-    @sys.exit(2)
+    finish_cli(2)
     return
   }
   let path = args[1]
@@ -67,7 +67,7 @@ fn main {
       "--delivery=unknown" => delivery = @guard.UnknownDelivery
       _ => {
         cli_error(json, "Unknown option: \{arg}")
-        @sys.exit(2)
+        finish_cli(2)
         return
       }
     }
@@ -76,7 +76,7 @@ fn main {
     cli_error(
       json, "SARIF cannot be combined with --baseline; use --json or text for comparison output.",
     )
-    @sys.exit(2)
+    finish_cli(2)
     return
   }
   if (json && sarif) ||
@@ -85,13 +85,13 @@ fn main {
     cli_error(
       json, "Choose one format; --artifact requires --sarif and is mandatory for SARIF replay.",
     )
-    @sys.exit(2)
+    finish_cli(2)
     return
   }
   try @utf8.decode(@fs.read_file_to_bytes(path)) catch {
     _ => {
       cli_error(json, "Cannot read UTF-8 SQL file: \{path}")
-      @sys.exit(2)
+      finish_cli(2)
     }
   } noraise {
     sql => {
@@ -101,13 +101,13 @@ fn main {
           cli_error(
             json, "Replay uses the recorded execution context; omit context overrides.",
           )
-          @sys.exit(2)
+          finish_cli(2)
           return
         }
         @guard.decode_report(sql) catch {
           error => {
             cli_error(json, "Report replay rejected: \{Repr(error)}")
-            @sys.exit(2)
+            finish_cli(2)
             return
           }
         }
@@ -121,21 +121,21 @@ fn main {
               json,
               "Cannot read UTF-8 baseline report: " + baseline_file,
             )
-            @sys.exit(2)
+            finish_cli(2)
             return
           }
         }
         let baseline = @guard.decode_report(baseline_text) catch {
           error => {
             cli_error(json, "Baseline replay rejected: \{Repr(error)}")
-            @sys.exit(2)
+            finish_cli(2)
             return
           }
         }
         let delta = @guard.compare_reviews(baseline, review) catch {
           error => {
             cli_error(json, "Baseline comparison rejected: \{Repr(error)}")
-            @sys.exit(2)
+            finish_cli(2)
             return
           }
         }
@@ -144,14 +144,14 @@ fn main {
         } else {
           println(delta.to_text())
         }
-        @sys.exit(delta.exit_code())
+        finish_cli(delta.exit_code())
         return
       }
       if sarif {
         let value = review.to_sarif(artifact.unwrap_or(path)) catch {
           error => {
             cli_error(json, "SARIF export rejected: \{Repr(error)}")
-            @sys.exit(2)
+            finish_cli(2)
             return
           }
         }
@@ -161,7 +161,7 @@ fn main {
       } else {
         println(review.to_text())
       }
-      @sys.exit(review.exit_code())
+      finish_cli(review.exit_code())
     }
   }
 }
