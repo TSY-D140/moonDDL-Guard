@@ -1,0 +1,50 @@
+----
+import {
+  "moonbitlang/async@0.22.5",
+  "moonbitlang/async@0.22.5/shell",
+  "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/json",
+}
+----
+
+async fn review(target : String, path : String, extra : Array[String]) -> (Int, Json, String) {
+  let args = ["run", "--target", target, "engine/cli", "--", path, "--directory", "--order=lexicographic", "--boundaries=per-file", "--transaction=autocommit", "--delivery=statements", "--json"]
+  args.append(extra)
+  let result = @shell.Cmd("moon", args).output()
+  let value = @json.parse(result.stdout())
+  (result.exit_code(), value, result.stdout())
+}
+
+async fn main {
+  let root = "_build/team-workflow"
+  for dir in ["_build", root, root + "/current"] { if !@fs.path_exists(dir) { @fs.create_dir(dir) } }
+  for target in ["wasm", "wasm-gc", "js"] {
+    let current = root + "/current"
+    let appended = current + "/002-new-risk.sql"
+    if @fs.path_exists(appended) { @fs.remove_file(appended) }
+    let (original_code, original, original_text) = review(target, "integrations/team-workflow/migrations", [])
+    assert_eq(original_code, 1)
+    assert_true(original is {"complete":True,..})
+    let baseline = root + "/baseline.json"
+    @fs.write_string_to_file(baseline, original_text)
+    @fs.write_bytes_to_file(current + "/001-orders-index.sql", @fs.read_file_to_bytes("integrations/team-workflow/revised/001-orders-index.sql"))
+    let (revised_code, revised, revised_text) = review(target, current, [])
+    assert_eq(revised_code, 0)
+    assert_true(revised is {"complete":True,..})
+    @fs.write_string_to_file(root + "/revised-" + target + ".json", revised_text)
+    let (fixed, _, delta) = review(target, current, ["--baseline=" + baseline])
+    assert_eq(fixed, 0)
+    @fs.write_string_to_file(root + "/delta-" + target + ".json", delta)
+    @fs.write_string_to_file(baseline, revised_text)
+    @fs.write_string_to_file(appended, "ALTER TABLE public.orders DROP COLUMN customer_id;")
+    let (new_risk, _, _) = review(target, current, ["--baseline=" + baseline])
+    assert_eq(new_risk, 1)
+    @fs.write_string_to_file(appended, "DO $$ BEGIN NULL; END $$;")
+    let (unknown, _, _) = review(target, current, ["--baseline=" + baseline])
+    assert_eq(unknown, 2)
+    @fs.remove_file(appended)
+    let (recovered, _, _) = review(target, current, ["--baseline=" + baseline])
+    assert_eq(recovered, 0)
+    println("Team workflow risk -> revision -> baseline -> new risk -> incomplete -> recovery passed: " + target)
+  }
+}

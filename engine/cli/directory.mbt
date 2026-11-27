@@ -144,7 +144,16 @@ fn directory_main(args : Array[String]) -> Int32 raise {
     }
     let inventory : Array[String] = []
     ignore(directory_inventory(args[1], "", 0, inventory, 4096))
-    inventory.sort()
+    // String's default order in the pinned core is length-first, not lexical.
+    inventory.sort_by(fn(a, b) {
+      for i in 0..<a.length().min(b.length()) {
+        let order = a.code_unit_at(i).compare(b.code_unit_at(i))
+        if order != 0 {
+          return order
+        }
+      }
+      a.length().compare(b.length())
+    })
     let paths = if order == "lexicographic" {
       @guard.decode_file_order(
         Json({ "format": Json("moonddl.order.v1"), "files": Json(inventory) }).stringify(),

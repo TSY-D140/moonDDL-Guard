@@ -50,6 +50,8 @@ Generated/identity/serial and generation-transition rules follow PostgreSQL 18 A
 
 ## Upstream specimens and verification tooling
 
+`integrations/team-workflow` and `checks/team-workflow.mbtx` are project-owned Apache-2.0 illustrative SQL, documentation and CLI acceptance checks. They copy no external application or migration runner; dependencies retain the terms already recorded below.
+
 CLI shutdown follows Node's documented [process.exitCode](https://nodejs.org/docs/latest-v22.x/api/process.html#processexitcode) contract to avoid truncating asynchronous stdout writes. Wasm/native exit declarations use the same host ABI names as the already referenced Apache-2.0 `moonbitlang/x@0.5.5/sys` bindings. The adapter and output-drain regression are project-owned Apache-2.0; no Node implementation or upstream tests are copied.
 
 The directory/batch workflow (0.24.0) is project-owned Apache-2.0 code, tests, order-plan data and documentation. It reuses this project's review/replay/comparison semantics and the already recorded MoonBit core and `moonbitlang/x@0.5.5` filesystem APIs. `checks/directory.mbtx` uses the already recorded Apache-2.0 async library to orchestrate subprocesses and copies the existing MIT Umami fixtures unchanged into `_build`; its extra incomplete-input specimen comes from the already recorded Apache-2.0 Supabase Storage fixture. No third-party migration executor, directory runner or test suite is copied. File discovery and review artifacts do not record or execute migration history, generate SQL or change the project's SQL-preflight boundary.

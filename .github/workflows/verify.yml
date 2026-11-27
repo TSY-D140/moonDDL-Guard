@@ -33,6 +33,13 @@ jobs:
       - run: moon run --deny-warn checks/examples.mbtx
       - run: moon run --deny-warn checks/consumer.mbtx
       - run: moon run --deny-warn checks/directory.mbtx
+      - run: moon run --deny-warn checks/team-workflow.mbtx
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: team-workflow-${{ runner.os }}
+          path: _build/team-workflow/*.json
+          if-no-files-found: ignore
       - run: moon run --deny-warn checks/corpus.mbtx
       - uses: actions/upload-artifact@v4
         if: always()

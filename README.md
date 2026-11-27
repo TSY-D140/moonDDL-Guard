@@ -78,6 +78,8 @@ The pure library targets Wasm, Wasm-GC, JavaScript and native. The file CLI runs
 
 ## Development
 
+For an application team's complete draft-SQL, CI-report, revision and baseline cycle, see the [adoption workflow](integrations/team-workflow/README.md), runnable without a database or registry publication.
+
 ```sh
 moon fmt
 moon info
