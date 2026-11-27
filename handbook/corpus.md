@@ -28,6 +28,8 @@ The four expected files now become complete; eleven files remain incomplete. Six
 
 ## What the original unsupported statements contained
 
+Version 0.25.0's bounded INSERT SELECT workflow additionally makes Umami 4 complete: **14/24** complete files, **91** analyzed and **29** unsupported statements. Only that file's two context observations change; the other 46 remain identical. The separate targeted Cal.com permission fixture is not counted in this 24-file sample. See [backfill limits and provenance](backfills.md).
+
 This inventory groups the 36 top-level unsupported statements by their dominant visible form. It is a manual triage of source files/full reports, not automatic proof of a parser's precise rejection point. Counts are mutually exclusive here; different clauses inside one statement can need separate engineering work.
 
 | Observed form | Statements / files / projects | Evidence and decision |

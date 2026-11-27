@@ -4,6 +4,7 @@ priv struct SeedInsertSpec {
   conflict : Bool
   updating : Bool
   returning_rows : Bool
+  backfill : BackfillSource?
 }
 
 ///|
@@ -52,6 +53,12 @@ fn seed_insert_spec(part : Segment) -> SeedInsertSpec? {
   }
   if depth != 0 {
     return None
+  }
+  for i in 0..<(part.tokens.length() - 1) {
+    if word(part.tokens, i, "UUID") &&
+      part.tokens[i + 1].token_type == @syntax.L_PAREN {
+      return None
+    }
   }
   let ast = @sqlglot.parse_one(part.sql, read="postgres") catch {
     _ => return None
@@ -104,6 +111,7 @@ fn seed_insert_spec(part : Segment) -> SeedInsertSpec? {
     relations.length() != 1 {
     return None
   }
+  let mut backfill = None
   if ast.bool_arg("default") {
     if ast.arg("expression") is Some(_) || column_count != 0 {
       return None
@@ -113,28 +121,35 @@ fn seed_insert_spec(part : Segment) -> SeedInsertSpec? {
       Some(v) => v
       None => return None
     }
-    let rows = values.list("expressions")
-    if values.kind != @syntax.Values ||
-      !has_only_keys(values, ["expressions"]) ||
-      rows.is_empty() ||
-      rows.length() > 100 {
-      return None
-    }
-    let mut width = column_count
-    for row in rows {
-      let cells = row.list("expressions")
-      if row.kind != @syntax.Tuple ||
-        !has_only_keys(row, ["expressions"]) ||
-        cells.is_empty() ||
-        cells.length() > 32 {
+    if values.kind == @syntax.Select {
+      backfill = match backfill_select(values, column_count) {
+        Some(s) => Some(s)
+        None => return None
+      }
+    } else {
+      let rows = values.list("expressions")
+      if values.kind != @syntax.Values ||
+        !has_only_keys(values, ["expressions"]) ||
+        rows.is_empty() ||
+        rows.length() > 100 {
         return None
       }
-      if width == 0 {
-        width = cells.length()
-      }
-      if cells.length() != width ||
-        !cells.iter().all(n => dml_scalar(n, assignment=true)) {
-        return None
+      let mut width = column_count
+      for row in rows {
+        let cells = row.list("expressions")
+        if row.kind != @syntax.Tuple ||
+          !has_only_keys(row, ["expressions"]) ||
+          cells.is_empty() ||
+          cells.length() > 32 {
+          return None
+        }
+        if width == 0 {
+          width = cells.length()
+        }
+        if cells.length() != width ||
+          !cells.iter().all(n => dml_scalar(n, assignment=true)) {
+          return None
+        }
       }
     }
   }
@@ -225,7 +240,7 @@ fn seed_insert_spec(part : Segment) -> SeedInsertSpec? {
     Some(value) => value
     None => return None
   }
-  Some({ table: relations[0], conflict, updating, returning_rows, })
+  Some({ table: relations[0], conflict, updating, returning_rows, backfill, })
 }
 
 ///|
@@ -244,7 +259,11 @@ fn review_seed_insert(
     number,
     "PG821",
     Warning,
-    "INSERT seed rows can wait on unique/FK/row locks and fail on defaults, identity, generated columns, types, triggers or RLS; VALUES bounds do not prove database effects.",
+    if spec.backfill is Some(_) {
+      "INSERT SELECT takes ROW EXCLUSIVE on the target and may wait on unique/FK/row locks or fail on target defaults, types, triggers or RLS."
+    } else {
+      "INSERT seed rows can wait on unique/FK/row locks and fail on defaults, identity, generated columns, types, triggers or RLS; VALUES bounds do not prove database effects."
+    },
     "Verify the actual schema, privileges, conflict keys and defaults; bound transaction/WAL budgets and test retries on representative data. No database rows are inspected.",
   )
   if held.contains(spec.table) {
@@ -295,7 +314,14 @@ fn review_seed_insert(
       "Handle empty results and sensitive columns deliberately; consume output without assuming one result per input row.",
     )
   }
-  if spec.updating {
+  if spec.backfill is Some(source) {
+    review_backfill(source, held, output, part, number)
+    if spec.updating {
+      "upsert_select_rows"
+    } else {
+      "insert_select_rows"
+    }
+  } else if spec.updating {
     "upsert_seed_rows"
   } else {
     "insert_seed_rows"

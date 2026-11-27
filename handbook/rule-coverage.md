@@ -29,7 +29,7 @@ Strong Migrations documents batched backfills but explicitly says it does **not*
 | CREATE/REPLACE VIEW/FUNCTION, routine/view options, trigger enable/disable, replica identity | Unassessed; not interchangeable with DROP review |
 | CREATE/ALTER policies, RLS enable/force/disable, GRANT/REVOKE, role/database/system options | Unassessed; DROP POLICY covers only its removal behavior |
 | Sequence value/options changes, extension updates, composite attributes | Unassessed; runtime/dependency contracts differ from retirement |
-| General SELECT/MERGE/COPY/INSERT SELECT, arbitrary calls/subqueries, writable/recursive CTEs, procedural/psql SQL | Unassessed; supported active AST fields/expressions are whitelisted |
+| General SELECT/MERGE/COPY, INSERT SELECT outside the [bounded profile](backfills.md), arbitrary calls/subqueries, writable/recursive CTEs, procedural/psql SQL | Unassessed; supported active AST fields/expressions are whitelisted |
 | Every renameable object, table schema moves, arrays/storage/collations/opclasses and arbitrary signatures | Not generally supported; per-workflow grammars remain authoritative |
 | Style preferences for integer/text/time types or mandatory schema qualification | No equivalent style-policy warning claimed |
 | Full PostgreSQL syntax/semantic validation and catalog/cardinality/cost/privilege/dependency proofs | Outside offline guarantees; even supported syntax retains runtime preconditions |

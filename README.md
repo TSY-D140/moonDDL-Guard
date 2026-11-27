@@ -111,6 +111,8 @@ Version 0.6.0 also reviews index replacement/removal: [DROP INDEX workflow](hand
 
 Version 0.7.0 adds [staged CHECK validation review](handbook/constraints.md), including the stronger-lock retention hazard when ADD and VALIDATE share a transaction or Simple Query message.
 
+Version 0.25.0 adds [bounded INSERT SELECT backfill review](handbook/backfills.md), validated against independent Umami table-source and Cal.com literal-source migrations. General queries and unknown clauses remain incomplete.
+
 Planned: additional PostgreSQL versions, broader expression/ALTER profiles and optional catalog evidence. These are not implemented promises of complete SQL coverage.
 
 The reusable API remains unchanged in 0.13.0; new statement operations and diagnostics extend the rule profile. `Review::to_sarif` / `--sarif` and `compare_reviews` / `--baseline=REPORT` cover the new operations too. Strict replay recomputes current rules: reports produced by an older release may need that release or regeneration. Baselines never suppress incomplete current analysis.

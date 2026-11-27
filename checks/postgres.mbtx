@@ -61,6 +61,27 @@ async fn main {
   sql(setup)
   let failure = try {
     for (name, body) in [
+      ("exact independent table and literal-source backfills with retry checks", (
+        #|CREATE TABLE website(website_id uuid, name varchar(200), share_id varchar(100));
+        #|CREATE INDEX website_share_id_idx ON website(share_id);
+        #|CREATE UNIQUE INDEX website_share_id_key ON website(share_id);
+        #|INSERT INTO website VALUES('00000000-0000-0000-0000-000000000001','site','public-link'),('00000000-0000-0000-0000-000000000002','private',NULL);
+      ) + "\n" + @fs.read_file_to_string("specimens/corpus/umami/4.sql") + "\n" + (
+        #|DO $$ BEGIN IF (SELECT count(*) FROM share)<>1 OR NOT EXISTS(SELECT 1 FROM share WHERE slug='public-link' AND name='site' AND parameters='{"overview":true}'::jsonb) THEN RAISE EXCEPTION 'Real table-source values/filter lost'; END IF; END $$;
+        #|CREATE TABLE "RolePermission"(id uuid PRIMARY KEY,"roleId" text,resource text,action text,"createdAt" timestamptz, UNIQUE("roleId",resource,action));
+      ) + "\n" + @fs.read_file_to_string("specimens/backfill/calcom-permissions.sql") + "\n" + @fs.read_file_to_string("specimens/backfill/calcom-permissions.sql") + "\n" + (
+        #|DO $$ BEGIN IF (SELECT count(*) FROM "RolePermission")<>2 OR (SELECT count(*) FROM "RolePermission" WHERE "roleId"='admin_role' AND resource='booking')<>2 THEN RAISE EXCEPTION 'Real literal-source conflict retry lost/duplicated rows'; END IF; END $$;
+        #|CREATE TABLE backfill_src(id int,n int);
+        #|CREATE TABLE backfill_dst(id int PRIMARY KEY,n int);
+        #|INSERT INTO backfill_src VALUES(1,10),(1,20);
+        #|DO $$ BEGIN
+        #|  BEGIN INSERT INTO backfill_dst(id,n) SELECT id,n FROM backfill_src; RAISE EXCEPTION 'Duplicate backfill unexpectedly succeeded'; EXCEPTION WHEN unique_violation THEN NULL; END;
+        #|  IF EXISTS(SELECT 1 FROM backfill_dst) THEN RAISE EXCEPTION 'Failed statement left partial data'; END IF;
+        #|  INSERT INTO backfill_dst(id,n) SELECT id,n FROM backfill_src ON CONFLICT(id) DO NOTHING;
+        #|  IF (SELECT count(*) FROM backfill_dst)<>1 THEN RAISE EXCEPTION 'DO NOTHING cardinality mismatch'; END IF;
+        #|  BEGIN INSERT INTO backfill_dst(id,n) SELECT id,n FROM backfill_src ON CONFLICT(id) DO UPDATE SET n=excluded.n; RAISE EXCEPTION 'Duplicate upsert unexpectedly succeeded'; EXCEPTION WHEN cardinality_violation THEN NULL; END;
+        #|END $$;
+      )),
       ("paired negative controls: default metadata, false predicate and NOT VALID", (
         #|CREATE TABLE contrast(id int PRIMARY KEY, n int);
         #|INSERT INTO contrast VALUES(1,-1),(2,NULL);

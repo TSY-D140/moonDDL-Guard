@@ -34,6 +34,7 @@ jobs:
       - run: moon run --deny-warn checks/consumer.mbtx
       - run: moon run --deny-warn checks/directory.mbtx
       - run: moon run --deny-warn checks/team-workflow.mbtx
+      - run: moon run --deny-warn checks/backfill.mbtx
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -19,6 +19,8 @@ async fn main {
   files.push("specimens/enum-evolution.sql")
   files.push("specimens/retire-objects.sql")
   files.push("specimens/combined-additions.sql")
+  files.push("specimens/backfill/calcom-permissions.sql")
+  files.push("specimens/corpus/umami/4.sql")
   for i, file in files {
     let report = @shell.Cmd("moon", ["run", "engine/cli", "--", file, "--sarif", "--transaction=autocommit", "--delivery=statements"]).output()
     let out = "_build/schema-case-\{i}.sarif"

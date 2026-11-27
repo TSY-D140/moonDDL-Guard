@@ -50,6 +50,8 @@ Generated/identity/serial and generation-transition rules follow PostgreSQL 18 A
 
 ## Upstream specimens and verification tooling
 
+Bounded INSERT SELECT logic/properties and the backfill harness are project-owned Apache-2.0, based on PostgreSQL 18 [INSERT](https://www.postgresql.org/docs/18/sql-insert.html), [SELECT](https://www.postgresql.org/docs/18/sql-select.html) and [explicit locking](https://www.postgresql.org/docs/18/explicit-locking.html). No upstream implementation/tests are copied. The complete Cal.com permission migration is MIT, pinned and blob-verified with its full existing license as recorded in `specimens/backfill/README.md`; the existing Umami file remains unchanged under MIT. Selection was targeted rather than a new unbiased corpus. SQLGlot's normalized Uuid handling is checked against original token spelling to reject non-PostgreSQL `uuid()`; existing seed/update profiles are not widened.
+
 Paired diagnostic controls (`engine/contrast_test.mbt`, `handbook/diagnostic-validation.md` and the corresponding PostgreSQL harness case) are project-owned Apache-2.0. They follow PostgreSQL 18 ALTER TABLE, CHECK/NULL and INSERT/UPDATE contracts already linked here; no upstream tests are copied.
 
 `integrations/team-workflow` and `checks/team-workflow.mbtx` are project-owned Apache-2.0 illustrative SQL, documentation and CLI acceptance checks. They copy no external application or migration runner; dependencies retain the terms already recorded below.

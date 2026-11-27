@@ -1,0 +1,28 @@
+----
+import { "moonbitlang/async@0.22.5", "moonbitlang/async@0.22.5/shell", "moonbitlang/x@0.5.5/fs", "moonbitlang/core/json" }
+----
+async fn main {
+ for (file, expected_statements, expected_backfills) in [("specimens/corpus/umami/4.sql",7,1),("specimens/backfill/calcom-permissions.sql",1,1)] {
+   if file.contains("calcom") {
+     let blob = @shell.Cmd("git",["hash-object","--no-filters",file]).output()
+     assert_eq(blob.stdout().trim(),"a07db820f198109bc3cfe89aa407ee47caf640c5")
+   }
+   let mut previous : Json? = None
+   for target in ["wasm","wasm-gc","js"] {
+     let r = @shell.Cmd("moon",["run","--target",target,"engine/cli","--",file,"--transaction=autocommit","--delivery=statements","--json"]).output()
+     assert_eq(r.exit_code(),1)
+     let value = @json.parse(r.stdout())
+     guard value is {"complete":True,"source":String(source),"statements":Array(statements),"findings":Array(findings),..} else {fail("Incomplete real backfill: "+file)}
+     assert_eq(source,@fs.read_file_to_string(file))
+     assert_eq(statements.length(),expected_statements)
+     assert_eq(findings.filter(f=>f is {"code":String("PG823"),..}).length(),expected_backfills)
+     assert_eq(findings.filter(f=>f is {"code":String("PG824"),..}).length(),expected_backfills)
+     match previous {None=>previous=Some(value);Some(old)=>assert_eq(old,value)}
+     @fs.write_string_to_file("_build/backfill-review.json",r.stdout())
+     let replay = @shell.Cmd("moon",["run","--target",target,"engine/cli","--","_build/backfill-review.json","--replay","--json"]).output()
+     assert_eq(replay.exit_code(),1)
+     assert_eq(@json.parse(replay.stdout()),value)
+   }
+   println("Pinned real backfill passed: "+file)
+ }
+}

@@ -12,7 +12,9 @@ test "unsupported construct hints preserve full input and exact Unicode location
         "CREATE FUNCTION f() RETURNS int LANGUAGE sql SECURITY DEFINER AS $$ SELECT 1 $$;",
         "FUNCTION", "routine",
       ),
-      ("INSERT INTO t(id) SELECT id FROM old;", "SELECT", "query source"),
+      (
+        "INSERT INTO t(id) SELECT custom(id) FROM old;", "SELECT", "query source",
+      ),
       ("CREATE INDEX i ON t(name COLLATE \"C\");", "COLLATE", "COLLATE"),
       ("ALTER TABLE t ADD a int[];", "[", "array"),
       ("ALTER TABLE t ADD a int, DROP b;", ",", "multi-ADD"),

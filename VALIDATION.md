@@ -196,6 +196,10 @@ Local verification passed 137 tests on all three portable backends, strict all-t
 
 ## Paired diagnostic and server negative controls
 
+## Bounded backfill workflow (0.25.0)
+
+Four new groups bring core tests to 144, covering complete table/literal-source workflows, conservative whole-query rejection, source/target lock boundaries, row limits, prefix replay and recovery after incomplete input. Both complete licensed real files pass portable review/replay checks. Only Umami 4's two frozen context observations change: 14/24 files complete, 91 analyzed/29 unsupported statements; other observations retain previous behavior. The added Cal.com fixture is targeted and separately blob-verified. The PostgreSQL harness compiles with exact upstream execution, real conflict retries, duplicate-input atomic failure and upsert cardinality checks; actual server/native outcomes require CI. SARIF now includes the new rules and two additional real-file schema cases.
+
 Three new paired/metamorphic groups bring the suite to 140, asserting presence and absence of rewrite, full-table, grouped-concurrent-index and constraint scan/lock findings. The PostgreSQL harness compiles with new negative controls for default non-backfill, zero-row UPDATE and NOT VALID old/new-row enforcement/recovery. These new server assertions are pending actual CI execution; local compilation is not a server test. See `handbook/diagnostic-validation.md` for the matrix and limits.
 
 The runnable `checks/team-workflow.mbtx` passes on Wasm/Wasm-GC/JavaScript: a blocking draft is revised to concurrent creation, accepted as a baseline, then tested against an appended destructive migration, incomplete SQL and recovery. It exposed a length-first default String order in the pinned core; the CLI now explicitly compares UTF-16 code units lexically, with unequal-length filenames covered by the append gate. Strict all-target compilation, formatting and interface generation pass locally; public APIs are unchanged. Three-OS workflow checks and retained JSON artifacts are configured in CI; their result must be confirmed on the pushed revision.

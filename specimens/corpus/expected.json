@@ -2714,10 +2714,10 @@
     {
       "id": "umami-4",
       "context": "unknown",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 6,
-      "unsupported": 1,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 7,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
@@ -2733,8 +2733,8 @@
           "create_index"
         ],
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "insert_select_rows"
         ],
         [
           "Analyzed",
@@ -2795,13 +2795,46 @@
           }
         ],
         [
-          "PG002",
-          "Error",
+          "PG821",
+          "Warning",
           4,
           {
-            "start": 639,
-            "end": 645,
-            "line": 23,
+            "start": 549,
+            "end": 814,
+            "line": 22,
+            "column": 1
+          }
+        ],
+        [
+          "PG804",
+          "Warning",
+          4,
+          {
+            "start": 549,
+            "end": 814,
+            "line": 22,
+            "column": 1
+          }
+        ],
+        [
+          "PG823",
+          "Warning",
+          4,
+          {
+            "start": 549,
+            "end": 814,
+            "line": 22,
+            "column": 1
+          }
+        ],
+        [
+          "PG824",
+          "Warning",
+          4,
+          {
+            "start": 549,
+            "end": 814,
+            "line": 22,
             "column": 1
           }
         ],
@@ -2887,10 +2920,10 @@
     {
       "id": "umami-4",
       "context": "autocommit-statements",
-      "exit_code": 2,
-      "complete": false,
-      "analyzed": 6,
-      "unsupported": 1,
+      "exit_code": 1,
+      "complete": true,
+      "analyzed": 7,
+      "unsupported": 0,
       "invalid": 0,
       "operations": [
         [
@@ -2906,8 +2939,8 @@
           "create_index"
         ],
         [
-          "Unsupported",
-          "unassessed"
+          "Analyzed",
+          "insert_select_rows"
         ],
         [
           "Analyzed",
@@ -2968,13 +3001,35 @@
           }
         ],
         [
-          "PG002",
-          "Error",
+          "PG821",
+          "Warning",
           4,
           {
-            "start": 639,
-            "end": 645,
-            "line": 23,
+            "start": 549,
+            "end": 814,
+            "line": 22,
+            "column": 1
+          }
+        ],
+        [
+          "PG823",
+          "Warning",
+          4,
+          {
+            "start": 549,
+            "end": 814,
+            "line": 22,
+            "column": 1
+          }
+        ],
+        [
+          "PG824",
+          "Warning",
+          4,
+          {
+            "start": 549,
+            "end": 814,
+            "line": 22,
             "column": 1
           }
         ],
