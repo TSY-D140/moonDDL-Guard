@@ -50,6 +50,8 @@ Generated/identity/serial and generation-transition rules follow PostgreSQL 18 A
 
 ## Upstream specimens and verification tooling
 
+Paired diagnostic controls (`engine/contrast_test.mbt`, `handbook/diagnostic-validation.md` and the corresponding PostgreSQL harness case) are project-owned Apache-2.0. They follow PostgreSQL 18 ALTER TABLE, CHECK/NULL and INSERT/UPDATE contracts already linked here; no upstream tests are copied.
+
 `integrations/team-workflow` and `checks/team-workflow.mbtx` are project-owned Apache-2.0 illustrative SQL, documentation and CLI acceptance checks. They copy no external application or migration runner; dependencies retain the terms already recorded below.
 
 CLI shutdown follows Node's documented [process.exitCode](https://nodejs.org/docs/latest-v22.x/api/process.html#processexitcode) contract to avoid truncating asynchronous stdout writes. Wasm/native exit declarations use the same host ABI names as the already referenced Apache-2.0 `moonbitlang/x@0.5.5/sys` bindings. The adapter and output-drain regression are project-owned Apache-2.0; no Node implementation or upstream tests are copied.

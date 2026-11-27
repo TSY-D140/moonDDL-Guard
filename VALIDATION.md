@@ -194,6 +194,10 @@ Local verification passed 137 tests on all three portable backends, strict all-t
 
 ## Team adoption workflow and lexical inventory regression
 
+## Paired diagnostic and server negative controls
+
+Three new paired/metamorphic groups bring the suite to 140, asserting presence and absence of rewrite, full-table, grouped-concurrent-index and constraint scan/lock findings. The PostgreSQL harness compiles with new negative controls for default non-backfill, zero-row UPDATE and NOT VALID old/new-row enforcement/recovery. These new server assertions are pending actual CI execution; local compilation is not a server test. See `handbook/diagnostic-validation.md` for the matrix and limits.
+
 The runnable `checks/team-workflow.mbtx` passes on Wasm/Wasm-GC/JavaScript: a blocking draft is revised to concurrent creation, accepted as a baseline, then tested against an appended destructive migration, incomplete SQL and recovery. It exposed a length-first default String order in the pinned core; the CLI now explicitly compares UTF-16 code units lexically, with unequal-length filenames covered by the append gate. Strict all-target compilation, formatting and interface generation pass locally; public APIs are unchanged. Three-OS workflow checks and retained JSON artifacts are configured in CI; their result must be confirmed on the pushed revision.
 
 [Run 41204949313](https://github.com/TSY-D140/moonDDL-Guard/actions/runs/41204949313) exposed truncated JavaScript directory JSON on Linux/macOS after the portable unit tests passed. The CLI now sets Node's `process.exitCode`, allowing stdout to drain before shutdown, while Wasm/native keep their host exit bindings. The directory regression requires a report larger than 16 Ki UTF-16 units and parses every JSON response, including large baseline comparisons, before checking its semantics. Local directory checks pass on all three portable backends; the correction's Unix/native result requires a fresh remote CI run.

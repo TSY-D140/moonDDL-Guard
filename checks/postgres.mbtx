@@ -61,6 +61,28 @@ async fn main {
   sql(setup)
   let failure = try {
     for (name, body) in [
+      ("paired negative controls: default metadata, false predicate and NOT VALID", (
+        #|CREATE TABLE contrast(id int PRIMARY KEY, n int);
+        #|INSERT INTO contrast VALUES(1,-1),(2,NULL);
+        #|DO $$ DECLARE original oid := pg_relation_filenode('contrast'::regclass); changed int; BEGIN
+        #|  ALTER TABLE contrast ALTER n SET DEFAULT 9;
+        #|  IF pg_relation_filenode('contrast'::regclass)<>original OR (SELECT n FROM contrast WHERE id=1)<>-1 OR NOT EXISTS(SELECT 1 FROM contrast WHERE id=2 AND n IS NULL) THEN RAISE EXCEPTION 'SET DEFAULT backfilled/rewrote old rows'; END IF;
+        #|  UPDATE contrast SET n=9 WHERE FALSE;
+        #|  GET DIAGNOSTICS changed = ROW_COUNT;
+        #|  IF changed<>0 THEN RAISE EXCEPTION 'FALSE predicate changed rows'; END IF;
+        #|END $$;
+        #|ALTER TABLE contrast ADD CONSTRAINT positive CHECK(n>0) NOT VALID;
+        #|DO $$ BEGIN
+        #|  IF (SELECT convalidated FROM pg_constraint WHERE conrelid='contrast'::regclass AND conname='positive') THEN RAISE EXCEPTION 'Unexpected validated constraint'; END IF;
+        #|  IF NOT EXISTS(SELECT 1 FROM pg_locks WHERE pid=pg_backend_pid() AND relation='contrast'::regclass AND mode='AccessExclusiveLock' AND granted) THEN RAISE EXCEPTION 'NOT VALID removed strong lock'; END IF;
+        #|  BEGIN INSERT INTO contrast VALUES(3,-2); RAISE EXCEPTION 'NOT VALID permitted invalid new row'; EXCEPTION WHEN check_violation THEN NULL; END;
+        #|  BEGIN ALTER TABLE contrast VALIDATE CONSTRAINT positive; RAISE EXCEPTION 'Bad old row validated'; EXCEPTION WHEN check_violation THEN NULL; END;
+        #|END $$;
+        #|UPDATE contrast SET n=1 WHERE n<0;
+        #|ALTER TABLE contrast VALIDATE CONSTRAINT positive;
+        #|INSERT INTO contrast VALUES(4,NULL);
+        #|DO $$ BEGIN IF NOT (SELECT convalidated FROM pg_constraint WHERE conrelid='contrast'::regclass AND conname='positive') OR NOT EXISTS(SELECT 1 FROM contrast WHERE id=4 AND n IS NULL) THEN RAISE EXCEPTION 'Repair/validation or CHECK NULL semantics failed'; END IF; END $$;
+      )),
       ("four exact upstream combined-add migrations on matching disposable tables", (
         #|CREATE TABLE team(id int);
         #|CREATE TABLE "user"(id int);
