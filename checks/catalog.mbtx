@@ -1,0 +1,38 @@
+----
+import { "moonbitlang/async@0.22.5", "moonbitlang/async@0.22.5/shell", "moonbitlang/x@0.5.5/fs", "moonbitlang/core/json", "moonbitlang/core/env" }
+----
+async fn cli(target : String, args : Array[String]) -> (Int, Json, String) {
+ let command = ["run","--target",target,"engine/cli","--"]
+ command.append(args)
+ let r = @shell.Cmd("moon",command).output()
+ let value = @json.parse(r.stdout())
+ (r.exit_code(),value,r.stdout())
+}
+async fn main {
+ if !@fs.path_exists("_build") {@fs.create_dir("_build")}
+ let targets = if @env.args().contains("--native") {["native"]} else {["wasm","wasm-gc","js"]}
+ let base = ["specimens/catalog/attach.sql","--catalog=specimens/catalog/snapshot.json","--catalog-source=illustrative-orders","--catalog-snapshot=before-001","--transaction=autocommit","--delivery=statements","--json"]
+ let mut previous : Json? = None
+ for target in targets {
+   let (code,value,text) = cli(target,base)
+   assert_eq(code,1)
+   assert_true(value is {"checks":Array(checks),..} && checks[0] is {"status":String("observed_pass"),..})
+   match previous {None=>previous=Some(value);Some(old)=>assert_eq(old,value)}
+   @fs.write_string_to_file("_build/catalog-review.json",text)
+   let (replay,replayed,_) = cli(target,["_build/catalog-review.json","--catalog-replay","--json"])
+   assert_eq(replay,code)
+   assert_eq(replayed,value)
+   for extra in [["--catalog-source=other"],["--catalog-snapshot=other"],["--baseline=ignored"],["--sarif"],["--directory"]] {
+     let args = base.copy();args.append(extra)
+     let (error,value,_) = cli(target,args)
+     assert_eq(error,2)
+     assert_true(value is {"format":String("moonddl.error.v1"),..})
+   }
+   @fs.write_string_to_file("_build/catalog-review.json",text.replace_all(old="observed_pass",new="observed_fail"))
+   let (altered,_,_) = cli(target,["_build/catalog-review.json","--catalog-replay","--json"])
+   assert_eq(altered,2)
+   let (recovered,_,_) = cli(target,base)
+   assert_eq(recovered,1)
+   println("Catalog evidence provenance/replay/rejection/recovery passed: "+target)
+ }
+}

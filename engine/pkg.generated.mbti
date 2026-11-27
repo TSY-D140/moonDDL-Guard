@@ -15,6 +15,10 @@ pub fn decode_batch(String) -> BatchReview raise ReportError
 
 pub fn decode_batch_delta(String) -> BatchDelta raise ReportError
 
+pub fn decode_catalog(String) -> CatalogSnapshot raise ReportError
+
+pub fn decode_catalog_review(String) -> CatalogReview raise ReportError
+
 pub fn decode_delta(String) -> ReviewDelta raise ReportError
 
 pub fn decode_file_order(String) -> Array[String] raise ReportError
@@ -24,6 +28,8 @@ pub fn decode_report(String) -> Review raise ReportError
 pub fn review_isolated_files(Array[MigrationInput], transaction~ : Transaction, delivery~ : Delivery) -> BatchReview raise BatchError
 
 pub fn review_sql(String, transaction~ : Transaction, delivery~ : Delivery) -> Review
+
+pub fn review_with_catalog(String, CatalogSnapshot, expected_source~ : String, expected_snapshot~ : String, transaction~ : Transaction, delivery~ : Delivery) -> CatalogReview raise ReportError
 
 // Errors
 pub(all) suberror BatchError {
@@ -62,6 +68,17 @@ pub fn BatchReview::files(Self) -> Array[FileReview]
 pub fn BatchReview::is_complete(Self) -> Bool
 pub fn BatchReview::to_json(Self) -> Json
 pub fn BatchReview::to_text(Self) -> String
+
+pub struct CatalogReview {
+  // private fields
+}
+pub fn CatalogReview::exit_code(Self) -> Int32
+pub fn CatalogReview::to_json(Self) -> Json
+
+pub struct CatalogSnapshot {
+  // private fields
+}
+pub fn CatalogSnapshot::to_json(Self) -> Json
 
 pub(all) enum Coverage {
   Analyzed

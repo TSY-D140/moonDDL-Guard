@@ -37,4 +37,8 @@ fn main raise {
     ["001.sql"],
   )
   println("Independent consumer: report replay and new-risk gate passed.")
+  let snapshot = @guard.decode_catalog("{\"format\":\"moonddl.catalog.v1\",\"postgres\":18,\"source\":\"consumer\",\"snapshot_id\":\"pre-file\",\"captured_at\":\"illustrative\",\"tables\":[]}")
+  let evidence = @guard.review_with_catalog("ALTER TABLE public.orders ADD CONSTRAINT uq UNIQUE USING INDEX idx;",snapshot,expected_source="consumer",expected_snapshot="pre-file",transaction=@guard.Autocommit,delivery=@guard.PerStatement)
+  assert_eq(evidence.exit_code(),1)
+  assert_eq(evidence.to_json(),@guard.decode_catalog_review(evidence.to_json().stringify()).to_json())
 }

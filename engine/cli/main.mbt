@@ -15,6 +15,18 @@ fn cli_error(json : Bool, message : String) -> Unit {
 fn main {
   let args = process_args()
   let mut json = args.contains("--json")
+  if args.contains("--catalog-replay") ||
+    args.any(a => a.has_prefix("--catalog=")) {
+    let code = catalog_main(args) catch {
+      error => {
+        cli_error(json, "Catalog review rejected: \{Repr(error)}")
+        finish_cli(2)
+        return
+      }
+    }
+    finish_cli(code)
+    return
+  }
   if args.contains("--directory") {
     let code = directory_main(args) catch {
       error => {
@@ -35,6 +47,9 @@ fn main {
     )
     println(
       "Directory: DIR --directory --order=PLAN.json|lexicographic --boundaries=per-file [--json] [--baseline=BATCH]. Replay: BATCH --directory --replay [--json].",
+    )
+    println(
+      "Evidence: FILE --catalog=SNAPSHOT --catalog-source=LABEL --catalog-snapshot=ID --json [context]. Replay: REPORT --catalog-replay --json.",
     )
     return
   }

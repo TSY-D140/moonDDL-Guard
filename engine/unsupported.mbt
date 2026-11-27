@@ -97,7 +97,7 @@ fn unsupported_finding(
         } else if word(t, 0, "INSERT") && word(t, i, "SELECT") && parens == 0 {
           marker = Some(
             (
-              i, "Unassessed INSERT query source: source-driven insertion is outside the bounded VALUES/default seed profile.",
+              i, "Unassessed INSERT query source: this query exceeds the bounded single-table/literal-source backfill profile.",
               "Inspect source cardinality, source/target dependencies, expressions, conflicts, retries and transaction duration; review the original INSERT SELECT as a whole.",
             ),
           )

@@ -1,0 +1,16 @@
+{
+  "format": "moonddl.catalog.v1",
+  "postgres": 18,
+  "source": "illustrative-orders",
+  "snapshot_id": "before-001",
+  "captured_at": "illustrative fixture; not a live database export",
+  "tables": [{
+    "schema": "public", "name": "orders", "kind": "ordinary",
+    "columns": [{"name":"id","data_type":"integer","not_null":true}],
+    "indexes": [{
+      "name":"orders_id_idx", "unique":true, "valid":true, "ready":true,
+      "live":true, "immediate":true, "btree":true, "partial":false,
+      "expression":false, "default_order":true, "owned":false, "keys":["id"]
+    }]
+  }]
+}

@@ -4,6 +4,7 @@ import {
   "moonbitlang/async@0.22.5/shell",
   "moonbitlang/core/env",
   "moonbitlang/x@0.5.5/fs",
+  "moonbitlang/core/json",
 }
 ----
 
@@ -60,6 +61,24 @@ async fn main {
     @fs.read_file_to_string("specimens/corpus/calcom/6.sql")
   sql(setup)
   let failure = try {
+    println("Checking real catalog export, evidence replay and changed ownership")
+    sql("CREATE TABLE moonddl_guard_probe.catalog_orders(id int NOT NULL); CREATE UNIQUE INDEX catalog_idx ON moonddl_guard_probe.catalog_orders(id);")
+    if !@fs.path_exists("_build") {@fs.create_dir("_build")}
+    for (index_name,status) in [("catalog_idx","observed_pass"),("catalog_pk","observed_fail")] {
+      let exported = @shell.Cmd("psql",["-XAt","-v","ON_ERROR_STOP=1","-v","schema=moonddl_guard_probe","-v","source=postgres-ci","-v","snapshot_id=before-attach","-f","checks/catalog-export.sql"]).output(timeout_ms=10000)
+      assert_eq(exported.exit_code(),0,msg=exported.stderr())
+      @fs.write_string_to_file("_build/live-catalog.json",exported.stdout())
+      @fs.write_string_to_file("_build/live-catalog-attach.sql","ALTER TABLE moonddl_guard_probe.catalog_orders ADD CONSTRAINT next_pk PRIMARY KEY USING INDEX "+index_name+";")
+      let reviewed = @shell.Cmd("moon",["run","engine/cli","--","_build/live-catalog-attach.sql","--catalog=_build/live-catalog.json","--catalog-source=postgres-ci","--catalog-snapshot=before-attach","--json","--transaction=autocommit","--delivery=statements"]).output(timeout_ms=30000)
+      assert_eq(reviewed.exit_code(),1,msg=reviewed.stderr()+reviewed.stdout())
+      let value = @json.parse(reviewed.stdout())
+      assert_true(value is {"checks":Array(checks),..} && checks[0] is {"status":String(s),..} && s==status,msg=reviewed.stdout())
+      @fs.write_string_to_file("_build/live-catalog-review.json",reviewed.stdout())
+      let replayed = @shell.Cmd("moon",["run","engine/cli","--","_build/live-catalog-review.json","--catalog-replay","--json"]).output(timeout_ms=30000)
+      assert_eq(replayed.exit_code(),1)
+      assert_eq(@json.parse(replayed.stdout()),value)
+      if index_name=="catalog_idx" {sql("ALTER TABLE moonddl_guard_probe.catalog_orders ADD CONSTRAINT catalog_pk PRIMARY KEY USING INDEX catalog_idx;")}
+    }
     for (name, body) in [
       ("exact independent table and literal-source backfills with retry checks", (
         #|CREATE TABLE website(website_id uuid, name varchar(200), share_id varchar(100));
